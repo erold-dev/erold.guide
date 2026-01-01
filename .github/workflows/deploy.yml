@@ -25,11 +25,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build API
-        run: npm run build:api
-
       - name: Build Website
         run: npm run build:astro
+
+      - name: Build API
+        run: npm run build:api
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
