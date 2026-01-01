@@ -1,26 +1,17 @@
-name: Build and Deploy erold.guide
+name: Deploy to AWS
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-permissions:
-  id-token: write
-  contents: read
+    branches: [main]
+  workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
-  AZURE_RESOURCE_GROUP: rg-erold-guide-prod
-  AZURE_LOCATION: eastus2
+  AWS_REGION: us-east-1
 
 jobs:
-  validate:
-    name: Validate Content
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,155 +19,42 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate content schemas
-        run: npm run validate
-        continue-on-error: true # Don't fail if validate script doesn't exist yet
-
-  build:
-    name: Build Site
-    runs-on: ubuntu-latest
-    needs: validate
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build API indexes
+      - name: Build API
         run: npm run build:api
 
-      - name: Build Astro site
+      - name: Build Website
         run: npm run build:astro
-        env:
-          BASE_URL: ${{ vars.BASE_URL || 'https://erold.guide' }}
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: dist
-          path: dist/
-          retention-days: 1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-  deploy-infra:
-    name: Deploy Infrastructure
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
-    outputs:
-      storage-account: ${{ steps.deploy.outputs.storageAccountName }}
-      website-url: ${{ steps.deploy.outputs.websiteUrl }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Create Resource Group
+      - name: Deploy API to S3
         run: |
-          az group create \
-            --name ${{ env.AZURE_RESOURCE_GROUP }} \
-            --location ${{ env.AZURE_LOCATION }} \
-            --output none
+          aws s3 sync dist/api/v1/ s3://erold-guidelines-api/v1/ \
+            --delete \
+            --content-type "application/json"
 
-      - name: Deploy Bicep
-        id: deploy
+      - name: Deploy Website to S3
         run: |
-          OUTPUT=$(az deployment group create \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --template-file infrastructure/main.bicep \
-            --parameters infrastructure/parameters/prod.bicepparam \
-            --query properties.outputs \
-            --output json)
+          aws s3 sync dist/ s3://erold-website/ \
+            --delete \
+            --exclude "api/*"
 
-          echo "storageAccountName=$(echo $OUTPUT | jq -r '.storageAccountName.value')" >> $GITHUB_OUTPUT
-          echo "websiteUrl=$(echo $OUTPUT | jq -r '.websiteUrl.value')" >> $GITHUB_OUTPUT
-
-  deploy-site:
-    name: Deploy Site
-    runs-on: ubuntu-latest
-    needs: [build, deploy-infra]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment:
-      name: production
-      url: ${{ needs.deploy-infra.outputs.website-url }}
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Upload to Azure Blob Storage
+      - name: Invalidate CloudFront caches
         run: |
-          # Upload static website files
-          az storage blob upload-batch \
-            --account-name ${{ needs.deploy-infra.outputs.storage-account }} \
-            --destination '$web' \
-            --source dist/ \
-            --overwrite \
-            --content-type "text/html" \
-            --pattern "*.html"
-
-          az storage blob upload-batch \
-            --account-name ${{ needs.deploy-infra.outputs.storage-account }} \
-            --destination '$web' \
-            --source dist/ \
-            --overwrite \
-            --content-type "application/json" \
-            --pattern "*.json"
-
-          az storage blob upload-batch \
-            --account-name ${{ needs.deploy-infra.outputs.storage-account }} \
-            --destination '$web' \
-            --source dist/ \
-            --overwrite \
-            --content-type "text/css" \
-            --pattern "*.css"
-
-          az storage blob upload-batch \
-            --account-name ${{ needs.deploy-infra.outputs.storage-account }} \
-            --destination '$web' \
-            --source dist/ \
-            --overwrite \
-            --content-type "application/javascript" \
-            --pattern "*.js"
-
-          # Upload remaining files
-          az storage blob upload-batch \
-            --account-name ${{ needs.deploy-infra.outputs.storage-account }} \
-            --destination '$web' \
-            --source dist/ \
-            --overwrite
-
-      - name: Deployment Summary
-        run: |
-          echo "## Deployment Complete! :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Website URL:** ${{ needs.deploy-infra.outputs.website-url }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**API Endpoint:** ${{ needs.deploy-infra.outputs.website-url }}api/v1/manifest.json" >> $GITHUB_STEP_SUMMARY
+          aws cloudfront create-invalidation \
+            --distribution-id E2Z2A14SC6AOFW \
+            --paths "/*"
+          aws cloudfront create-invalidation \
+            --distribution-id E1JEAAW1UUUT5Z \
+            --paths "/*"
