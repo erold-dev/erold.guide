@@ -1,0 +1,26 @@
+id: erold
+name: erold.guide
+slug: erold
+description: Meta-guidelines for contributing to erold.guide. Learn how to write, structure, and submit guidelines that help developers and AI agents build better software.
+logo: /favicon.svg
+website: https://erold.guide
+repository: https://github.com/erold-dev/erold.guide
+documentation: https://erold.guide/contribute
+technology: documentation
+type: meta
+tags:
+  - contributing
+  - documentation
+  - guidelines
+  - meta
+  - community
+currentVersion: "1.0.0"
+supportedVersions:
+  - "1.x"
+guidelinesCount: 0
+categories:
+  - contributing
+  - style-guide
+  - api
+createdAt: "2026-01-01T00:00:00Z"
+updatedAt: "2026-01-01T00:00:00Z"

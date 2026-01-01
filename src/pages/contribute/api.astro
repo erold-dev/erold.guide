@@ -1,0 +1,430 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const endpoints = [
+  {
+    method: 'POST',
+    path: '/v1/contributions',
+    description: 'Submit a new guideline for review',
+    auth: 'Required (GitHub OAuth)',
+    status: 'coming-soon'
+  },
+  {
+    method: 'GET',
+    path: '/v1/contributions/:id',
+    description: 'Check the status of a submission',
+    auth: 'Required (owner or admin)',
+    status: 'coming-soon'
+  },
+  {
+    method: 'GET',
+    path: '/v1/contributions',
+    description: 'List your submissions',
+    auth: 'Required',
+    status: 'coming-soon'
+  },
+  {
+    method: 'PUT',
+    path: '/v1/contributions/:id',
+    description: 'Update a pending submission',
+    auth: 'Required (owner)',
+    status: 'coming-soon'
+  },
+  {
+    method: 'DELETE',
+    path: '/v1/contributions/:id',
+    description: 'Withdraw a pending submission',
+    auth: 'Required (owner)',
+    status: 'coming-soon'
+  }
+];
+
+const statuses = [
+  { name: 'pending', color: 'yellow', desc: 'Submitted, awaiting AI review' },
+  { name: 'ai_approved', color: 'blue', desc: 'Passed AI review, awaiting human review' },
+  { name: 'ai_needs_changes', color: 'orange', desc: 'AI found issues, needs revision' },
+  { name: 'approved', color: 'green', desc: 'Approved and published' },
+  { name: 'rejected', color: 'red', desc: 'Rejected by reviewer' },
+  { name: 'withdrawn', color: 'gray', desc: 'Withdrawn by contributor' }
+];
+---
+
+<BaseLayout title="Contribution API" description="API documentation for submitting guidelines to erold.guide. Learn how to authenticate and submit guidelines programmatically.">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 py-12">
+
+    <!-- Header -->
+    <section class="mb-12">
+      <a href="/contribute" class="inline-flex items-center gap-1 text-sm text-[--color-terminal-muted] hover:text-[--color-primary-400] mb-4">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Contribute
+      </a>
+
+      <h1 class="text-3xl font-bold text-white mb-4">Contribution API</h1>
+      <p class="text-lg text-[--color-terminal-muted]">
+        Submit guidelines programmatically via our REST API. Perfect for AI agents and automated workflows.
+      </p>
+
+      <div class="mt-6 p-4 rounded-lg" style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3);">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-yellow-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <p class="font-semibold text-yellow-400">Coming Soon</p>
+            <p class="text-sm text-[--color-terminal-muted]">
+              The contribution API is under development. This documentation describes the planned API.
+              For now, contributions can be submitted via GitHub pull requests.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Base URL -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-white mb-4">Base URL</h2>
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-dot terminal-dot-red"></div>
+          <div class="terminal-dot terminal-dot-yellow"></div>
+          <div class="terminal-dot terminal-dot-green"></div>
+        </div>
+        <div class="terminal-body">
+          <code class="text-[--color-syntax-string]">https://contribute.erold.guide</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authentication -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-white mb-4">Authentication</h2>
+      <p class="text-[--color-terminal-muted] mb-4">
+        All contribution endpoints require authentication via GitHub OAuth. After authenticating,
+        include the JWT token in the Authorization header.
+      </p>
+
+      <div class="terminal-window mb-4">
+        <div class="terminal-header">
+          <div class="terminal-dot terminal-dot-red"></div>
+          <div class="terminal-dot terminal-dot-yellow"></div>
+          <div class="terminal-dot terminal-dot-green"></div>
+          <span class="ml-3 text-xs text-[--color-terminal-muted] font-mono">Authorization Header</span>
+        </div>
+        <div class="terminal-body">
+          <div class="text-[--color-terminal-muted]"># Include in all requests</div>
+          <div><span class="text-[--color-syntax-keyword]">Authorization:</span> <span class="text-[--color-syntax-string]">Bearer YOUR_JWT_TOKEN</span></div>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-semibold text-white mb-3">OAuth Flow</h3>
+      <ol class="space-y-2 text-[--color-terminal-muted]">
+        <li class="flex items-start gap-2">
+          <span class="text-[--color-primary-400] font-mono">1.</span>
+          <span>Redirect user to <code class="text-[--color-accent-400]">/auth/github</code></span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-[--color-primary-400] font-mono">2.</span>
+          <span>User authorizes with GitHub</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-[--color-primary-400] font-mono">3.</span>
+          <span>Callback returns JWT token</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-[--color-primary-400] font-mono">4.</span>
+          <span>Use token in Authorization header</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Endpoints -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-white mb-4">Endpoints</h2>
+
+      <div class="space-y-4">
+        {endpoints.map((endpoint) => (
+          <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+            <div class="flex items-center gap-3 mb-2">
+              <span class:list={[
+                "px-2 py-0.5 rounded text-xs font-mono font-semibold",
+                endpoint.method === 'GET' && "bg-green-500/20 text-green-400",
+                endpoint.method === 'POST' && "bg-blue-500/20 text-blue-400",
+                endpoint.method === 'PUT' && "bg-yellow-500/20 text-yellow-400",
+                endpoint.method === 'DELETE' && "bg-red-500/20 text-red-400"
+              ]}>
+                {endpoint.method}
+              </span>
+              <code class="text-[--color-terminal-text] font-mono">{endpoint.path}</code>
+              {endpoint.status === 'coming-soon' && (
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase" style="background: rgba(251, 191, 36, 0.1); color: rgb(251, 191, 36);">Soon</span>
+              )}
+            </div>
+            <p class="text-sm text-[--color-terminal-muted] mb-2">{endpoint.description}</p>
+            <p class="text-xs text-[--color-terminal-comment]">Auth: {endpoint.auth}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Submit Guideline -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-white mb-4">Submit a Guideline</h2>
+
+      <div class="terminal-window mb-4">
+        <div class="terminal-header">
+          <div class="terminal-dot terminal-dot-red"></div>
+          <div class="terminal-dot terminal-dot-yellow"></div>
+          <div class="terminal-dot terminal-dot-green"></div>
+          <span class="ml-3 text-xs text-[--color-terminal-muted] font-mono">POST /v1/contributions</span>
+        </div>
+        <div class="terminal-body text-sm">
+          <pre class="text-[--color-terminal-text]">{`{
+  "framework": "nextjs",
+  "category": "performance",
+  "guideline": {
+    "title": "Use Dynamic Imports for Large Components",
+    "slug": "dynamic-imports-large-components",
+    "version": "1.0.0",
+    "description": "Lazy load large components to reduce initial bundle size...",
+    "tags": ["performance", "bundle-size", "code-splitting"],
+    "difficulty": "intermediate",
+    "estimatedReadTime": 5,
+    "content": "# Use Dynamic Imports...\\n\\nMarkdown content here...",
+    "ai": {
+      "prompt_snippet": "Use next/dynamic for components over 50KB...",
+      "applies_when": ["Adding large charts", "Modal dialogs"],
+      "does_not_apply_when": ["Small utility components"],
+      "priority": "recommended",
+      "confidence": "established"
+    }
+  }
+}`}</pre>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-semibold text-white mb-3">Response</h3>
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-dot terminal-dot-red"></div>
+          <div class="terminal-dot terminal-dot-yellow"></div>
+          <div class="terminal-dot terminal-dot-green"></div>
+          <span class="ml-3 text-xs text-[--color-terminal-muted] font-mono">201 Created</span>
+        </div>
+        <div class="terminal-body text-sm">
+          <pre class="text-[--color-terminal-text]">{`{
+  "id": "contrib_abc123",
+  "status": "pending",
+  "createdAt": "2026-01-01T12:00:00Z",
+  "contributor": {
+    "github": "your-username",
+    "avatar": "https://github.com/your-username.png"
+  },
+  "framework": "nextjs",
+  "category": "performance",
+  "guideline": { ... },
+  "review": null
+}`}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Submission Statuses -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-white mb-4">Submission Statuses</h2>
+
+      <div class="grid sm:grid-cols-2 gap-3">
+        {statuses.map((status) => (
+          <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+            <span class:list={[
+              "w-3 h-3 rounded-full",
+              status.color === 'yellow' && "bg-yellow-400",
+              status.color === 'blue' && "bg-blue-400",
+              status.color === 'orange' && "bg-orange-400",
+              status.color === 'green' && "bg-green-400",
+              status.color === 'red' && "bg-red-400",
+              status.color === 'gray' && "bg-gray-400"
+            ]}></span>
+            <div>
+              <code class="text-sm text-[--color-terminal-text] font-mono">{status.name}</code>
+              <p class="text-xs text-[--color-terminal-muted]">{status.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Schema Reference -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-white mb-4">Schema Reference</h2>
+      <p class="text-[--color-terminal-muted] mb-4">
+        Guidelines must conform to our schema. Here are the required and optional fields:
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-[--color-terminal-border]">
+              <th class="text-left py-2 text-[--color-terminal-muted] font-mono">Field</th>
+              <th class="text-left py-2 text-[--color-terminal-muted] font-mono">Type</th>
+              <th class="text-left py-2 text-[--color-terminal-muted] font-mono">Required</th>
+              <th class="text-left py-2 text-[--color-terminal-muted] font-mono">Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-[--color-terminal-text]">
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">title</td>
+              <td class="py-2 font-mono">string</td>
+              <td class="py-2"><span class="text-green-400">Yes</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">5-100 characters</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">slug</td>
+              <td class="py-2 font-mono">string</td>
+              <td class="py-2"><span class="text-green-400">Yes</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">URL-friendly, lowercase</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">version</td>
+              <td class="py-2 font-mono">string</td>
+              <td class="py-2"><span class="text-green-400">Yes</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">Semver format (1.0.0)</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">description</td>
+              <td class="py-2 font-mono">string</td>
+              <td class="py-2"><span class="text-green-400">Yes</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">20-300 characters</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">tags</td>
+              <td class="py-2 font-mono">string[]</td>
+              <td class="py-2"><span class="text-green-400">Yes</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">1-10 tags</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">difficulty</td>
+              <td class="py-2 font-mono">enum</td>
+              <td class="py-2"><span class="text-green-400">Yes</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">beginner, intermediate, advanced</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">content</td>
+              <td class="py-2 font-mono">string</td>
+              <td class="py-2"><span class="text-green-400">Yes</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">Markdown content</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">ai</td>
+              <td class="py-2 font-mono">object</td>
+              <td class="py-2"><span class="text-yellow-400">Recommended</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">AI optimization fields</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 font-mono text-[--color-accent-400]">minVersion</td>
+              <td class="py-2 font-mono">string</td>
+              <td class="py-2"><span class="text-[--color-terminal-muted]">No</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">Min framework version</td>
+            </tr>
+            <tr>
+              <td class="py-2 font-mono text-[--color-accent-400]">prerequisites</td>
+              <td class="py-2 font-mono">string[]</td>
+              <td class="py-2"><span class="text-[--color-terminal-muted]">No</span></td>
+              <td class="py-2 text-[--color-terminal-muted]">Slugs of required guidelines</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-4 text-sm text-[--color-terminal-muted]">
+        For the complete schema, see the <a href="/guidelines/erold/contributing/how-to-write-guidelines" class="text-[--color-primary-400] hover:underline">Style Guide</a>.
+      </p>
+    </section>
+
+    <!-- Rate Limits -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-white mb-4">Rate Limits</h2>
+      <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+        <table class="w-full text-sm">
+          <tbody>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 text-[--color-terminal-muted]">Submissions per hour</td>
+              <td class="py-2 text-[--color-terminal-text] font-mono">10</td>
+            </tr>
+            <tr class="border-b border-[--color-terminal-border]/50">
+              <td class="py-2 text-[--color-terminal-muted]">Submissions per day</td>
+              <td class="py-2 text-[--color-terminal-text] font-mono">50</td>
+            </tr>
+            <tr>
+              <td class="py-2 text-[--color-terminal-muted]">Pending submissions</td>
+              <td class="py-2 text-[--color-terminal-text] font-mono">20 max</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Errors -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold text-white mb-4">Error Responses</h2>
+
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-dot terminal-dot-red"></div>
+          <div class="terminal-dot terminal-dot-yellow"></div>
+          <div class="terminal-dot terminal-dot-green"></div>
+          <span class="ml-3 text-xs text-[--color-terminal-muted] font-mono">Error Format</span>
+        </div>
+        <div class="terminal-body text-sm">
+          <pre class="text-[--color-terminal-text]">{`{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid guideline format",
+    "details": [
+      { "field": "title", "message": "Must be 5-100 characters" },
+      { "field": "tags", "message": "At least 1 tag required" }
+    ]
+  }
+}`}</pre>
+        </div>
+      </div>
+
+      <div class="mt-4 space-y-2 text-sm">
+        <div class="flex items-center gap-3">
+          <code class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">400</code>
+          <span class="text-[--color-terminal-muted]">Validation error - check details array</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <code class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">401</code>
+          <span class="text-[--color-terminal-muted]">Missing or invalid authentication</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <code class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">409</code>
+          <span class="text-[--color-terminal-muted]">Duplicate guideline (slug exists)</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <code class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">429</code>
+          <span class="text-[--color-terminal-muted]">Rate limit exceeded</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section>
+      <div class="p-6 rounded-xl text-center" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+        <h3 class="text-lg font-semibold text-white mb-2">Ready to Contribute?</h3>
+        <p class="text-sm text-[--color-terminal-muted] mb-4">
+          While the API is in development, you can contribute via GitHub pull requests.
+        </p>
+        <a href="https://github.com/erold-dev/erold.guide" class="btn btn-primary inline-flex" target="_blank" rel="noopener">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          Open on GitHub
+        </a>
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
