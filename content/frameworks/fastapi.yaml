@@ -1,0 +1,32 @@
+id: fastapi
+name: FastAPI
+slug: fastapi
+description: A modern, fast web framework for building APIs with Python based on standard Python type hints. High performance, easy to learn, and ready for production.
+logo: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg
+website: https://fastapi.tiangolo.com/
+repository: https://github.com/tiangolo/fastapi
+documentation: https://fastapi.tiangolo.com/tutorial/
+technology: python
+type: framework
+tags:
+  - api
+  - rest
+  - async
+  - backend
+  - openapi
+  - pydantic
+currentVersion: "0.115.0"
+supportedVersions:
+  - "0.115.x"
+  - "0.114.x"
+  - "0.100.x"
+guidelinesCount: 0
+categories:
+  - async-patterns
+  - dependencies
+  - security
+  - testing
+  - deployment
+  - performance
+createdAt: "2025-01-01T00:00:00Z"
+updatedAt: "2025-01-01T00:00:00Z"

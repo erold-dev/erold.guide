@@ -1,0 +1,32 @@
+id: nextjs
+name: Next.js
+slug: nextjs
+description: The React framework for production. Next.js provides hybrid static and server rendering, TypeScript support, smart bundling, and route pre-fetching.
+logo: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg
+website: https://nextjs.org/
+repository: https://github.com/vercel/next.js
+documentation: https://nextjs.org/docs
+technology: javascript
+type: framework
+tags:
+  - react
+  - ssr
+  - ssg
+  - fullstack
+  - web
+  - frontend
+currentVersion: "15.1.0"
+supportedVersions:
+  - "15.x"
+  - "14.x"
+  - "13.x"
+guidelinesCount: 0
+categories:
+  - app-router
+  - security
+  - performance
+  - testing
+  - data-fetching
+  - deployment
+createdAt: "2025-01-01T00:00:00Z"
+updatedAt: "2025-01-01T00:00:00Z"

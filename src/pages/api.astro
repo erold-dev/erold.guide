@@ -1,0 +1,191 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const endpoints = [
+  {
+    method: 'GET',
+    path: '/api/v1/manifest.json',
+    description: 'Complete manifest of all guidelines, frameworks, and metadata',
+    example: `{
+  "version": "1.0.0",
+  "generatedAt": "2025-01-01T00:00:00Z",
+  "frameworks": [...],
+  "technologies": [...],
+  "tags": [...],
+  "stats": { "totalGuidelines": 150, ... }
+}`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/frameworks/index.json',
+    description: 'List of all frameworks with metadata',
+    example: `[
+  {
+    "id": "nextjs",
+    "name": "Next.js",
+    "slug": "nextjs",
+    "description": "...",
+    "guidelinesCount": 24
+  }
+]`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/frameworks/{slug}/index.json',
+    description: 'All guidelines for a specific framework',
+    example: `{
+  "framework": { "id": "nextjs", "name": "Next.js", ... },
+  "guidelines": [
+    { "title": "...", "slug": "...", "category": "..." }
+  ]
+}`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/guidelines/{framework}/{category}/{slug}.json',
+    description: 'Full guideline content including markdown',
+    example: `{
+  "title": "Default to Server Components",
+  "framework": "nextjs",
+  "category": "app-router",
+  "content": "# Markdown content...",
+  "tags": ["performance", "ssr"]
+}`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/tags/index.json',
+    description: 'List of all tags with usage counts',
+    example: `[
+  { "name": "performance", "count": 45 },
+  { "name": "security", "count": 38 }
+]`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/technologies/index.json',
+    description: 'List of all technologies',
+    example: `[
+  {
+    "id": "typescript",
+    "name": "TypeScript",
+    "slug": "typescript"
+  }
+]`,
+  },
+];
+---
+
+<BaseLayout title="API Documentation">
+  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <div class="mb-8 pb-6 border-b border-[--color-terminal-border]">
+      <h1 class="text-2xl font-mono font-bold text-white mb-2">API Documentation</h1>
+      <p class="font-mono text-sm" style="color: var(--color-terminal-muted);">
+        Access guidelines programmatically. All endpoints return JSON and are publicly accessible.
+      </p>
+    </div>
+
+    <!-- Overview -->
+    <section class="mb-12">
+      <h2 class="font-mono text-sm font-semibold text-white mb-4">Overview</h2>
+      <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+        <dl class="space-y-3 font-mono text-sm">
+          <div>
+            <dt class="mb-1" style="color: var(--color-terminal-comment);">Base URL</dt>
+            <dd>
+              <code class="px-2 py-1 rounded" style="background: var(--color-terminal-bg); color: var(--color-primary-400);">
+                https://erold.guide/api/v1
+              </code>
+            </dd>
+          </div>
+          <div>
+            <dt class="mb-1" style="color: var(--color-terminal-comment);">Format</dt>
+            <dd style="color: var(--color-terminal-text);">JSON (UTF-8)</dd>
+          </div>
+          <div>
+            <dt class="mb-1" style="color: var(--color-terminal-comment);">Authentication</dt>
+            <dd style="color: var(--color-terminal-text);">None required (public API)</dd>
+          </div>
+          <div>
+            <dt class="mb-1" style="color: var(--color-terminal-comment);">Rate Limiting</dt>
+            <dd style="color: var(--color-terminal-text);">None (please be reasonable)</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- Usage Example -->
+    <section class="mb-12">
+      <h2 class="font-mono text-sm font-semibold text-white mb-4">Quick Start</h2>
+      <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+        <pre class="font-mono text-xs overflow-x-auto" style="color: var(--color-terminal-text);"><code><span style="color: var(--color-terminal-comment);"># Fetch all frameworks</span>
+curl https://erold.guide/api/v1/frameworks/index.json
+
+<span style="color: var(--color-terminal-comment);"># Fetch Next.js guidelines</span>
+curl https://erold.guide/api/v1/frameworks/nextjs/index.json
+
+<span style="color: var(--color-terminal-comment);"># Fetch a specific guideline</span>
+curl https://erold.guide/api/v1/guidelines/nextjs/app-router/server-components-default.json</code></pre>
+      </div>
+    </section>
+
+    <!-- Endpoints -->
+    <section>
+      <h2 class="font-mono text-sm font-semibold text-white mb-4">Endpoints</h2>
+      <div class="space-y-6">
+        {endpoints.map((endpoint) => (
+          <div class="rounded-lg overflow-hidden" style="border: 1px solid var(--color-terminal-border);">
+            <div class="px-4 py-3 flex items-center gap-3" style="background: var(--color-terminal-surface);">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
+                {endpoint.method}
+              </span>
+              <code class="font-mono text-sm text-white">{endpoint.path}</code>
+            </div>
+            <div class="px-4 py-3" style="background: var(--color-terminal-bg);">
+              <p class="font-mono text-xs mb-3" style="color: var(--color-terminal-muted);">
+                {endpoint.description}
+              </p>
+              <details class="group">
+                <summary class="font-mono text-xs cursor-pointer text-[--color-primary-400] hover:underline">
+                  Example response
+                </summary>
+                <pre class="mt-2 p-3 rounded font-mono text-xs overflow-x-auto" style="background: var(--color-terminal-surface); color: var(--color-terminal-text);">{endpoint.example}</pre>
+              </details>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section class="mt-12">
+      <h2 class="font-mono text-sm font-semibold text-white mb-4">Use Cases</h2>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <h3 class="font-mono text-sm font-semibold text-white mb-2">AI Agents</h3>
+          <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+            Fetch guidelines to inform code generation and review. Pre-indexed URLs enable zero-latency lookups.
+          </p>
+        </div>
+        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <h3 class="font-mono text-sm font-semibold text-white mb-2">IDE Extensions</h3>
+          <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+            Build extensions that show relevant guidelines while developers code.
+          </p>
+        </div>
+        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <h3 class="font-mono text-sm font-semibold text-white mb-2">CI/CD Pipelines</h3>
+          <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+            Validate code against guidelines in automated pipelines.
+          </p>
+        </div>
+        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <h3 class="font-mono text-sm font-semibold text-white mb-2">Documentation Sites</h3>
+          <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+            Embed guidelines in your own documentation or wikis.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,28 @@
+id: python
+name: Python
+slug: python
+description: A high-level, general-purpose programming language known for its clear syntax and readability. Python is widely used in web development, data science, AI, and automation.
+logo: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg
+website: https://www.python.org/
+documentation: https://docs.python.org/3/
+type: language
+paradigms:
+  - object-oriented
+  - functional
+  - procedural
+  - dynamic
+tags:
+  - backend
+  - data-science
+  - machine-learning
+  - automation
+  - scripting
+frameworks:
+  - fastapi
+  - django
+  - flask
+  - pytorch
+  - pandas
+frameworksCount: 5
+createdAt: "2025-01-01T00:00:00Z"
+updatedAt: "2025-01-01T00:00:00Z"

@@ -1,0 +1,26 @@
+id: typescript
+name: TypeScript
+slug: typescript
+description: A strongly typed programming language that builds on JavaScript. TypeScript adds optional static typing and class-based object-oriented programming.
+logo: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg
+website: https://www.typescriptlang.org/
+documentation: https://www.typescriptlang.org/docs/
+type: language
+paradigms:
+  - object-oriented
+  - functional
+  - imperative
+  - generic
+tags:
+  - typed
+  - web
+  - frontend
+  - backend
+  - enterprise
+frameworks:
+  - nextjs
+  - angular
+  - nestjs
+frameworksCount: 3
+createdAt: "2025-01-01T00:00:00Z"
+updatedAt: "2025-01-01T00:00:00Z"

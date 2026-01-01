@@ -1,0 +1,28 @@
+id: javascript
+name: JavaScript
+slug: javascript
+description: A dynamic, high-level programming language that powers the web. JavaScript enables interactive web pages and is an essential part of web applications.
+logo: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg
+website: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+documentation: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide
+type: language
+paradigms:
+  - object-oriented
+  - functional
+  - event-driven
+  - imperative
+tags:
+  - web
+  - frontend
+  - backend
+  - scripting
+frameworks:
+  - nextjs
+  - react
+  - vue
+  - angular
+  - express
+  - nodejs
+frameworksCount: 6
+createdAt: "2025-01-01T00:00:00Z"
+updatedAt: "2025-01-01T00:00:00Z"

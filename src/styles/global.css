@@ -1,0 +1,592 @@
+@import "tailwindcss";
+
+/* ============================================
+   GUIDEBASE - Developer-First Design System
+   Part of the Erold Ecosystem
+   ============================================ */
+
+@theme {
+  /* Erold Brand Colors */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  --color-secondary-400: #c084fc;
+  --color-secondary-500: #a855f7;
+  --color-secondary-600: #9333ea;
+  --color-secondary-700: #7c3aed;
+
+  --color-accent-400: #34d399;
+  --color-accent-500: #10b981;
+  --color-accent-600: #059669;
+
+  /* Terminal Colors */
+  --color-terminal-bg: #0a0a0f;
+  --color-terminal-surface: #12121a;
+  --color-terminal-border: #1e1e2e;
+  --color-terminal-text: #e4e4e7;
+  --color-terminal-muted: #71717a;
+  --color-terminal-comment: #6b7280;
+
+  /* Syntax Highlighting */
+  --color-syntax-keyword: #c084fc;
+  --color-syntax-string: #34d399;
+  --color-syntax-function: #60a5fa;
+  --color-syntax-variable: #f472b6;
+  --color-syntax-number: #fbbf24;
+  --color-syntax-operator: #94a3b8;
+
+  /* Fonts */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Base Styles - Dark Mode First */
+:root {
+  color-scheme: dark;
+}
+
+html {
+  @apply scroll-smooth;
+  background: var(--color-terminal-bg);
+}
+
+body {
+  @apply antialiased;
+  font-family: var(--font-sans);
+  background: var(--color-terminal-bg);
+  color: var(--color-terminal-text);
+}
+
+/* Selection */
+::selection {
+  @apply bg-primary-600/40 text-white;
+}
+
+/* Scrollbar - Minimal */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-terminal-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-terminal-muted);
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Terminal-style headings */
+.heading-terminal {
+  @apply font-mono font-bold tracking-tight;
+  text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+}
+
+/* Gradient text */
+.text-gradient {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(135deg, #60a5fa 0%, #a855f7 50%, #34d399 100%);
+}
+
+.text-gradient-blue {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+}
+
+/* ============================================
+   Code & Terminal Blocks
+   ============================================ */
+
+code:not(pre code) {
+  @apply rounded px-1.5 py-0.5 font-mono text-sm;
+  background: var(--color-terminal-surface);
+  color: var(--color-syntax-function);
+  border: 1px solid var(--color-terminal-border);
+}
+
+pre {
+  @apply overflow-x-auto rounded-lg p-4 font-mono text-sm;
+  background: var(--color-terminal-surface);
+  border: 1px solid var(--color-terminal-border);
+}
+
+pre code {
+  @apply bg-transparent p-0 border-0;
+}
+
+/* Terminal window */
+.terminal-window {
+  @apply rounded-lg overflow-hidden;
+  background: var(--color-terminal-surface);
+  border: 1px solid var(--color-terminal-border);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 20px 50px -15px rgba(0, 0, 0, 0.5);
+}
+
+.terminal-header {
+  @apply flex items-center gap-2 px-4 py-3 border-b;
+  background: var(--color-terminal-bg);
+  border-color: var(--color-terminal-border);
+}
+
+.terminal-dot {
+  @apply w-3 h-3 rounded-full;
+}
+
+.terminal-dot-red { background: #ff5f56; }
+.terminal-dot-yellow { background: #ffbd2e; }
+.terminal-dot-green { background: #27ca40; }
+
+.terminal-body {
+  @apply p-4 font-mono text-sm;
+}
+
+/* ============================================
+   Buttons & Interactive
+   ============================================ */
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:ring-offset-2 focus:ring-offset-terminal-bg;
+}
+
+.btn-primary {
+  @apply bg-primary-600 text-white hover:bg-primary-500;
+  box-shadow: 0 0 20px -5px rgba(37, 99, 235, 0.5);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 30px -5px rgba(37, 99, 235, 0.7);
+}
+
+.btn-secondary {
+  @apply text-terminal-text hover:text-white;
+  background: var(--color-terminal-surface);
+  border: 1px solid var(--color-terminal-border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 20px -10px rgba(37, 99, 235, 0.5);
+}
+
+.btn-ghost {
+  @apply text-terminal-muted hover:text-terminal-text hover:bg-terminal-surface;
+}
+
+/* Keyboard shortcut badges */
+.kbd {
+  @apply inline-flex items-center justify-center rounded px-1.5 py-0.5 font-mono text-xs;
+  background: var(--color-terminal-surface);
+  border: 1px solid var(--color-terminal-border);
+  color: var(--color-terminal-muted);
+  min-width: 1.5rem;
+  box-shadow: 0 2px 0 var(--color-terminal-border);
+}
+
+/* ============================================
+   Cards & Surfaces
+   ============================================ */
+
+.card {
+  @apply rounded-xl p-6;
+  background: var(--color-terminal-surface);
+  border: 1px solid var(--color-terminal-border);
+}
+
+.card-hover {
+  @apply transition-all duration-300;
+}
+
+.card-hover:hover {
+  border-color: var(--color-primary-600);
+  box-shadow:
+    0 0 0 1px rgba(37, 99, 235, 0.1),
+    0 0 40px -15px rgba(37, 99, 235, 0.3);
+  transform: translateY(-2px);
+}
+
+.card-glow {
+  position: relative;
+}
+
+.card-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, rgba(37, 99, 235, 0.3), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card-glow:hover::before {
+  opacity: 1;
+}
+
+/* ============================================
+   Tags & Badges
+   ============================================ */
+
+.tag {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  background: var(--color-terminal-surface);
+  border: 1px solid var(--color-terminal-border);
+  color: var(--color-terminal-muted);
+}
+
+.tag-primary {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.3);
+  color: var(--color-primary-400);
+}
+
+.tag-secondary {
+  background: rgba(168, 85, 247, 0.1);
+  border-color: rgba(168, 85, 247, 0.3);
+  color: var(--color-secondary-400);
+}
+
+.tag-accent {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--color-accent-400);
+}
+
+/* Difficulty badges */
+.difficulty-beginner {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--color-accent-400);
+}
+
+.difficulty-intermediate {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: #fbbf24;
+}
+
+.difficulty-advanced {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+/* ============================================
+   Navigation
+   ============================================ */
+
+.nav-link {
+  @apply relative px-3 py-2 text-sm font-medium transition-colors;
+  color: var(--color-terminal-muted);
+}
+
+.nav-link:hover {
+  color: var(--color-terminal-text);
+}
+
+.nav-link-active {
+  color: var(--color-primary-400);
+}
+
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary-600);
+  box-shadow: 0 0 10px var(--color-primary-600);
+}
+
+/* ============================================
+   Backgrounds & Effects
+   ============================================ */
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.bg-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.bg-gradient-radial {
+  background: radial-gradient(ellipse at center, var(--color-terminal-surface) 0%, var(--color-terminal-bg) 70%);
+}
+
+.bg-glow-blue {
+  background: radial-gradient(ellipse at 50% 0%, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+}
+
+.bg-glow-purple {
+  background: radial-gradient(ellipse at 50% 50%, rgba(124, 58, 237, 0.1) 0%, transparent 60%);
+}
+
+/* Noise overlay */
+.noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* ============================================
+   Prose (Markdown Content)
+   ============================================ */
+
+.prose {
+  @apply max-w-none;
+  color: var(--color-terminal-text);
+}
+
+.prose h1 {
+  @apply mb-6 mt-12 text-3xl font-bold tracking-tight;
+  color: white;
+}
+
+.prose h2 {
+  @apply mb-4 mt-10 text-2xl font-semibold tracking-tight;
+  color: white;
+}
+
+.prose h3 {
+  @apply mb-3 mt-8 text-xl font-semibold;
+  color: white;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+  color: var(--color-terminal-text);
+}
+
+.prose a {
+  @apply underline decoration-primary-600/50 underline-offset-2 transition-colors;
+  color: var(--color-primary-400);
+}
+
+.prose a:hover {
+  color: var(--color-primary-300);
+  text-decoration-color: var(--color-primary-400);
+}
+
+.prose ul, .prose ol {
+  @apply mb-4 pl-6;
+}
+
+.prose ul {
+  list-style-type: none;
+}
+
+.prose ul li::before {
+  content: '▸';
+  @apply mr-2;
+  color: var(--color-primary-500);
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li {
+  @apply mb-2;
+}
+
+.prose blockquote {
+  @apply border-l-2 pl-4 italic;
+  border-color: var(--color-primary-600);
+  color: var(--color-terminal-muted);
+}
+
+.prose table {
+  @apply w-full mb-6 text-sm;
+}
+
+.prose th {
+  @apply text-left font-mono font-medium px-4 py-2;
+  background: var(--color-terminal-surface);
+  border: 1px solid var(--color-terminal-border);
+  color: var(--color-terminal-text);
+}
+
+.prose td {
+  @apply px-4 py-2;
+  border: 1px solid var(--color-terminal-border);
+  color: var(--color-terminal-muted);
+}
+
+.prose hr {
+  @apply my-8;
+  border-color: var(--color-terminal-border);
+}
+
+.prose strong {
+  color: white;
+  font-weight: 600;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px -5px rgba(37, 99, 235, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px -5px rgba(37, 99, 235, 0.6);
+  }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.cursor-blink::after {
+  content: '▋';
+  animation: blink 1s step-end infinite;
+  color: var(--color-primary-500);
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ============================================
+   Command Palette
+   ============================================ */
+
+.command-palette-overlay {
+  @apply fixed inset-0 z-50;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.command-palette {
+  @apply fixed left-1/2 top-1/4 z-50 w-full max-w-xl -translate-x-1/2 rounded-xl overflow-hidden;
+  background: var(--color-terminal-surface);
+  border: 1px solid var(--color-terminal-border);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.command-palette-input {
+  @apply w-full bg-transparent px-4 py-4 text-lg outline-none font-mono;
+  color: var(--color-terminal-text);
+  border-bottom: 1px solid var(--color-terminal-border);
+}
+
+.command-palette-input::placeholder {
+  color: var(--color-terminal-muted);
+}
+
+.command-palette-results {
+  @apply max-h-80 overflow-y-auto p-2;
+}
+
+.command-palette-item {
+  @apply flex items-center gap-3 rounded-lg px-3 py-2 cursor-pointer transition-colors;
+  color: var(--color-terminal-text);
+}
+
+.command-palette-item:hover,
+.command-palette-item-active {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.command-palette-item-icon {
+  @apply w-5 h-5;
+  color: var(--color-terminal-muted);
+}
+
+/* ============================================
+   Erold Branding
+   ============================================ */
+
+.erold-badge {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  color: var(--color-primary-400);
+}
+
+.powered-by-erold {
+  @apply text-xs;
+  color: var(--color-terminal-muted);
+}
+
+.powered-by-erold a {
+  @apply font-medium transition-colors;
+  color: var(--color-primary-400);
+}
+
+.powered-by-erold a:hover {
+  color: var(--color-primary-300);
+}

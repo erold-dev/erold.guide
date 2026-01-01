@@ -1,0 +1,183 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getFrameworks, getFramework, getGuidelinesByFramework } from '../../lib/content';
+
+export function getStaticPaths() {
+  const frameworks = getFrameworks();
+  return frameworks.map((fw) => ({
+    params: { slug: fw.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const framework = getFramework(slug);
+
+if (!framework) {
+  return Astro.redirect('/404');
+}
+
+const guidelines = getGuidelinesByFramework(slug);
+
+const guidelinesByCategory = guidelines.reduce((acc, g) => {
+  if (!acc[g.category]) {
+    acc[g.category] = [];
+  }
+  acc[g.category].push(g);
+  return acc;
+}, {} as Record<string, typeof guidelines>);
+
+const categories = Object.keys(guidelinesByCategory).sort();
+---
+
+<BaseLayout title={framework.name} description={framework.description}>
+  <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <!-- Breadcrumb -->
+    <nav class="font-mono text-xs mb-6" style="color: var(--color-terminal-muted);">
+      <a href="/frameworks" class="hover:text-[--color-primary-400]">frameworks</a>
+      <span class="mx-2">/</span>
+      <span class="text-white">{framework.slug}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="mb-8 pb-6 border-b border-[--color-terminal-border]">
+      <div class="flex items-start gap-4">
+        {framework.logo && (
+          <img
+            src={framework.logo}
+            alt={framework.name}
+            class="w-12 h-12 rounded"
+            style="filter: brightness(0) invert(1);"
+          />
+        )}
+        <div>
+          <h1 class="text-2xl font-mono font-bold text-white">{framework.name}</h1>
+          <p class="font-mono text-sm mt-2" style="color: var(--color-terminal-muted);">
+            {framework.description}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-4 mt-4">
+        {framework.website && (
+          <a
+            href={framework.website}
+            target="_blank"
+            rel="noopener"
+            class="font-mono text-xs text-[--color-primary-400] hover:underline"
+          >
+            Website
+          </a>
+        )}
+        {framework.documentation && (
+          <a
+            href={framework.documentation}
+            target="_blank"
+            rel="noopener"
+            class="font-mono text-xs text-[--color-primary-400] hover:underline"
+          >
+            Docs
+          </a>
+        )}
+        {framework.repository && (
+          <a
+            href={framework.repository}
+            target="_blank"
+            rel="noopener"
+            class="font-mono text-xs text-[--color-primary-400] hover:underline"
+          >
+            GitHub
+          </a>
+        )}
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-[1fr,280px] gap-8">
+      <!-- Guidelines by Category -->
+      <div class="space-y-8">
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <section>
+              <h2 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
+                {category.replace(/-/g, ' ')}
+              </h2>
+              <div class="space-y-1">
+                {guidelinesByCategory[category].map((g) => (
+                  <a
+                    href={`/guidelines/${g.framework}/${g.category}/${g.slug}`}
+                    class="block px-3 py-2 rounded font-mono text-sm transition-colors hover:bg-[--color-terminal-surface]"
+                    style="color: var(--color-terminal-text);"
+                  >
+                    <span>{g.title}</span>
+                    {g.deprecated && (
+                      <span class="ml-2 text-xs px-1.5 py-0.5 rounded" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">
+                        deprecated
+                      </span>
+                    )}
+                  </a>
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <div class="text-center py-12">
+            <p class="font-mono text-sm" style="color: var(--color-terminal-muted);">
+              No guidelines yet for {framework.name}.
+            </p>
+            <a href="https://github.com/erold-dev/erold.guide" class="inline-block mt-3 font-mono text-xs text-[--color-primary-400] hover:underline">
+              Contribute one →
+            </a>
+          </div>
+        )}
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="space-y-6">
+        <!-- Info -->
+        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <dl class="space-y-3 font-mono text-sm">
+            <div class="flex justify-between">
+              <dt style="color: var(--color-terminal-muted);">Guidelines</dt>
+              <dd class="text-white">{guidelines.length}</dd>
+            </div>
+            {framework.currentVersion && (
+              <div class="flex justify-between">
+                <dt style="color: var(--color-terminal-muted);">Version</dt>
+                <dd class="text-white">{framework.currentVersion}</dd>
+              </div>
+            )}
+            <div class="flex justify-between">
+              <dt style="color: var(--color-terminal-muted);">Technology</dt>
+              <dd class="text-white">{framework.technology}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Tags -->
+        {framework.tags.length > 0 && (
+          <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+            <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
+              Tags
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {framework.tags.map((tag) => (
+                <span class="font-mono text-xs px-2 py-1 rounded" style="background: var(--color-terminal-bg); color: var(--color-terminal-muted);">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- API -->
+        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
+            API
+          </h3>
+          <code class="block font-mono text-xs p-2 rounded break-all" style="background: var(--color-terminal-bg); color: var(--color-terminal-muted);">
+            /api/v1/frameworks/{framework.slug}/index.json
+          </code>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,29 @@
+{
+  "name": "guidelines",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run build:api && astro build",
+    "build:api": "tsx scripts/generate-api.ts",
+    "build:astro": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "validate": "tsx scripts/validate-content.ts"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.13",
+    "@pagefind/default-ui": "^1.4.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.16.6",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.1",
+    "marked": "^17.0.1",
+    "tailwindcss": "^4.1.18",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "tsx": "^4.21.0"
+  }
+}

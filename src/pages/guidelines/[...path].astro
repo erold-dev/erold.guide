@@ -1,0 +1,258 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getGuidelines, getGuideline, getFramework } from '../../lib/content';
+import { marked } from 'marked';
+
+export function getStaticPaths() {
+  const guidelines = getGuidelines();
+  return guidelines.map((g) => ({
+    params: { path: `${g.framework}/${g.category}/${g.slug}` },
+  }));
+}
+
+const { path } = Astro.params;
+const [framework, category, slug] = path.split('/');
+
+const guideline = getGuideline(framework, category, slug);
+const frameworkData = getFramework(framework);
+
+if (!guideline) {
+  return Astro.redirect('/404');
+}
+
+const htmlContent = await marked.parse(guideline.content);
+
+const difficultyColors = {
+  beginner: { bg: 'rgba(16, 185, 129, 0.2)', color: '#10b981' },
+  intermediate: { bg: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b' },
+  advanced: { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' },
+};
+
+const difficulty = difficultyColors[guideline.difficulty] || difficultyColors.beginner;
+---
+
+<BaseLayout title={guideline.title} description={guideline.description}>
+  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <!-- Breadcrumb -->
+    <nav class="font-mono text-xs mb-6" style="color: var(--color-terminal-muted);">
+      <a href="/frameworks" class="hover:text-[--color-primary-400]">frameworks</a>
+      <span class="mx-2">/</span>
+      <a href={`/frameworks/${framework}`} class="hover:text-[--color-primary-400]">{framework}</a>
+      <span class="mx-2">/</span>
+      <span style="color: var(--color-terminal-comment);">{category}</span>
+      <span class="mx-2">/</span>
+      <span class="text-white">{slug}</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-8 pb-6 border-b border-[--color-terminal-border]">
+      <h1 class="text-2xl font-mono font-bold text-white mb-3">{guideline.title}</h1>
+      <p class="font-mono text-sm" style="color: var(--color-terminal-muted);">
+        {guideline.description}
+      </p>
+
+      <div class="flex flex-wrap items-center gap-3 mt-4">
+        <span
+          class="font-mono text-xs px-2 py-1 rounded"
+          style={`background: ${difficulty.bg}; color: ${difficulty.color};`}
+        >
+          {guideline.difficulty}
+        </span>
+        <span class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+          {guideline.estimatedReadTime} min read
+        </span>
+        {guideline.deprecated && (
+          <span class="font-mono text-xs px-2 py-1 rounded" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">
+            deprecated
+          </span>
+        )}
+        {guideline.minVersion && (
+          <span class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+            v{guideline.minVersion}+
+          </span>
+        )}
+      </div>
+    </header>
+
+    <!-- Content -->
+    <article class="prose" set:html={htmlContent} />
+
+    <!-- Footer -->
+    <footer class="mt-12 pt-6 border-t border-[--color-terminal-border]">
+      <div class="grid sm:grid-cols-2 gap-6">
+        <!-- Tags -->
+        {guideline.tags.length > 0 && (
+          <div>
+            <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
+              Tags
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {guideline.tags.map((tag) => (
+                <span class="font-mono text-xs px-2 py-1 rounded" style="background: var(--color-terminal-surface); color: var(--color-terminal-muted);">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Meta -->
+        <div>
+          <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
+            Meta
+          </h3>
+          <dl class="space-y-1 font-mono text-xs" style="color: var(--color-terminal-muted);">
+            <div class="flex gap-2">
+              <dt>Author:</dt>
+              <dd class="text-white">{guideline.author}</dd>
+            </div>
+            <div class="flex gap-2">
+              <dt>Version:</dt>
+              <dd class="text-white">{guideline.version}</dd>
+            </div>
+            <div class="flex gap-2">
+              <dt>Updated:</dt>
+              <dd class="text-white">{new Date(guideline.updatedAt).toLocaleDateString()}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Related -->
+      {guideline.relatedGuidelines.length > 0 && (
+        <div class="mt-6">
+          <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
+            Related Guidelines
+          </h3>
+          <div class="flex flex-wrap gap-2">
+            {guideline.relatedGuidelines.map((related) => (
+              <span class="font-mono text-xs px-2 py-1 rounded" style="background: var(--color-terminal-surface); color: var(--color-terminal-muted);">
+                {related}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- API -->
+      <div class="mt-6 p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+        <h3 class="font-mono text-xs uppercase tracking-wider mb-2" style="color: var(--color-terminal-comment);">
+          API Endpoint
+        </h3>
+        <code class="font-mono text-xs break-all" style="color: var(--color-terminal-muted);">
+          /api/v1/guidelines/{guideline.framework}/{guideline.category}/{guideline.slug}.json
+        </code>
+      </div>
+
+      <!-- Edit -->
+      <div class="mt-6 text-center">
+        <a
+          href={`https://github.com/erold-dev/erold.guide/edit/main/content/guidelines/${guideline.framework}/${guideline.category}/${guideline.slug}.md`}
+          target="_blank"
+          rel="noopener"
+          class="inline-block font-mono text-xs text-[--color-primary-400] hover:underline"
+        >
+          Edit this page on GitHub
+        </a>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .prose {
+    color: var(--color-terminal-text);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.75;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    color: white;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose h1 { font-size: 1.5rem; }
+  .prose h2 { font-size: 1.25rem; }
+  .prose h3 { font-size: 1.125rem; }
+
+  .prose p {
+    margin-bottom: 1rem;
+  }
+
+  .prose ul, .prose ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+
+  .prose strong {
+    color: white;
+    font-weight: 600;
+  }
+
+  .prose code {
+    background: var(--color-terminal-surface);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.8125rem;
+  }
+
+  .prose pre {
+    background: var(--color-terminal-surface);
+    border: 1px solid var(--color-terminal-border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .prose pre code {
+    background: transparent;
+    padding: 0;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .prose a {
+    color: var(--color-primary-400);
+    text-decoration: none;
+  }
+
+  .prose a:hover {
+    text-decoration: underline;
+  }
+
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .prose th, .prose td {
+    border: 1px solid var(--color-terminal-border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+
+  .prose th {
+    background: var(--color-terminal-surface);
+    color: white;
+    font-weight: 500;
+  }
+
+  .prose blockquote {
+    border-left: 3px solid var(--color-primary-500);
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-bottom: 1rem;
+    color: var(--color-terminal-muted);
+    font-style: italic;
+  }
+</style>

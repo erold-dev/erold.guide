@@ -1,0 +1,29 @@
+id: react
+name: React
+slug: react
+description: A JavaScript library for building user interfaces. React makes it painless to create interactive UIs with declarative, component-based architecture.
+logo: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg
+website: https://react.dev/
+repository: https://github.com/facebook/react
+documentation: https://react.dev/learn
+technology: javascript
+type: library
+tags:
+  - ui
+  - components
+  - declarative
+  - frontend
+  - spa
+currentVersion: "19.0.0"
+supportedVersions:
+  - "19.x"
+  - "18.x"
+guidelinesCount: 0
+categories:
+  - hooks
+  - state-management
+  - performance
+  - patterns
+  - testing
+createdAt: "2025-01-01T00:00:00Z"
+updatedAt: "2025-01-01T00:00:00Z"
