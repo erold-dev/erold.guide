@@ -1,0 +1,593 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const statusFilters = [
+  { value: '', label: 'All' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'ai_approved', label: 'AI Approved' },
+  { value: 'ai_needs_changes', label: 'AI Needs Changes' },
+  { value: 'ai_rejected', label: 'AI Rejected' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'rejected', label: 'Rejected' },
+];
+---
+
+<BaseLayout title="Admin Review" description="Review and manage guideline contributions">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 py-12">
+
+    <!-- Auth Check -->
+    <div id="auth-checking" class="text-center py-24">
+      <svg class="w-8 h-8 mx-auto text-[--color-primary-400] animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="mt-4 text-[--color-terminal-muted]">Checking admin access...</p>
+    </div>
+
+    <!-- Not Authorized -->
+    <div id="not-authorized" class="hidden text-center py-24">
+      <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-6" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-white mb-2">Access Denied</h1>
+      <p class="text-[--color-terminal-muted] mb-6">You don't have permission to access the admin panel.</p>
+      <a href="/contribute" class="btn btn-primary">Back to Contribute</a>
+    </div>
+
+    <!-- Admin Content -->
+    <div id="admin-content" class="hidden">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-white">Admin Review</h1>
+          <p class="text-[--color-terminal-muted] mt-1">Review and manage guideline contributions</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <select id="status-filter" class="px-3 py-2 rounded-lg text-sm font-mono" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border); color: white;">
+            {statusFilters.map(f => (
+              <option value={f.value}>{f.label}</option>
+            ))}
+          </select>
+          <button id="refresh-btn" class="btn btn-secondary text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div id="stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <div class="text-2xl font-bold text-white" id="stat-pending">-</div>
+          <div class="text-sm text-[--color-terminal-muted]">Pending Review</div>
+        </div>
+        <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <div class="text-2xl font-bold text-green-400" id="stat-approved">-</div>
+          <div class="text-sm text-[--color-terminal-muted]">AI Approved</div>
+        </div>
+        <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <div class="text-2xl font-bold text-yellow-400" id="stat-changes">-</div>
+          <div class="text-sm text-[--color-terminal-muted]">Needs Changes</div>
+        </div>
+        <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+          <div class="text-2xl font-bold text-emerald-400" id="stat-published">-</div>
+          <div class="text-sm text-[--color-terminal-muted]">Published</div>
+        </div>
+      </div>
+
+      <!-- Contributions List -->
+      <div id="contributions-loading" class="text-center py-12">
+        <svg class="w-8 h-8 mx-auto text-[--color-primary-400] animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-2 text-sm text-[--color-terminal-muted]">Loading contributions...</p>
+      </div>
+
+      <div id="contributions-empty" class="hidden text-center py-12 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+        <svg class="w-12 h-12 mx-auto text-[--color-terminal-muted] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p class="text-[--color-terminal-muted]">No contributions found with this filter.</p>
+      </div>
+
+      <div id="contributions-list" class="hidden space-y-4"></div>
+
+      <div id="contributions-error" class="hidden text-center py-12 rounded-xl" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);">
+        <p class="text-red-400">Failed to load contributions. Please try again.</p>
+      </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/70" id="modal-backdrop"></div>
+      <div class="absolute inset-4 sm:inset-8 lg:inset-16 overflow-hidden rounded-2xl flex flex-col" style="background: var(--color-terminal-bg); border: 1px solid var(--color-terminal-border);">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color: var(--color-terminal-border);">
+          <h2 id="modal-title" class="text-xl font-bold text-white truncate">Contribution Details</h2>
+          <button id="modal-close" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+            <svg class="w-5 h-5 text-[--color-terminal-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="flex-1 overflow-auto p-6" id="modal-body">
+          <!-- Loaded dynamically -->
+        </div>
+
+        <!-- Modal Footer -->
+        <div id="modal-actions" class="px-6 py-4 border-t flex flex-wrap gap-3" style="border-color: var(--color-terminal-border);">
+          <!-- Actions loaded dynamically -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_URL = 'https://su5t4tzra5.execute-api.eu-west-1.amazonaws.com';
+    let currentContribution: any = null;
+
+    async function checkAdminAccess() {
+      const authChecking = document.getElementById('auth-checking');
+      const notAuthorized = document.getElementById('not-authorized');
+      const adminContent = document.getElementById('admin-content');
+
+      const token = localStorage.getItem('erold_token');
+      if (!token) {
+        authChecking?.classList.add('hidden');
+        notAuthorized?.classList.remove('hidden');
+        return false;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/v1/admin/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Not authorized');
+
+        const data = await response.json();
+        if (!data.isAdmin) {
+          throw new Error('Not an admin');
+        }
+
+        authChecking?.classList.add('hidden');
+        adminContent?.classList.remove('hidden');
+        return true;
+      } catch {
+        authChecking?.classList.add('hidden');
+        notAuthorized?.classList.remove('hidden');
+        return false;
+      }
+    }
+
+    async function loadContributions(status = '') {
+      const token = localStorage.getItem('erold_token');
+      const loading = document.getElementById('contributions-loading');
+      const empty = document.getElementById('contributions-empty');
+      const list = document.getElementById('contributions-list');
+      const error = document.getElementById('contributions-error');
+
+      loading?.classList.remove('hidden');
+      empty?.classList.add('hidden');
+      list?.classList.add('hidden');
+      error?.classList.add('hidden');
+
+      try {
+        const url = status
+          ? `${API_URL}/v1/admin/contributions?status=${status}`
+          : `${API_URL}/v1/admin/contributions`;
+
+        const response = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch');
+
+        const data = await response.json();
+        loading?.classList.add('hidden');
+
+        // Update stats
+        const allContribs = data.contributions || [];
+        updateStats(allContribs);
+
+        if (allContribs.length === 0) {
+          empty?.classList.remove('hidden');
+          return;
+        }
+
+        list?.classList.remove('hidden');
+        if (list) {
+          list.innerHTML = allContribs.map((c: any) => `
+            <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+              <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <h3 class="font-semibold text-white">${escapeHtml(c.title)}</h3>
+                    <span class="px-2 py-0.5 rounded text-xs font-mono ${getStatusClasses(c.status)}">${formatStatus(c.status)}</span>
+                    ${c.review?.score ? `<span class="px-2 py-0.5 rounded text-xs font-mono bg-violet-500/20 text-violet-400 border border-violet-500/30">Score: ${c.review.score}</span>` : ''}
+                  </div>
+                  <p class="text-sm text-[--color-terminal-muted] mb-2">
+                    <span class="capitalize">${c.framework}</span> / ${c.category.replace(/-/g, ' ')}
+                  </p>
+                  <div class="flex items-center gap-4 text-xs text-[--color-terminal-muted]">
+                    <span class="flex items-center gap-1">
+                      <img src="${c.author?.avatar || ''}" alt="" class="w-4 h-4 rounded-full" />
+                      ${escapeHtml(c.author?.username || 'Unknown')}
+                    </span>
+                    <span>${formatDate(c.createdAt)}</span>
+                  </div>
+                  ${c.review?.summary ? `<p class="mt-2 text-sm text-[--color-terminal-muted] italic">"${escapeHtml(c.review.summary)}"</p>` : ''}
+                </div>
+                <button class="btn btn-secondary text-sm view-details" data-id="${c.id}">
+                  View Details
+                </button>
+              </div>
+            </div>
+          `).join('');
+
+          // Add click handlers
+          list.querySelectorAll('.view-details').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const id = (btn as HTMLElement).dataset.id;
+              if (id) viewContribution(id);
+            });
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load contributions:', err);
+        loading?.classList.add('hidden');
+        error?.classList.remove('hidden');
+      }
+    }
+
+    function updateStats(contributions: any[]) {
+      const pending = contributions.filter(c => c.status === 'pending').length;
+      const aiApproved = contributions.filter(c => c.status === 'ai_approved').length;
+      const needsChanges = contributions.filter(c => ['ai_needs_changes', 'needs_changes'].includes(c.status)).length;
+      const published = contributions.filter(c => c.status === 'approved').length;
+
+      const statPending = document.getElementById('stat-pending');
+      const statApproved = document.getElementById('stat-approved');
+      const statChanges = document.getElementById('stat-changes');
+      const statPublished = document.getElementById('stat-published');
+
+      if (statPending) statPending.textContent = String(pending);
+      if (statApproved) statApproved.textContent = String(aiApproved);
+      if (statChanges) statChanges.textContent = String(needsChanges);
+      if (statPublished) statPublished.textContent = String(published);
+    }
+
+    async function viewContribution(id: string) {
+      const token = localStorage.getItem('erold_token');
+      const modal = document.getElementById('detail-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalBody = document.getElementById('modal-body');
+      const modalActions = document.getElementById('modal-actions');
+
+      modal?.classList.remove('hidden');
+      if (modalBody) modalBody.innerHTML = `
+        <div class="text-center py-12">
+          <svg class="w-8 h-8 mx-auto text-[--color-primary-400] animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="mt-2 text-sm text-[--color-terminal-muted]">Loading contribution...</p>
+        </div>
+      `;
+
+      try {
+        const response = await fetch(`${API_URL}/v1/admin/contributions/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch');
+
+        const data = await response.json();
+        currentContribution = data;
+
+        if (modalTitle) modalTitle.textContent = data.title;
+
+        if (modalBody) {
+          const g = data.guideline || {};
+          modalBody.innerHTML = `
+            <div class="grid lg:grid-cols-2 gap-6">
+              <!-- Left: Metadata -->
+              <div class="space-y-6">
+                <!-- Status -->
+                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Status</h4>
+                  <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded text-sm font-mono ${getStatusClasses(data.status)}">${formatStatus(data.status)}</span>
+                    ${data.review?.score ? `<span class="text-sm text-[--color-terminal-muted]">Score: <strong class="text-white">${data.review.score}/100</strong></span>` : ''}
+                  </div>
+                </div>
+
+                <!-- Author -->
+                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Author</h4>
+                  <div class="flex items-center gap-3">
+                    <img src="${data.author?.avatar || ''}" alt="" class="w-10 h-10 rounded-full" />
+                    <div>
+                      <div class="font-semibold text-white">${escapeHtml(data.author?.username || 'Unknown')}</div>
+                      <div class="text-sm text-[--color-terminal-muted]">Submitted ${formatDate(data.createdAt)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Metadata -->
+                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Metadata</h4>
+                  <dl class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <dt class="text-[--color-terminal-muted]">Framework</dt>
+                      <dd class="text-white capitalize">${data.framework}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                      <dt class="text-[--color-terminal-muted]">Category</dt>
+                      <dd class="text-white">${data.category}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                      <dt class="text-[--color-terminal-muted]">Slug</dt>
+                      <dd class="text-white font-mono">${g.slug || '-'}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                      <dt class="text-[--color-terminal-muted]">Version</dt>
+                      <dd class="text-white">${g.version || '-'}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                      <dt class="text-[--color-terminal-muted]">Difficulty</dt>
+                      <dd class="text-white capitalize">${g.difficulty || '-'}</dd>
+                    </div>
+                    ${g.tags?.length ? `
+                    <div>
+                      <dt class="text-[--color-terminal-muted] mb-1">Tags</dt>
+                      <dd class="flex flex-wrap gap-1">
+                        ${g.tags.map((t: string) => `<span class="px-2 py-0.5 rounded text-xs bg-white/10 text-white">${escapeHtml(t)}</span>`).join('')}
+                      </dd>
+                    </div>
+                    ` : ''}
+                  </dl>
+                </div>
+
+                <!-- AI Review -->
+                ${data.review ? `
+                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">AI Review</h4>
+                  ${data.review.summary ? `<p class="text-sm text-white mb-3">${escapeHtml(data.review.summary)}</p>` : ''}
+                  ${data.review.strengths?.length ? `
+                  <div class="mb-3">
+                    <div class="text-xs font-semibold text-green-400 mb-1">Strengths</div>
+                    <ul class="text-sm text-[--color-terminal-muted] space-y-1">
+                      ${data.review.strengths.map((s: string) => `<li class="flex items-start gap-2"><span class="text-green-400">+</span> ${escapeHtml(s)}</li>`).join('')}
+                    </ul>
+                  </div>
+                  ` : ''}
+                  ${data.review.issues?.length ? `
+                  <div class="mb-3">
+                    <div class="text-xs font-semibold text-red-400 mb-1">Issues</div>
+                    <ul class="text-sm text-[--color-terminal-muted] space-y-1">
+                      ${data.review.issues.map((i: any) => `<li class="flex items-start gap-2"><span class="${i.type === 'critical' ? 'text-red-400' : i.type === 'important' ? 'text-yellow-400' : 'text-blue-400'}">${i.type === 'critical' ? '!' : i.type === 'important' ? '*' : '?'}</span> ${escapeHtml(i.description)}</li>`).join('')}
+                    </ul>
+                  </div>
+                  ` : ''}
+                  ${data.review.suggestions?.length ? `
+                  <div>
+                    <div class="text-xs font-semibold text-blue-400 mb-1">Suggestions</div>
+                    <ul class="text-sm text-[--color-terminal-muted] space-y-1">
+                      ${data.review.suggestions.map((s: string) => `<li class="flex items-start gap-2"><span class="text-blue-400">*</span> ${escapeHtml(s)}</li>`).join('')}
+                    </ul>
+                  </div>
+                  ` : ''}
+                </div>
+                ` : ''}
+              </div>
+
+              <!-- Right: Content -->
+              <div class="space-y-6">
+                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Description</h4>
+                  <p class="text-white">${escapeHtml(g.description || '-')}</p>
+                </div>
+
+                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Content</h4>
+                  <div class="prose prose-invert prose-sm max-h-96 overflow-auto">
+                    <pre class="text-sm text-white whitespace-pre-wrap font-mono bg-black/30 p-4 rounded-lg overflow-auto">${escapeHtml(g.content || '-')}</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // Update actions based on status
+        if (modalActions) {
+          const canApprove = ['pending', 'ai_approved', 'ai_needs_changes'].includes(data.status);
+          const canReject = ['pending', 'ai_approved', 'ai_needs_changes', 'ai_rejected'].includes(data.status);
+          const canRequestChanges = ['pending', 'ai_approved'].includes(data.status);
+
+          modalActions.innerHTML = `
+            <div class="flex-1">
+              ${canRequestChanges ? `
+              <div class="flex items-center gap-2">
+                <input type="text" id="feedback-input" placeholder="Feedback for changes..." class="flex-1 px-3 py-2 rounded-lg text-sm" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border); color: white;" />
+                <button id="request-changes-btn" class="btn text-sm" style="background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.3); color: rgb(251, 191, 36);">
+                  Request Changes
+                </button>
+              </div>
+              ` : ''}
+            </div>
+            <div class="flex items-center gap-2">
+              ${canReject ? `
+              <button id="reject-btn" class="btn text-sm" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); color: rgb(239, 68, 68);">
+                Reject
+              </button>
+              ` : ''}
+              ${canApprove ? `
+              <button id="approve-btn" class="btn btn-primary text-sm">
+                Approve & Publish
+              </button>
+              ` : ''}
+            </div>
+          `;
+
+          // Attach action handlers
+          document.getElementById('approve-btn')?.addEventListener('click', () => approveContribution(id));
+          document.getElementById('reject-btn')?.addEventListener('click', () => rejectContribution(id));
+          document.getElementById('request-changes-btn')?.addEventListener('click', () => {
+            const feedback = (document.getElementById('feedback-input') as HTMLInputElement)?.value;
+            if (feedback) requestChanges(id, feedback);
+          });
+        }
+
+      } catch (err) {
+        console.error('Failed to load contribution:', err);
+        if (modalBody) modalBody.innerHTML = `
+          <div class="text-center py-12 text-red-400">Failed to load contribution details.</div>
+        `;
+      }
+    }
+
+    async function approveContribution(id: string) {
+      if (!confirm('Approve and publish this guideline?')) return;
+
+      const token = localStorage.getItem('erold_token');
+      try {
+        const response = await fetch(`${API_URL}/v1/admin/contributions/${id}/approve`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        });
+
+        if (!response.ok) throw new Error('Failed to approve');
+
+        closeModal();
+        loadContributions((document.getElementById('status-filter') as HTMLSelectElement)?.value || '');
+      } catch (err) {
+        console.error('Failed to approve:', err);
+        alert('Failed to approve contribution');
+      }
+    }
+
+    async function rejectContribution(id: string) {
+      const reason = prompt('Reason for rejection:');
+      if (!reason) return;
+
+      const token = localStorage.getItem('erold_token');
+      try {
+        const response = await fetch(`${API_URL}/v1/admin/contributions/${id}/reject`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ reason })
+        });
+
+        if (!response.ok) throw new Error('Failed to reject');
+
+        closeModal();
+        loadContributions((document.getElementById('status-filter') as HTMLSelectElement)?.value || '');
+      } catch (err) {
+        console.error('Failed to reject:', err);
+        alert('Failed to reject contribution');
+      }
+    }
+
+    async function requestChanges(id: string, feedback: string) {
+      const token = localStorage.getItem('erold_token');
+      try {
+        const response = await fetch(`${API_URL}/v1/admin/contributions/${id}/request-changes`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ feedback })
+        });
+
+        if (!response.ok) throw new Error('Failed to request changes');
+
+        closeModal();
+        loadContributions((document.getElementById('status-filter') as HTMLSelectElement)?.value || '');
+      } catch (err) {
+        console.error('Failed to request changes:', err);
+        alert('Failed to request changes');
+      }
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('detail-modal');
+      modal?.classList.add('hidden');
+      currentContribution = null;
+    }
+
+    function getStatusClasses(status: string): string {
+      switch (status) {
+        case 'pending': return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
+        case 'ai_approved': return 'bg-green-500/20 text-green-400 border border-green-500/30';
+        case 'ai_needs_changes': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+        case 'ai_rejected': return 'bg-red-500/20 text-red-400 border border-red-500/30';
+        case 'approved': return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        case 'rejected': return 'bg-red-500/20 text-red-400 border border-red-500/30';
+        case 'needs_changes': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+        default: return 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+      }
+    }
+
+    function formatStatus(status: string): string {
+      return status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function formatDate(dateStr: string): string {
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function escapeHtml(str: string): string {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Initialize
+    async function init() {
+      const isAdmin = await checkAdminAccess();
+      if (isAdmin) {
+        await loadContributions();
+
+        // Filter change handler
+        document.getElementById('status-filter')?.addEventListener('change', (e) => {
+          loadContributions((e.target as HTMLSelectElement).value);
+        });
+
+        // Refresh button
+        document.getElementById('refresh-btn')?.addEventListener('click', () => {
+          loadContributions((document.getElementById('status-filter') as HTMLSelectElement)?.value || '');
+        });
+
+        // Modal handlers
+        document.getElementById('modal-backdrop')?.addEventListener('click', closeModal);
+        document.getElementById('modal-close')?.addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') closeModal();
+        });
+      }
+    }
+
+    init();
+  </script>
+</BaseLayout>
