@@ -1,10 +1,12 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 import crypto from "crypto";
 
 const dynamodb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const s3 = new S3Client({});
+const lambda = new LambdaClient({});
 
 const TABLE_NAME = process.env.TABLE_NAME || "erold-contributions";
 const BUCKET_NAME = process.env.BUCKET_NAME || "erold-contributions-pending";
@@ -12,6 +14,7 @@ const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "https://erold.guide";
+const AI_REVIEWER_FUNCTION = process.env.AI_REVIEWER_FUNCTION || "erold-ai-reviewer";
 
 // CORS headers
 const corsHeaders = {
@@ -200,6 +203,19 @@ async function createContribution(user, body) {
 
   await dynamodb.send(new PutCommand({ TableName: TABLE_NAME, Item: item }));
 
+  // Trigger AI review asynchronously (fire and forget)
+  try {
+    await lambda.send(new InvokeCommand({
+      FunctionName: AI_REVIEWER_FUNCTION,
+      InvocationType: "Event", // Async invocation
+      Payload: JSON.stringify({ contributionId: id }),
+    }));
+    console.log(`AI review triggered for ${id}`);
+  } catch (err) {
+    // Don't fail the submission if AI review fails to trigger
+    console.error(`Failed to trigger AI review for ${id}:`, err);
+  }
+
   return json(201, {
     id,
     status: "pending",
@@ -297,15 +313,28 @@ async function updateContribution(user, id, body) {
   await dynamodb.send(new UpdateCommand({
     TableName: TABLE_NAME,
     Key: { pk: `CONTRIB#${id}`, sk: "META" },
-    UpdateExpression: "SET #status = :status, title = :title, slug = :slug, updatedAt = :now",
+    UpdateExpression: "SET #status = :status, title = :title, slug = :slug, updatedAt = :now, review = :review",
     ExpressionAttributeNames: { "#status": "status" },
     ExpressionAttributeValues: {
       ":status": "pending",
       ":title": guideline.title,
       ":slug": guideline.slug,
       ":now": now,
+      ":review": null, // Clear previous review
     },
   }));
+
+  // Trigger AI review for updated contribution
+  try {
+    await lambda.send(new InvokeCommand({
+      FunctionName: AI_REVIEWER_FUNCTION,
+      InvocationType: "Event",
+      Payload: JSON.stringify({ contributionId: id }),
+    }));
+    console.log(`AI review triggered for updated ${id}`);
+  } catch (err) {
+    console.error(`Failed to trigger AI review for ${id}:`, err);
+  }
 
   return json(200, { id, status: "pending", updatedAt: now });
 }
