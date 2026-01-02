@@ -6,12 +6,38 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-west-1
 
 jobs:
-  deploy:
+  # Detect what changed
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      website: ${{ steps.filter.outputs.website }}
+      contributions-lambda: ${{ steps.filter.outputs.contributions-lambda }}
+      ai-reviewer-lambda: ${{ steps.filter.outputs.ai-reviewer-lambda }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            website:
+              - 'src/**'
+              - 'content/**'
+              - 'public/**'
+              - 'astro.config.mjs'
+              - 'package.json'
+            contributions-lambda:
+              - 'infra/lambda/contributions/**'
+            ai-reviewer-lambda:
+              - 'infra/lambda/ai-reviewer/**'
 
+  # Deploy website (always runs on workflow_dispatch, or when website files change)
+  deploy-website:
+    needs: changes
+    if: ${{ needs.changes.outputs.website == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,3 +84,83 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id E1JEAAW1UUUT5Z \
             --paths "/*"
+
+  # Deploy contributions Lambda
+  deploy-contributions-lambda:
+    needs: changes
+    if: ${{ needs.changes.outputs.contributions-lambda == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package Lambda
+        run: |
+          cd infra/lambda/contributions
+          zip -r ../contributions.zip index.mjs
+
+      - name: Deploy Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name erold-contributions-api \
+            --zip-file fileb://infra/lambda/contributions.zip
+
+      - name: Update Lambda configuration
+        run: |
+          aws lambda update-function-configuration \
+            --function-name erold-contributions-api \
+            --environment "Variables={
+              TABLE_NAME=erold-contributions,
+              PENDING_BUCKET=erold-contributions-pending,
+              GUIDELINES_BUCKET=erold-guide-content,
+              GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }},
+              GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }},
+              JWT_SECRET=${{ secrets.JWT_SECRET }},
+              AI_REVIEWER_FUNCTION=erold-ai-reviewer,
+              ADMIN_USERS=${{ secrets.ADMIN_USERS }}
+            }"
+
+  # Deploy AI reviewer Lambda
+  deploy-ai-reviewer-lambda:
+    needs: changes
+    if: ${{ needs.changes.outputs.ai-reviewer-lambda == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package Lambda
+        run: |
+          cd infra/lambda/ai-reviewer
+          zip -r ../ai-reviewer.zip index.mjs
+
+      - name: Deploy Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name erold-ai-reviewer \
+            --zip-file fileb://infra/lambda/ai-reviewer.zip
+
+      - name: Update Lambda configuration
+        run: |
+          aws lambda update-function-configuration \
+            --function-name erold-ai-reviewer \
+            --environment "Variables={
+              TABLE_NAME=erold-contributions,
+              PENDING_BUCKET=erold-contributions-pending,
+              GUIDELINES_BUCKET=erold-guide-content,
+              ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+            }"
