@@ -1,0 +1,448 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Load frameworks for the form
+import { promises as fs } from 'fs';
+import path from 'path';
+import yaml from 'js-yaml';
+
+const frameworksDir = path.join(process.cwd(), 'content/frameworks');
+const files = await fs.readdir(frameworksDir);
+
+const frameworks = await Promise.all(
+  files.filter(f => f.endsWith('.yaml')).map(async (file) => {
+    const content = await fs.readFile(path.join(frameworksDir, file), 'utf-8');
+    const data = yaml.load(content) as { id: string; name: string; categories: string[] };
+    return {
+      id: data.id,
+      name: data.name,
+      categories: data.categories || []
+    };
+  })
+);
+---
+
+<BaseLayout title="Submit Guideline" description="Submit a new guideline to erold.guide">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 py-16">
+    <!-- Auth Check -->
+    <div id="auth-required" class="hidden">
+      <div class="text-center py-16">
+        <div class="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+          <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-10a4 4 0 100 8 4 4 0 000-8z" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white mb-4">Authentication Required</h1>
+        <p class="text-[--color-terminal-muted] mb-6">Please sign in with GitHub to submit a guideline.</p>
+        <a href="/contribute" class="btn btn-primary inline-flex">
+          Go to Contribute Page
+        </a>
+      </div>
+    </div>
+
+    <!-- Submission Form -->
+    <div id="submission-form" class="hidden">
+      <div class="mb-8">
+        <nav class="text-sm text-[--color-terminal-muted] mb-4">
+          <a href="/contribute" class="hover:text-white transition-colors">Contribute</a>
+          <span class="mx-2">/</span>
+          <span class="text-white">Submit Guideline</span>
+        </nav>
+        <h1 class="text-3xl font-bold text-white mb-2">Submit a Guideline</h1>
+        <p class="text-[--color-terminal-muted]">Share your knowledge with the community. All submissions are reviewed before publishing.</p>
+      </div>
+
+      <form id="guideline-form" class="space-y-8">
+        <!-- Framework & Category -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="framework" class="block text-sm font-medium text-white mb-2">Framework *</label>
+            <select id="framework" name="framework" required class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors">
+              <option value="">Select a framework...</option>
+              {frameworks.map(fw => (
+                <option value={fw.id} data-categories={JSON.stringify(fw.categories)}>{fw.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label for="category" class="block text-sm font-medium text-white mb-2">Category *</label>
+            <select id="category" name="category" required disabled class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors disabled:opacity-50">
+              <option value="">Select framework first...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Title & Slug -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="title" class="block text-sm font-medium text-white mb-2">Title * <span class="text-[--color-terminal-muted] font-normal">(5-100 characters)</span></label>
+            <input type="text" id="title" name="title" required minlength="5" maxlength="100" placeholder="e.g., Use Server Components by Default" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors" />
+          </div>
+
+          <div>
+            <label for="slug" class="block text-sm font-medium text-white mb-2">Slug * <span class="text-[--color-terminal-muted] font-normal">(lowercase, hyphens only)</span></label>
+            <input type="text" id="slug" name="slug" required pattern="^[a-z0-9-]+$" placeholder="e.g., server-components-default" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+          </div>
+        </div>
+
+        <!-- Version & Difficulty -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="version" class="block text-sm font-medium text-white mb-2">Version * <span class="text-[--color-terminal-muted] font-normal">(semver format)</span></label>
+            <input type="text" id="version" name="version" required pattern="^\d+\.\d+\.\d+$" value="1.0.0" placeholder="1.0.0" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+          </div>
+
+          <div>
+            <label for="difficulty" class="block text-sm font-medium text-white mb-2">Difficulty *</label>
+            <select id="difficulty" name="difficulty" required class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-medium text-white mb-2">Description * <span class="text-[--color-terminal-muted] font-normal">(20-300 characters)</span></label>
+          <textarea id="description" name="description" required minlength="20" maxlength="300" rows="2" placeholder="A brief summary of the guideline for search results and previews..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors resize-none"></textarea>
+          <p class="mt-1 text-sm text-[--color-terminal-muted]"><span id="desc-count">0</span>/300</p>
+        </div>
+
+        <!-- Tags -->
+        <div>
+          <label for="tags-input" class="block text-sm font-medium text-white mb-2">Tags * <span class="text-[--color-terminal-muted] font-normal">(1-10 tags, press Enter to add)</span></label>
+          <div class="flex flex-wrap gap-2 mb-2" id="tags-container"></div>
+          <input type="text" id="tags-input" placeholder="Type a tag and press Enter..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors" />
+          <input type="hidden" id="tags" name="tags" value="[]" />
+        </div>
+
+        <!-- Content -->
+        <div>
+          <label for="content" class="block text-sm font-medium text-white mb-2">Content * <span class="text-[--color-terminal-muted] font-normal">(Markdown, 100+ characters)</span></label>
+          <div class="border border-[--color-border-primary] rounded-lg overflow-hidden">
+            <div class="flex border-b border-[--color-border-primary] bg-[--color-bg-secondary]">
+              <button type="button" id="tab-write" class="px-4 py-2 text-sm font-medium text-white border-b-2 border-[--color-primary-500]">Write</button>
+              <button type="button" id="tab-preview" class="px-4 py-2 text-sm font-medium text-[--color-terminal-muted] hover:text-white transition-colors">Preview</button>
+            </div>
+            <textarea id="content" name="content" required minlength="100" rows="20" placeholder="# Your Guideline Title
+
+Explain the guideline here. Use Markdown for formatting.
+
+## Why This Matters
+
+Explain the reasoning...
+
+## Code Example
+
+```javascript
+// Your code example
+```
+
+## Anti-patterns
+
+What to avoid...
+
+## Summary
+
+Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white placeholder:text-[--color-terminal-muted] outline-none resize-none font-mono text-sm" style="min-height: 400px;"></textarea>
+            <div id="preview-container" class="hidden px-4 py-3 bg-[--color-bg-tertiary] prose prose-invert max-w-none" style="min-height: 400px;"></div>
+          </div>
+          <p class="mt-1 text-sm text-[--color-terminal-muted]"><span id="content-count">0</span> characters</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="hidden p-4 rounded-lg" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+          <p class="text-red-400" id="error-text"></p>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex items-center justify-between pt-4 border-t border-[--color-border-primary]">
+          <a href="/contribute" class="text-[--color-terminal-muted] hover:text-white transition-colors">Cancel</a>
+          <button type="submit" id="submit-btn" class="btn btn-primary">
+            <span id="submit-text">Submit for Review</span>
+            <svg id="submit-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Success State -->
+    <div id="success-state" class="hidden">
+      <div class="text-center py-16">
+        <div class="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+          <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white mb-4">Guideline Submitted!</h1>
+        <p class="text-[--color-terminal-muted] mb-2">Your guideline has been submitted for review.</p>
+        <p class="text-[--color-terminal-muted] mb-6">Contribution ID: <code id="contribution-id" class="font-mono text-[--color-primary-400]"></code></p>
+        <div class="flex items-center justify-center gap-4">
+          <a href="/contribute" class="btn btn-secondary">View My Contributions</a>
+          <button type="button" id="submit-another" class="btn btn-primary">Submit Another</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://contribute.erold.guide';
+
+    // Check authentication
+    function checkAuth() {
+      const token = localStorage.getItem('erold_token');
+      const authRequired = document.getElementById('auth-required');
+      const submissionForm = document.getElementById('submission-form');
+
+      if (!token) {
+        authRequired?.classList.remove('hidden');
+        submissionForm?.classList.add('hidden');
+      } else {
+        authRequired?.classList.add('hidden');
+        submissionForm?.classList.remove('hidden');
+      }
+    }
+
+    // Framework/Category handling
+    const frameworkSelect = document.getElementById('framework') as HTMLSelectElement;
+    const categorySelect = document.getElementById('category') as HTMLSelectElement;
+
+    frameworkSelect?.addEventListener('change', () => {
+      const selected = frameworkSelect.options[frameworkSelect.selectedIndex];
+      const categories = JSON.parse(selected.dataset.categories || '[]');
+
+      categorySelect.innerHTML = '';
+      categorySelect.disabled = categories.length === 0;
+
+      if (categories.length === 0) {
+        categorySelect.innerHTML = '<option value="">No categories available</option>';
+      } else {
+        categorySelect.innerHTML = '<option value="">Select a category...</option>';
+        categories.forEach((cat: string) => {
+          const option = document.createElement('option');
+          option.value = cat;
+          option.textContent = cat.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+          categorySelect.appendChild(option);
+        });
+      }
+    });
+
+    // Auto-generate slug from title
+    const titleInput = document.getElementById('title') as HTMLInputElement;
+    const slugInput = document.getElementById('slug') as HTMLInputElement;
+    let slugManuallyEdited = false;
+
+    slugInput?.addEventListener('input', () => {
+      slugManuallyEdited = true;
+    });
+
+    titleInput?.addEventListener('input', () => {
+      if (!slugManuallyEdited) {
+        slugInput.value = titleInput.value
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .slice(0, 50);
+      }
+    });
+
+    // Description character count
+    const descInput = document.getElementById('description') as HTMLTextAreaElement;
+    const descCount = document.getElementById('desc-count');
+
+    descInput?.addEventListener('input', () => {
+      if (descCount) descCount.textContent = String(descInput.value.length);
+    });
+
+    // Content character count
+    const contentInput = document.getElementById('content') as HTMLTextAreaElement;
+    const contentCount = document.getElementById('content-count');
+
+    contentInput?.addEventListener('input', () => {
+      if (contentCount) contentCount.textContent = String(contentInput.value.length);
+    });
+
+    // Tags handling
+    const tagsContainer = document.getElementById('tags-container');
+    const tagsInput = document.getElementById('tags-input') as HTMLInputElement;
+    const tagsHidden = document.getElementById('tags') as HTMLInputElement;
+    let tags: string[] = [];
+
+    function renderTags() {
+      if (!tagsContainer) return;
+      tagsContainer.innerHTML = '';
+      tags.forEach((tag, index) => {
+        const span = document.createElement('span');
+        span.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium';
+        span.style.cssText = 'background: rgba(37, 99, 235, 0.2); color: rgb(147, 197, 253);';
+        span.innerHTML = `
+          ${tag}
+          <button type="button" class="hover:text-white" data-index="${index}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        `;
+        tagsContainer.appendChild(span);
+      });
+      tagsHidden.value = JSON.stringify(tags);
+    }
+
+    tagsContainer?.addEventListener('click', (e) => {
+      const btn = (e.target as Element).closest('button');
+      if (btn) {
+        const index = parseInt(btn.getAttribute('data-index') || '0');
+        tags.splice(index, 1);
+        renderTags();
+      }
+    });
+
+    tagsInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const value = tagsInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+        if (value && !tags.includes(value) && tags.length < 10) {
+          tags.push(value);
+          renderTags();
+          tagsInput.value = '';
+        }
+      }
+    });
+
+    // Tab switching (Write/Preview)
+    const tabWrite = document.getElementById('tab-write');
+    const tabPreview = document.getElementById('tab-preview');
+    const previewContainer = document.getElementById('preview-container');
+
+    tabWrite?.addEventListener('click', () => {
+      tabWrite.classList.add('border-[--color-primary-500]', 'text-white');
+      tabWrite.classList.remove('text-[--color-terminal-muted]');
+      tabPreview?.classList.remove('border-[--color-primary-500]', 'text-white');
+      tabPreview?.classList.add('text-[--color-terminal-muted]');
+      contentInput?.classList.remove('hidden');
+      previewContainer?.classList.add('hidden');
+    });
+
+    tabPreview?.addEventListener('click', async () => {
+      tabPreview.classList.add('border-[--color-primary-500]', 'text-white');
+      tabPreview.classList.remove('text-[--color-terminal-muted]');
+      tabWrite?.classList.remove('border-[--color-primary-500]', 'text-white');
+      tabWrite?.classList.add('text-[--color-terminal-muted]');
+      contentInput?.classList.add('hidden');
+      previewContainer?.classList.remove('hidden');
+
+      // Simple markdown preview (basic)
+      if (previewContainer && contentInput) {
+        let html = contentInput.value
+          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+          .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+          .replace(/\*(.*)\*/gim, '<em>$1</em>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>')
+          .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+          .replace(/\n/g, '<br>');
+        previewContainer.innerHTML = html || '<p class="text-[--color-terminal-muted]">Nothing to preview yet...</p>';
+      }
+    });
+
+    // Form submission
+    const form = document.getElementById('guideline-form') as HTMLFormElement;
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    const successState = document.getElementById('success-state');
+    const contributionId = document.getElementById('contribution-id');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const token = localStorage.getItem('erold_token');
+      if (!token) {
+        showError('Please sign in to submit a guideline.');
+        return;
+      }
+
+      // Validate tags
+      if (tags.length < 1) {
+        showError('Please add at least one tag.');
+        return;
+      }
+
+      // Show loading state
+      submitBtn?.setAttribute('disabled', 'true');
+      submitText?.classList.add('hidden');
+      submitSpinner?.classList.remove('hidden');
+      errorMessage?.classList.add('hidden');
+
+      try {
+        const payload = {
+          framework: (document.getElementById('framework') as HTMLSelectElement).value,
+          category: (document.getElementById('category') as HTMLSelectElement).value,
+          guideline: {
+            title: (document.getElementById('title') as HTMLInputElement).value,
+            slug: (document.getElementById('slug') as HTMLInputElement).value,
+            version: (document.getElementById('version') as HTMLInputElement).value,
+            description: (document.getElementById('description') as HTMLTextAreaElement).value,
+            tags: tags,
+            difficulty: (document.getElementById('difficulty') as HTMLSelectElement).value,
+            content: (document.getElementById('content') as HTMLTextAreaElement).value,
+          }
+        };
+
+        const response = await fetch(`${API_URL}/v1/contributions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error?.message || 'Failed to submit guideline');
+        }
+
+        // Show success
+        document.getElementById('submission-form')?.classList.add('hidden');
+        successState?.classList.remove('hidden');
+        if (contributionId) contributionId.textContent = data.id;
+
+      } catch (err) {
+        showError(err instanceof Error ? err.message : 'Failed to submit guideline');
+      } finally {
+        submitBtn?.removeAttribute('disabled');
+        submitText?.classList.remove('hidden');
+        submitSpinner?.classList.add('hidden');
+      }
+    });
+
+    function showError(message: string) {
+      if (errorText) errorText.textContent = message;
+      errorMessage?.classList.remove('hidden');
+    }
+
+    // Submit another button
+    document.getElementById('submit-another')?.addEventListener('click', () => {
+      form.reset();
+      tags = [];
+      renderTags();
+      slugManuallyEdited = false;
+      successState?.classList.add('hidden');
+      document.getElementById('submission-form')?.classList.remove('hidden');
+    });
+
+    // Initialize
+    checkAuth();
+  </script>
+</BaseLayout>
