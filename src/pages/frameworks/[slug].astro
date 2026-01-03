@@ -30,41 +30,47 @@ const categories = Object.keys(guidelinesByCategory).sort();
 ---
 
 <BaseLayout title={framework.name} description={framework.description}>
-  <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+
     <!-- Breadcrumb -->
-    <nav class="font-mono text-xs mb-6" style="color: var(--color-terminal-muted);">
-      <a href="/frameworks" class="hover:text-[--color-primary-400]">frameworks</a>
+    <nav class="text-sm font-mono mb-6" style="color: var(--color-terminal-muted);">
+      <a href="/" class="hover:text-[--color-primary-400] transition-colors">Home</a>
       <span class="mx-2">/</span>
-      <span class="text-white">{framework.slug}</span>
+      <a href="/frameworks" class="hover:text-[--color-primary-400] transition-colors">Frameworks</a>
+      <span class="mx-2">/</span>
+      <span class="text-white">{framework.name}</span>
     </nav>
 
     <!-- Header -->
-    <div class="mb-8 pb-6 border-b border-[--color-terminal-border]">
-      <div class="flex items-start gap-4">
-        {framework.logo && (
-          <img
-            src={framework.logo}
-            alt={framework.name}
-            class="w-12 h-12 rounded"
-            style="filter: brightness(0) invert(1);"
-          />
-        )}
+    <header class="mb-12">
+      <div class="flex items-start gap-5 mb-6">
+        <div class="framework-card-icon w-16 h-16">
+          {framework.logo ? (
+            <img src={framework.logo} alt={framework.name} class="w-9 h-9" style="filter: brightness(0) invert(1);" />
+          ) : (
+            <span class="text-2xl font-bold text-white">{framework.name.charAt(0)}</span>
+          )}
+        </div>
         <div>
-          <h1 class="text-2xl font-mono font-bold text-white">{framework.name}</h1>
-          <p class="font-mono text-sm mt-2" style="color: var(--color-terminal-muted);">
+          <h1 class="text-3xl font-bold text-white tracking-tight">{framework.name}</h1>
+          <p class="text-lg mt-2" style="color: var(--color-terminal-muted);">
             {framework.description}
           </p>
         </div>
       </div>
 
-      <div class="flex flex-wrap gap-4 mt-4">
+      <!-- Quick Links -->
+      <div class="flex flex-wrap gap-3">
         {framework.website && (
           <a
             href={framework.website}
             target="_blank"
             rel="noopener"
-            class="font-mono text-xs text-[--color-primary-400] hover:underline"
+            class="btn btn-secondary text-sm"
           >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
             Website
           </a>
         )}
@@ -73,8 +79,11 @@ const categories = Object.keys(guidelinesByCategory).sort();
             href={framework.documentation}
             target="_blank"
             rel="noopener"
-            class="font-mono text-xs text-[--color-primary-400] hover:underline"
+            class="btn btn-secondary text-sm"
           >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
             Docs
           </a>
         )}
@@ -83,101 +92,129 @@ const categories = Object.keys(guidelinesByCategory).sort();
             href={framework.repository}
             target="_blank"
             rel="noopener"
-            class="font-mono text-xs text-[--color-primary-400] hover:underline"
+            class="btn btn-secondary text-sm"
           >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+            </svg>
             GitHub
           </a>
         )}
       </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="quick-stats mb-12">
+      <div class="quick-stat">
+        <span class="quick-stat-value">{guidelines.length}</span>
+        <span class="quick-stat-label">Guidelines</span>
+      </div>
+      <div class="quick-stat-divider"></div>
+      <div class="quick-stat">
+        <span class="quick-stat-value">{categories.length}</span>
+        <span class="quick-stat-label">Categories</span>
+      </div>
+      {framework.currentVersion && (
+        <>
+          <div class="quick-stat-divider"></div>
+          <div class="quick-stat">
+            <span class="quick-stat-value">v{framework.currentVersion}</span>
+            <span class="quick-stat-label">Latest</span>
+          </div>
+        </>
+      )}
     </div>
 
-    <div class="grid lg:grid-cols-[1fr,280px] gap-8">
-      <!-- Guidelines by Category -->
-      <div class="space-y-8">
-        {categories.length > 0 ? (
-          categories.map((category) => (
-            <section>
-              <h2 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
-                {category.replace(/-/g, ' ')}
-              </h2>
-              <div class="space-y-1">
-                {guidelinesByCategory[category].map((g) => (
-                  <a
-                    href={`/guidelines/${g.framework}/${g.category}/${g.slug}`}
-                    class="block px-3 py-2 rounded font-mono text-sm transition-colors hover:bg-[--color-terminal-surface]"
-                    style="color: var(--color-terminal-text);"
-                  >
-                    <span>{g.title}</span>
-                    {g.deprecated && (
-                      <span class="ml-2 text-xs px-1.5 py-0.5 rounded" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">
-                        deprecated
+    <!-- Guidelines by Category -->
+    <div class="space-y-12">
+      {categories.length > 0 ? (
+        categories.map((category, catIndex) => (
+          <section class="zone">
+            <div class="zone-header">
+              <div class="zone-title">
+                <div class="zone-icon">
+                  <span class="text-sm font-bold text-[--color-primary-400]">{catIndex + 1}</span>
+                </div>
+                <h2>{category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h2>
+                <span class="zone-count">{guidelinesByCategory[category].length}</span>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              {guidelinesByCategory[category].map((g, i) => (
+                <a
+                  href={`/guidelines/${g.framework}/${g.category}/${g.slug}`}
+                  class="guideline-card"
+                >
+                  <div class="guideline-card-number">{i + 1}</div>
+                  <div class="guideline-card-content">
+                    <div class="guideline-card-title">{g.title}</div>
+                    <p class="text-sm mt-1 line-clamp-1" style="color: var(--color-terminal-muted);">
+                      {g.description}
+                    </p>
+                    <div class="guideline-card-meta mt-2">
+                      <span class={`tag text-xs ${
+                        g.difficulty === 'beginner' ? 'difficulty-beginner' :
+                        g.difficulty === 'intermediate' ? 'difficulty-intermediate' :
+                        'difficulty-advanced'
+                      }`}>
+                        {g.difficulty}
                       </span>
-                    )}
-                  </a>
-                ))}
-              </div>
-            </section>
-          ))
-        ) : (
-          <div class="text-center py-12">
-            <p class="font-mono text-sm" style="color: var(--color-terminal-muted);">
-              No guidelines yet for {framework.name}.
-            </p>
-            <a href="https://github.com/erold-dev/erold.guide" class="inline-block mt-3 font-mono text-xs text-[--color-primary-400] hover:underline">
-              Contribute one →
-            </a>
-          </div>
-        )}
-      </div>
-
-      <!-- Sidebar -->
-      <aside class="space-y-6">
-        <!-- Info -->
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <dl class="space-y-3 font-mono text-sm">
-            <div class="flex justify-between">
-              <dt style="color: var(--color-terminal-muted);">Guidelines</dt>
-              <dd class="text-white">{guidelines.length}</dd>
-            </div>
-            {framework.currentVersion && (
-              <div class="flex justify-between">
-                <dt style="color: var(--color-terminal-muted);">Version</dt>
-                <dd class="text-white">{framework.currentVersion}</dd>
-              </div>
-            )}
-            <div class="flex justify-between">
-              <dt style="color: var(--color-terminal-muted);">Technology</dt>
-              <dd class="text-white">{framework.technology}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Tags -->
-        {framework.tags.length > 0 && (
-          <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-            <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
-              Tags
-            </h3>
-            <div class="flex flex-wrap gap-2">
-              {framework.tags.map((tag) => (
-                <span class="font-mono text-xs px-2 py-1 rounded" style="background: var(--color-terminal-bg); color: var(--color-terminal-muted);">
-                  {tag}
-                </span>
+                      <span class="text-xs" style="color: var(--color-terminal-muted);">
+                        {g.estimatedReadTime} min read
+                      </span>
+                      {g.deprecated && (
+                        <span class="tag text-xs" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">
+                          deprecated
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <svg class="guideline-card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               ))}
             </div>
+          </section>
+        ))
+      ) : (
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg class="w-8 h-8 text-[--color-terminal-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
           </div>
-        )}
+          <div class="empty-state-title">No guidelines yet for {framework.name}</div>
+          <div class="empty-state-desc">
+            Guidelines for this framework are coming soon.
+          </div>
+          <a
+            href="/contributing"
+            class="btn btn-primary mt-4"
+          >
+            Learn How to Contribute
+          </a>
+        </div>
+      )}
+    </div>
 
-        <!-- API -->
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
-            API
-          </h3>
-          <code class="block font-mono text-xs p-2 rounded break-all" style="background: var(--color-terminal-bg); color: var(--color-terminal-muted);">
-            /api/v1/frameworks/{framework.slug}/index.json
+    <!-- API Info -->
+    <section class="mt-16 p-6 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+      <h3 class="text-lg font-semibold text-white mb-3">API Access</h3>
+      <p class="text-sm mb-4" style="color: var(--color-terminal-muted);">
+        Access these guidelines programmatically through our JSON API.
+      </p>
+      <div class="space-y-2">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-mono px-2 py-1 rounded" style="background: rgba(16, 185, 129, 0.1); color: var(--color-accent-400);">GET</span>
+          <code class="text-sm font-mono" style="color: var(--color-terminal-muted);">
+            /api/v1/frameworks/{framework.slug}/_index.json
           </code>
         </div>
-      </aside>
-    </div>
+      </div>
+      <a href="/api" class="zone-link inline-block mt-4">View full API docs →</a>
+    </section>
+
   </div>
 </BaseLayout>

@@ -22,6 +22,26 @@ relatedGuidelines:
 prerequisites: []
 difficulty: beginner
 estimatedReadTime: 5
+
+ai:
+  prompt_snippet: "In Next.js App Router, keep components as Server Components by default. Only add 'use client' when the component needs onClick handlers, useState/useEffect hooks, or browser APIs like localStorage."
+  applies_when:
+    - "Creating a new component in Next.js App Router"
+    - "Deciding between Server and Client Components"
+    - "Optimizing bundle size in Next.js"
+    - "Adding data fetching to a component"
+  does_not_apply_when:
+    - "Using Next.js Pages Router (pages/ directory)"
+    - "Component requires useState, useEffect, or event handlers"
+    - "Component uses browser-only APIs"
+  priority: critical
+  confidence: established
+
+changelog:
+  - version: "1.0.0"
+    date: "2025-01-01"
+    changes:
+      - "Initial guideline release"
 ---
 
 # Default to Server Components

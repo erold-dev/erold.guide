@@ -37,6 +37,22 @@ export const GuidelineFrontmatterSchema = z.object({
   // Content hints
   difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
   estimatedReadTime: z.number().min(1).max(60),
+
+  // AI-optimized fields (optional for backwards compatibility)
+  ai: z.object({
+    prompt_snippet: z.string().max(500),
+    applies_when: z.array(z.string()).max(10),
+    does_not_apply_when: z.array(z.string()).max(10),
+    priority: z.enum(['critical', 'recommended', 'optional']),
+    confidence: z.enum(['established', 'emerging', 'experimental']),
+  }).optional(),
+
+  // Changelog for versioned updates
+  changelog: z.array(z.object({
+    version: z.string(),
+    date: z.string(),
+    changes: z.array(z.string()),
+  })).optional(),
 });
 
 export type GuidelineFrontmatter = z.infer<typeof GuidelineFrontmatterSchema>;

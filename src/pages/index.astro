@@ -6,26 +6,15 @@ const allFrameworks = getFrameworks();
 const allGuidelines = getGuidelines();
 
 const frameworks = allFrameworks.map(fw => ({
-  name: fw.name,
-  slug: fw.slug,
-  count: getGuidelinesByFramework(fw.slug).length,
+  ...fw,
+  guidelinesCount: getGuidelinesByFramework(fw.slug).length,
 }));
 
 const recentGuidelines = allGuidelines
   .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-  .slice(0, 5)
-  .map(g => ({
-    title: g.title,
-    framework: g.framework,
-    category: g.category,
-    slug: g.slug,
-  }));
+  .slice(0, 5);
 
-const categories = getAllCategories().slice(0, 6).map(c => ({
-  name: c.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-  slug: c.name,
-  count: c.count,
-}));
+const categories = getAllCategories().slice(0, 8);
 
 const stats = {
   guidelines: allGuidelines.length,
@@ -34,146 +23,224 @@ const stats = {
 };
 ---
 
-<BaseLayout title="Guidelines">
-  <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-    <!-- Header -->
-    <div class="mb-8 pb-6 border-b border-[--color-terminal-border]">
-      <h1 class="text-2xl font-mono font-bold text-white mb-2">Development Guidelines</h1>
-      <p class="font-mono text-sm" style="color: var(--color-terminal-muted);">
-        Open encyclopedia of best practices. <a href="/api" class="text-[--color-primary-400] hover:underline">API available</a> for programmatic access.
-      </p>
-    </div>
+<BaseLayout title="Development Guidelines">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6">
 
-    <div class="grid lg:grid-cols-[1fr,300px] gap-8">
-      <!-- Main Content -->
-      <div class="space-y-8">
-        <!-- Search -->
-        <div>
-          <input
-            type="text"
-            placeholder="Search guidelines..."
-            class="w-full px-4 py-3 rounded-lg font-mono text-sm outline-none transition-all"
-            style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border); color: var(--color-terminal-text);"
-            id="search-input"
-          />
-        </div>
-
-        <!-- Frameworks -->
-        <section>
-          <h2 class="font-mono text-xs uppercase tracking-wider mb-4" style="color: var(--color-terminal-comment);">
-            Frameworks
-          </h2>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {frameworks.map((fw) => (
-              <a
-                href={`/frameworks/${fw.slug}`}
-                class="flex items-center justify-between px-3 py-2 rounded font-mono text-sm transition-colors hover:bg-[--color-terminal-surface]"
-                style="color: var(--color-terminal-text);"
-              >
-                <span>{fw.name}</span>
-                <span class="text-xs" style="color: var(--color-terminal-muted);">{fw.count}</span>
-              </a>
-            ))}
-          </div>
-          <a href="/frameworks" class="inline-block mt-3 font-mono text-xs text-[--color-primary-400] hover:underline">
-            All frameworks →
-          </a>
-        </section>
-
-        <!-- Recent Guidelines -->
-        <section>
-          <h2 class="font-mono text-xs uppercase tracking-wider mb-4" style="color: var(--color-terminal-comment);">
-            Recent Guidelines
-          </h2>
-          <div class="space-y-1">
-            {recentGuidelines.map((g) => (
-              <a
-                href={`/guidelines/${g.framework}/${g.category}/${g.slug}`}
-                class="flex items-center gap-3 px-3 py-2 rounded font-mono text-sm transition-colors hover:bg-[--color-terminal-surface]"
-              >
-                <span class="text-[--color-primary-400]">{g.framework}</span>
-                <span style="color: var(--color-terminal-muted);">/</span>
-                <span style="color: var(--color-terminal-text);">{g.title}</span>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <!-- By Category -->
-        <section>
-          <h2 class="font-mono text-xs uppercase tracking-wider mb-4" style="color: var(--color-terminal-comment);">
-            By Category
-          </h2>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {categories.map((cat) => (
-              <a
-                href={`/tags/${cat.slug}`}
-                class="flex items-center justify-between px-3 py-2 rounded font-mono text-sm transition-colors hover:bg-[--color-terminal-surface]"
-                style="color: var(--color-terminal-text);"
-              >
-                <span>{cat.name}</span>
-                <span class="text-xs" style="color: var(--color-terminal-muted);">{cat.count}</span>
-              </a>
-            ))}
-          </div>
-        </section>
+    <!-- HERO SECTION - First Impression (5-second rule) -->
+    <section class="hero">
+      <div class="hero-badge">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span>Free & Open Source</span>
       </div>
 
-      <!-- Sidebar -->
-      <aside class="space-y-6">
-        <!-- API Box -->
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
-            API Access
-          </h3>
-          <code class="block font-mono text-xs p-2 rounded mb-3" style="background: var(--color-terminal-bg); color: var(--color-terminal-muted);">
-            GET /api/v1/manifest.json
-          </code>
-          <a href="/api" class="font-mono text-xs text-[--color-primary-400] hover:underline">
-            View API docs →
-          </a>
-        </div>
+      <h1 class="hero-title">
+        Development Guidelines<br/>
+        <span class="text-gradient">for Every Framework</span>
+      </h1>
 
-        <!-- Stats -->
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
-            Stats
-          </h3>
-          <dl class="space-y-2 font-mono text-sm">
-            <div class="flex justify-between">
-              <dt style="color: var(--color-terminal-muted);">Guidelines</dt>
-              <dd style="color: var(--color-terminal-text);">{stats.guidelines}</dd>
-            </div>
-            <div class="flex justify-between">
-              <dt style="color: var(--color-terminal-muted);">Frameworks</dt>
-              <dd style="color: var(--color-terminal-text);">{stats.frameworks}</dd>
-            </div>
-            <div class="flex justify-between">
-              <dt style="color: var(--color-terminal-muted);">Tags</dt>
-              <dd style="color: var(--color-terminal-text);">{stats.tags}</dd>
-            </div>
-          </dl>
-        </div>
+      <p class="hero-subtitle">
+        The open encyclopedia of best practices. Curated guidelines for modern development,
+        accessible to humans and AI agents through our JSON API.
+      </p>
+    </section>
 
-        <!-- Contribute -->
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
-            Contribute
-          </h3>
-          <p class="font-mono text-xs mb-3" style="color: var(--color-terminal-muted);">
-            Add or improve guidelines via GitHub.
-          </p>
-          <a
-            href="https://github.com/erold-dev/erold.guide"
-            class="inline-flex items-center gap-2 font-mono text-xs text-[--color-primary-400] hover:underline"
-          >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+    <!-- QUICK STATS - Instant Understanding -->
+    <section class="quick-stats mb-16">
+      <div class="quick-stat">
+        <span class="quick-stat-value">{stats.guidelines}</span>
+        <span class="quick-stat-label">Guidelines</span>
+      </div>
+      <div class="quick-stat-divider"></div>
+      <div class="quick-stat">
+        <span class="quick-stat-value">{stats.frameworks}</span>
+        <span class="quick-stat-label">Frameworks</span>
+      </div>
+      <div class="quick-stat-divider"></div>
+      <div class="quick-stat">
+        <span class="quick-stat-value">{stats.tags}</span>
+        <span class="quick-stat-label">Topics</span>
+      </div>
+      <div class="quick-stat-divider"></div>
+      <div class="quick-stat">
+        <svg class="w-6 h-6 text-[--color-accent-400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="quick-stat-label">100% Free</span>
+      </div>
+    </section>
+
+    <!-- SEARCH -->
+    <section class="mb-16">
+      <div class="search-box">
+        <input
+          type="text"
+          class="search-input pl-14"
+          placeholder="Search guidelines, frameworks, or topics..."
+          id="search-input"
+        />
+        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <div class="search-shortcut">
+          <kbd class="kbd">⌘</kbd>
+          <kbd class="kbd">K</kbd>
+        </div>
+      </div>
+    </section>
+
+    <!-- FRAMEWORKS ZONE -->
+    <section class="zone mb-16">
+      <div class="zone-header">
+        <div class="zone-title">
+          <div class="zone-icon">
+            <svg class="w-4 h-4 text-[--color-primary-400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
-            GitHub →
-          </a>
+          </div>
+          <h2>Frameworks</h2>
+          <span class="zone-count">{frameworks.length}</span>
         </div>
-      </aside>
-    </div>
+        <a href="/frameworks" class="zone-link">View all →</a>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {frameworks.map((fw) => (
+          <a href={`/frameworks/${fw.slug}`} class="framework-card">
+            <div class="framework-card-header">
+              <div class="framework-card-icon">
+                {fw.logo ? (
+                  <img src={fw.logo} alt={fw.name} />
+                ) : (
+                  <span class="text-lg font-bold text-white">{fw.name.charAt(0)}</span>
+                )}
+              </div>
+              <div>
+                <div class="framework-card-title">{fw.name}</div>
+                <div class="framework-card-tech">{fw.technology}</div>
+              </div>
+            </div>
+            <p class="framework-card-desc">{fw.description}</p>
+            <div class="framework-card-footer">
+              <div class="framework-card-stat">
+                <span class="framework-card-stat-value">{fw.guidelinesCount}</span>
+                <span class="framework-card-stat-label">guidelines</span>
+              </div>
+              <svg class="w-5 h-5 text-[--color-terminal-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- RECENT GUIDELINES ZONE -->
+    <section class="zone mb-16">
+      <div class="zone-header">
+        <div class="zone-title">
+          <div class="zone-icon">
+            <svg class="w-4 h-4 text-[--color-primary-400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h2>Recent Guidelines</h2>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        {recentGuidelines.map((g, i) => (
+          <a href={`/guidelines/${g.framework}/${g.category}/${g.slug}`} class="guideline-card">
+            <div class="guideline-card-number">{i + 1}</div>
+            <div class="guideline-card-content">
+              <div class="guideline-card-title">{g.title}</div>
+              <div class="guideline-card-meta">
+                <span class="guideline-card-framework">{g.framework}</span>
+                <span class="guideline-card-category">{g.category.replace(/-/g, ' ')}</span>
+              </div>
+            </div>
+            <svg class="guideline-card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        ))}
+      </div>
+
+      {recentGuidelines.length === 0 && (
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg class="w-8 h-8 text-[--color-terminal-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div class="empty-state-title">No guidelines yet</div>
+          <div class="empty-state-desc">Be the first to contribute a guideline to the encyclopedia.</div>
+        </div>
+      )}
+    </section>
+
+    <!-- CATEGORIES ZONE -->
+    {categories.length > 0 && (
+      <section class="zone mb-16">
+        <div class="zone-header">
+          <div class="zone-title">
+            <div class="zone-icon">
+              <svg class="w-4 h-4 text-[--color-primary-400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+            </div>
+            <h2>Browse by Category</h2>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          {categories.map((cat) => (
+            <a href={`/tags/${cat.name}`} class="category-pill">
+              <span>{cat.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+              <span class="category-pill-count">{cat.count}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- API CTA -->
+    <section class="mb-16">
+      <div class="relative overflow-hidden rounded-2xl p-8 md:p-12" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1)); border: 1px solid rgba(37, 99, 235, 0.2);">
+        <div class="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h2 class="text-2xl font-bold text-white mb-3">Built for AI Agents</h2>
+            <p class="text-[--color-terminal-muted] mb-6">
+              Access all guidelines programmatically through our JSON API.
+              Pre-indexed, predictable URLs, zero authentication required.
+            </p>
+            <a href="/api" class="btn btn-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              API Documentation
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="terminal-dot terminal-dot-red"></div>
+                <div class="terminal-dot terminal-dot-yellow"></div>
+                <div class="terminal-dot terminal-dot-green"></div>
+                <span class="ml-3 text-xs text-[--color-terminal-muted] font-mono">api-example.sh</span>
+              </div>
+              <div class="terminal-body">
+                <div class="text-[--color-terminal-muted]"># Fetch all frameworks</div>
+                <div class="text-[--color-accent-400]">curl</div> <span class="text-[--color-syntax-string]">erold.guide/api/v1/frameworks.json</span>
+                <div class="mt-3 text-[--color-terminal-muted]"># Get Next.js guidelines</div>
+                <div class="text-[--color-accent-400]">curl</div> <span class="text-[--color-syntax-string]">erold.guide/api/v1/frameworks/nextjs/_index.json</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 </BaseLayout>

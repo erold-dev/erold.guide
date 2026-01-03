@@ -1,25 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-// Load frameworks for the form
-import { promises as fs } from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-
-const frameworksDir = path.join(process.cwd(), 'content/frameworks');
-const files = await fs.readdir(frameworksDir);
-
-const frameworks = await Promise.all(
-  files.filter(f => f.endsWith('.yaml')).map(async (file) => {
-    const content = await fs.readFile(path.join(frameworksDir, file), 'utf-8');
-    const data = yaml.load(content) as { id: string; name: string; categories: string[] };
-    return {
-      id: data.id,
-      name: data.name,
-      categories: data.categories || []
-    };
-  })
-);
 ---
 
 <BaseLayout title="Submit Guideline" description="Submit a new guideline to erold.guide">
@@ -50,26 +30,31 @@ const frameworks = await Promise.all(
         </nav>
         <h1 class="text-3xl font-bold text-white mb-2">Submit a Guideline</h1>
         <p class="text-[--color-terminal-muted]">Share your knowledge with the community. All submissions are reviewed before publishing.</p>
+
+        <!-- Demo Button (Temkit only) -->
+        <button type="button" id="demo-btn" class="hidden mt-4 px-4 py-2 text-sm font-medium rounded-lg transition-colors" style="background: rgba(234, 179, 8, 0.2); color: rgb(250, 204, 21); border: 1px solid rgba(234, 179, 8, 0.4);">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Fill Demo Data
+          </span>
+        </button>
       </div>
 
       <form id="guideline-form" class="space-y-8">
         <!-- Framework & Category -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label for="framework" class="block text-sm font-medium text-white mb-2">Framework *</label>
-            <select id="framework" name="framework" required class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors">
-              <option value="">Select a framework...</option>
-              {frameworks.map(fw => (
-                <option value={fw.id} data-categories={JSON.stringify(fw.categories)}>{fw.name}</option>
-              ))}
-            </select>
+            <label for="framework" class="block text-sm font-medium text-white mb-2">Framework/Technology * <span class="text-[--color-terminal-muted] font-normal">(lowercase)</span></label>
+            <input type="text" id="framework" name="framework" required placeholder="e.g., nextjs, react, python, docker" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+            <p class="mt-1 text-xs text-[--color-terminal-muted]">Any framework, library, language, or technology</p>
           </div>
 
           <div>
-            <label for="category" class="block text-sm font-medium text-white mb-2">Category *</label>
-            <select id="category" name="category" required disabled class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors disabled:opacity-50">
-              <option value="">Select framework first...</option>
-            </select>
+            <label for="category" class="block text-sm font-medium text-white mb-2">Category * <span class="text-[--color-terminal-muted] font-normal">(lowercase)</span></label>
+            <input type="text" id="category" name="category" required placeholder="e.g., security, performance, best-practices" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+            <p class="mt-1 text-xs text-[--color-terminal-muted]">Group related guidelines together</p>
           </div>
         </div>
 
@@ -82,7 +67,7 @@ const frameworks = await Promise.all(
 
           <div>
             <label for="slug" class="block text-sm font-medium text-white mb-2">Slug * <span class="text-[--color-terminal-muted] font-normal">(lowercase, hyphens only)</span></label>
-            <input type="text" id="slug" name="slug" required pattern="^[a-z0-9-]+$" placeholder="e.g., server-components-default" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+            <input type="text" id="slug" name="slug" required placeholder="e.g., server-components-default" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
           </div>
         </div>
 
@@ -90,7 +75,7 @@ const frameworks = await Promise.all(
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label for="version" class="block text-sm font-medium text-white mb-2">Version * <span class="text-[--color-terminal-muted] font-normal">(semver format)</span></label>
-            <input type="text" id="version" name="version" required pattern="^\d+\.\d+\.\d+$" value="1.0.0" placeholder="1.0.0" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+            <input type="text" id="version" name="version" required value="1.0.0" placeholder="1.0.0" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
           </div>
 
           <div>
@@ -193,11 +178,26 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
   <script>
     const API_URL = 'https://su5t4tzra5.execute-api.eu-west-1.amazonaws.com';
 
+    // Parse JWT to get user info
+    function parseJwt(token: string) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+          '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        ).join(''));
+        return JSON.parse(jsonPayload);
+      } catch {
+        return null;
+      }
+    }
+
     // Check authentication
     function checkAuth() {
       const token = localStorage.getItem('erold_token');
       const authRequired = document.getElementById('auth-required');
       const submissionForm = document.getElementById('submission-form');
+      const demoBtn = document.getElementById('demo-btn');
 
       if (!token) {
         authRequired?.classList.remove('hidden');
@@ -205,32 +205,125 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
       } else {
         authRequired?.classList.add('hidden');
         submissionForm?.classList.remove('hidden');
+
+        // Show demo button only for Temkit
+        const payload = parseJwt(token);
+        if (payload?.username === 'Temkit') {
+          demoBtn?.classList.remove('hidden');
+        }
       }
     }
 
-    // Framework/Category handling
-    const frameworkSelect = document.getElementById('framework') as HTMLSelectElement;
-    const categorySelect = document.getElementById('category') as HTMLSelectElement;
+    // Fill form with demo data
+    function fillDemoData() {
+      // Framework & Category
+      (document.getElementById('framework') as HTMLInputElement).value = 'react';
+      (document.getElementById('category') as HTMLInputElement).value = 'performance';
 
-    frameworkSelect?.addEventListener('change', () => {
-      const selected = frameworkSelect.options[frameworkSelect.selectedIndex];
-      const categories = JSON.parse(selected.dataset.categories || '[]');
+      // Title & Slug
+      (document.getElementById('title') as HTMLInputElement).value = 'Use React.memo for Expensive Components';
+      (document.getElementById('slug') as HTMLInputElement).value = 'use-react-memo-expensive-components';
+      slugManuallyEdited = true;
 
-      categorySelect.innerHTML = '';
-      categorySelect.disabled = categories.length === 0;
+      // Version & Difficulty
+      (document.getElementById('version') as HTMLInputElement).value = '1.0.0';
+      (document.getElementById('difficulty') as HTMLSelectElement).value = 'intermediate';
 
-      if (categories.length === 0) {
-        categorySelect.innerHTML = '<option value="">No categories available</option>';
-      } else {
-        categorySelect.innerHTML = '<option value="">Select a category...</option>';
-        categories.forEach((cat: string) => {
-          const option = document.createElement('option');
-          option.value = cat;
-          option.textContent = cat.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-          categorySelect.appendChild(option);
-        });
-      }
-    });
+      // Description
+      const descEl = document.getElementById('description') as HTMLTextAreaElement;
+      descEl.value = 'Wrap expensive components with React.memo to prevent unnecessary re-renders and improve application performance.';
+      if (descCount) descCount.textContent = String(descEl.value.length);
+
+      // Tags
+      tags = ['react', 'performance', 'optimization', 'memo'];
+      renderTags();
+
+      // Content
+      const contentEl = document.getElementById('content') as HTMLTextAreaElement;
+      contentEl.value = `# Use React.memo for Expensive Components
+
+When building React applications, unnecessary re-renders can significantly impact performance. \`React.memo\` is a higher-order component that memoizes your component, preventing re-renders when props haven't changed.
+
+## Why This Matters
+
+React re-renders a component whenever its parent re-renders, even if the props haven't changed. For simple components, this is fine. But for components with expensive render logic, complex DOM trees, or heavy computations, this can cause performance issues.
+
+## When to Use React.memo
+
+Use \`React.memo\` when:
+- The component renders often with the same props
+- The component has expensive render logic
+- The component is pure (same props = same output)
+
+## Code Example
+
+\`\`\`jsx
+// Before: Re-renders on every parent update
+function ExpensiveList({ items }) {
+  return (
+    <ul>
+      {items.map(item => (
+        <li key={item.id}>{complexCalculation(item)}</li>
+      ))}
+    </ul>
+  );
+}
+
+// After: Only re-renders when items change
+const ExpensiveList = React.memo(function ExpensiveList({ items }) {
+  return (
+    <ul>
+      {items.map(item => (
+        <li key={item.id}>{complexCalculation(item)}</li>
+      ))}
+    </ul>
+  );
+});
+\`\`\`
+
+## Custom Comparison
+
+For complex props, provide a custom comparison function:
+
+\`\`\`jsx
+const MyComponent = React.memo(
+  function MyComponent({ user, settings }) {
+    return <div>{user.name} - {settings.theme}</div>;
+  },
+  (prevProps, nextProps) => {
+    return prevProps.user.id === nextProps.user.id &&
+           prevProps.settings.theme === nextProps.settings.theme;
+  }
+);
+\`\`\`
+
+## Anti-patterns
+
+**Don't use React.memo when:**
+- Props change frequently (memo overhead > re-render cost)
+- The component is already cheap to render
+- You're passing new object/array references on every render
+
+\`\`\`jsx
+// Bad: memo is useless here because style is a new object every render
+<MemoizedComponent style={{ color: 'red' }} />
+
+// Good: memoize the style object
+const style = useMemo(() => ({ color: 'red' }), []);
+<MemoizedComponent style={style} />
+\`\`\`
+
+## Summary
+
+- Use \`React.memo\` for expensive pure components
+- Combine with \`useMemo\` and \`useCallback\` for optimal results
+- Profile before optimizing - don't premature optimize
+- Custom comparison functions for complex prop structures`;
+      if (contentCount) contentCount.textContent = String(contentEl.value.length);
+    }
+
+    // Demo button click handler
+    document.getElementById('demo-btn')?.addEventListener('click', fillDemoData);
 
     // Auto-generate slug from title
     const titleInput = document.getElementById('title') as HTMLInputElement;
@@ -377,6 +470,30 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
         return;
       }
 
+      // Validate slug format (lowercase alphanumeric and hyphens)
+      const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+      const frameworkVal = (document.getElementById('framework') as HTMLInputElement).value;
+      const categoryVal = (document.getElementById('category') as HTMLInputElement).value;
+      const slugVal = (document.getElementById('slug') as HTMLInputElement).value;
+      const versionVal = (document.getElementById('version') as HTMLInputElement).value;
+
+      if (!slugPattern.test(frameworkVal)) {
+        showError('Framework must be lowercase letters, numbers, and hyphens only (e.g., nextjs, react-native)');
+        return;
+      }
+      if (!slugPattern.test(categoryVal)) {
+        showError('Category must be lowercase letters, numbers, and hyphens only (e.g., security, best-practices)');
+        return;
+      }
+      if (!slugPattern.test(slugVal)) {
+        showError('Slug must be lowercase letters, numbers, and hyphens only (e.g., server-components-default)');
+        return;
+      }
+      if (!/^\d+\.\d+\.\d+$/.test(versionVal)) {
+        showError('Version must be in semver format (e.g., 1.0.0)');
+        return;
+      }
+
       // Show loading state
       submitBtn?.setAttribute('disabled', 'true');
       submitText?.classList.add('hidden');
@@ -385,8 +502,8 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
 
       try {
         const payload = {
-          framework: (document.getElementById('framework') as HTMLSelectElement).value,
-          category: (document.getElementById('category') as HTMLSelectElement).value,
+          framework: (document.getElementById('framework') as HTMLInputElement).value.toLowerCase(),
+          category: (document.getElementById('category') as HTMLInputElement).value.toLowerCase(),
           guideline: {
             title: (document.getElementById('title') as HTMLInputElement).value,
             slug: (document.getElementById('slug') as HTMLInputElement).value,
@@ -398,8 +515,13 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
           }
         };
 
-        const response = await fetch(`${API_URL}/v1/contributions`, {
-          method: 'POST',
+        // Check if editing existing contribution
+        const editId = (document.getElementById('guideline-form') as HTMLFormElement).dataset.editId;
+        const url = editId ? `${API_URL}/v1/contributions/${editId}` : `${API_URL}/v1/contributions`;
+        const method = editId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -442,7 +564,62 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
       document.getElementById('submission-form')?.classList.remove('hidden');
     });
 
+    // Load contribution for editing
+    async function loadContributionForEdit() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+      if (!editId) return;
+
+      const token = localStorage.getItem('erold_token');
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${API_URL}/v1/contributions/${editId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          console.error('Failed to load contribution for editing');
+          return;
+        }
+
+        const data = await response.json();
+
+        // Populate form fields
+        (document.getElementById('framework') as HTMLInputElement).value = data.framework || '';
+        (document.getElementById('category') as HTMLInputElement).value = data.category || '';
+        (document.getElementById('title') as HTMLInputElement).value = data.title || '';
+        (document.getElementById('slug') as HTMLInputElement).value = data.slug || '';
+        (document.getElementById('version') as HTMLInputElement).value = data.version || '1.0.0';
+        (document.getElementById('difficulty') as HTMLSelectElement).value = data.difficulty || 'beginner';
+
+        const descEl = document.getElementById('description') as HTMLTextAreaElement;
+        descEl.value = data.description || '';
+        if (descCount) descCount.textContent = String(descEl.value.length);
+
+        const contentEl = document.getElementById('content') as HTMLTextAreaElement;
+        contentEl.value = data.content || '';
+        if (contentCount) contentCount.textContent = String(contentEl.value.length);
+
+        // Load tags
+        tags = data.tags || [];
+        renderTags();
+
+        slugManuallyEdited = true; // Don't auto-generate slug when editing
+
+        // Update page title
+        document.querySelector('h1')!.textContent = 'Edit Guideline';
+
+        // Store edit ID for submission
+        (document.getElementById('guideline-form') as HTMLFormElement).dataset.editId = editId;
+
+      } catch (err) {
+        console.error('Error loading contribution:', err);
+      }
+    }
+
     // Initialize
     checkAuth();
+    loadContributionForEdit();
   </script>
 </BaseLayout>

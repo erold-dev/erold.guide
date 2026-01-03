@@ -3,7 +3,8 @@ import { DynamoDBDocumentClient, UpdateCommand, GetCommand, ScanCommand } from "
 import { S3Client, GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 
 const dynamodb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
-const s3 = new S3Client({});
+const s3UsEast1 = new S3Client({ region: 'us-east-1' });  // For pending bucket
+const s3EuWest1 = new S3Client({ region: 'eu-west-1' });  // For guidelines bucket
 
 const TABLE_NAME = process.env.TABLE_NAME || "erold-contributions";
 const PENDING_BUCKET = process.env.PENDING_BUCKET || "erold-contributions-pending";
@@ -11,63 +12,83 @@ const GUIDELINES_BUCKET = process.env.GUIDELINES_BUCKET || "erold-guide-content"
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // Review criteria and prompts
-const REVIEW_SYSTEM_PROMPT = `You are a senior technical reviewer for erold.guide, an open encyclopedia of development guidelines. Your job is to review submitted guidelines for quality, accuracy, and compliance with our standards.
+const REVIEW_SYSTEM_PROMPT = `You are a senior technical reviewer for erold.guide, an open encyclopedia of development guidelines. Your job is to provide a comprehensive assessment to help ADMINS decide whether to publish a guideline.
 
 ## Review Criteria
 
-1. **Content Quality** (Critical)
+1. **Safety & Security** (CRITICAL - Block if failed)
+   - No malicious code examples (working XSS, SQL injection, etc.)
+   - No harmful advice that could compromise systems
+   - Code examples are safe to copy-paste
+   - No credential exposure or security anti-patterns presented as good
+
+2. **Technical Accuracy** (CRITICAL)
+   - Is the information technically correct?
+   - Is it up-to-date for current framework versions?
+   - Would following this advice produce working code?
+
+3. **Content Quality** (Important)
    - Is the guideline specific and actionable?
    - Does it explain WHY, not just WHAT?
    - Are code examples correct and well-formatted?
    - Does it show both good and bad patterns?
 
-2. **Technical Accuracy** (Critical)
-   - Is the information technically correct?
-   - Is it up-to-date for the specified framework version?
-   - Are there any security concerns in the recommendations?
+4. **Value & Uniqueness** (Important)
+   - Does it add value to the encyclopedia?
+   - Is it too basic (e.g., "use semicolons")?
+   - Does it duplicate existing content?
 
-3. **Formatting & Structure** (Important)
-   - Does it follow markdown best practices?
-   - Is it well-organized with clear sections?
-   - Are code blocks properly syntax-highlighted?
-
-4. **Uniqueness** (Important)
-   - Does it duplicate existing guidelines?
-   - Does it add value beyond what already exists?
-
-5. **AI Optimization** (Nice to have)
-   - Is the content clear enough for AI agents to apply?
-   - Would this help AI write better code?
+5. **Structure & Formatting** (Minor)
+   - Proper markdown formatting
+   - Clear sections and organization
+   - Syntax-highlighted code blocks
 
 ## Response Format
 
 Respond with a JSON object:
 {
   "decision": "approve" | "needs_changes" | "reject",
-  "score": 0-100,
-  "summary": "One sentence summary of your decision",
-  "feedback": "Detailed feedback for the contributor (if needs_changes or reject)",
+  "confidence": 0-100,
+  "overallScore": 0-100,
+
+  "adminSummary": "2-3 sentence summary for admin explaining your recommendation",
+
+  "checks": {
+    "safe": { "passed": true/false, "note": "explanation" },
+    "accurate": { "passed": true/false, "note": "explanation" },
+    "valuable": { "passed": true/false, "note": "explanation" },
+    "wellWritten": { "passed": true/false, "note": "explanation" },
+    "followsRules": { "passed": true/false, "note": "explanation" }
+  },
+
+  "recommendation": "PUBLISH" | "NEEDS_REVISION" | "REJECT",
+  "recommendationReason": "One clear reason for your recommendation",
+
   "issues": [
     {
-      "type": "critical" | "important" | "suggestion",
+      "severity": "critical" | "warning" | "suggestion",
       "description": "Description of the issue",
       "location": "Where in the content (optional)"
     }
   ],
+
   "strengths": ["What the guideline does well"],
-  "suggestions": ["Optional improvements even if approving"]
+
+  "feedbackForContributor": "Constructive feedback if changes needed (null if approving)"
 }
 
 ## Decision Guidelines
 
-- **approve**: Score >= 70, no critical issues, meets quality standards
-- **needs_changes**: Score 40-69, has fixable issues, contributor should revise
-- **reject**: Score < 40, fundamentally flawed, doesn't fit the project, or duplicate`;
+- **approve** (recommend PUBLISH): Score >= 75, all critical checks pass, ready for public
+- **needs_changes** (NEEDS_REVISION): Score 50-74 OR has fixable issues, contributor should revise
+- **reject** (REJECT): Score < 50, unsafe, inaccurate, spam, or fundamentally unsuitable
+
+Be STRICT on safety. Be helpful with feedback. Admins rely on your assessment.`;
 
 async function getExistingGuidelines(framework) {
   // Try to get existing guidelines from the published bucket for comparison
   try {
-    const listResult = await s3.send(new ListObjectsV2Command({
+    const listResult = await s3EuWest1.send(new ListObjectsV2Command({
       Bucket: GUIDELINES_BUCKET,
       Prefix: `guidelines/${framework}/`,
     }));
@@ -82,7 +103,7 @@ async function getExistingGuidelines(framework) {
         .slice(0, 10) // Limit to 10 for context size
         .map(async (obj) => {
           try {
-            const result = await s3.send(new GetObjectCommand({
+            const result = await s3EuWest1.send(new GetObjectCommand({
               Bucket: GUIDELINES_BUCKET,
               Key: obj.Key,
             }));
@@ -156,8 +177,8 @@ async function reviewContribution(contributionId) {
     return { skipped: true, reason: `Status is ${meta.status}` };
   }
 
-  // Get full content from S3
-  const s3Result = await s3.send(new GetObjectCommand({
+  // Get full content from S3 (pending bucket is in us-east-1)
+  const s3Result = await s3UsEast1.send(new GetObjectCommand({
     Bucket: PENDING_BUCKET,
     Key: `${contributionId}/guideline.json`
   }));
@@ -231,12 +252,25 @@ Please review this submission and provide your assessment in JSON format.`;
     ExpressionAttributeValues: {
       ":status": newStatus,
       ":review": {
-        score: review.score,
-        summary: review.summary,
-        feedback: review.feedback || null,
+        // Core assessment
+        score: review.overallScore || review.score || 0,
+        confidence: review.confidence || 0,
+        decision: review.decision,
+        recommendation: review.recommendation || review.decision.toUpperCase(),
+        recommendationReason: review.recommendationReason || review.summary,
+
+        // Admin summary
+        adminSummary: review.adminSummary || review.summary,
+
+        // Detailed checks
+        checks: review.checks || null,
+
+        // Issues and feedback
         issues: review.issues || [],
         strengths: review.strengths || [],
-        suggestions: review.suggestions || [],
+        feedbackForContributor: review.feedbackForContributor || review.feedback || null,
+
+        // Metadata
         reviewedAt: new Date().toISOString(),
         reviewedBy: 'claude-sonnet-4'
       },

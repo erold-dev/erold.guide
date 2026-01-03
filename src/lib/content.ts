@@ -39,6 +39,7 @@ export interface Technology {
 }
 
 export interface Guideline {
+  // Core identification
   title: string;
   slug: string;
   framework: string;
@@ -46,16 +47,45 @@ export interface Guideline {
   version: string;
   description: string;
   tags: string[];
+
+  // Versioning & compatibility
   minVersion?: string;
+  maxVersion?: string;
   deprecated: boolean;
+  deprecatedReason?: string;
+  supersededBy?: string;
+
+  // Authorship
   author: string;
   contributors: string[];
   createdAt: string;
   updatedAt: string;
+
+  // Relationships
   relatedGuidelines: string[];
   prerequisites: string[];
+
+  // Reading metadata
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   estimatedReadTime: number;
+
+  // AI-optimized fields
+  ai?: {
+    prompt_snippet: string;        // One-liner for AI to use directly
+    applies_when: string[];        // Context triggers for this guideline
+    does_not_apply_when: string[]; // Exclusion triggers
+    priority: 'critical' | 'recommended' | 'optional';
+    confidence: 'established' | 'emerging' | 'experimental';
+  };
+
+  // Changelog for versioned updates
+  changelog?: Array<{
+    version: string;
+    date: string;
+    changes: string[];
+  }>;
+
+  // The actual content
   content: string;
 }
 
