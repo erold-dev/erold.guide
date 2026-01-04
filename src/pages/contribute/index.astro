@@ -1,416 +1,684 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const steps = [
-  {
-    number: '01',
-    title: 'Sign in with GitHub',
-    description: 'Authenticate with your GitHub account to start contributing. Your contributions will be credited to your profile.',
-    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />`,
-    status: 'available'
-  },
-  {
-    number: '02',
-    title: 'Write Your Guideline',
-    description: 'Follow our style guide to create a clear, actionable guideline. Include code examples, anti-patterns, and AI-optimized fields.',
-    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />`,
-    status: 'available'
-  },
-  {
-    number: '03',
-    title: 'AI Review',
-    description: 'Your submission is automatically reviewed by Claude AI for quality, duplicates, and compliance with our standards.',
-    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />`,
-    status: 'coming-soon'
-  },
-  {
-    number: '04',
-    title: 'Community Review',
-    description: 'Pre-approved guidelines are reviewed by maintainers. Once approved, your guideline goes live automatically.',
-    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />`,
-    status: 'coming-soon'
-  }
-];
 ---
 
-<BaseLayout title="Contribute" description="Help build the open encyclopedia of development guidelines. Share your knowledge and help developers and AI agents build better software.">
-  <main id="main-content" class="mx-auto max-w-6xl px-4 sm:px-6 py-12">
+<BaseLayout title="Contribute" description="Submit development guidelines to help developers and AI agents.">
+  <div class="page-layout">
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="page-header">
+        <h1>Contribute</h1>
+        <p>Submit guidelines to help developers and AI agents write better code.</p>
+      </header>
 
-    <!-- Hero -->
-    <section class="text-center mb-16">
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono mb-6" style="background: var(--status-success-bg); border: 1px solid var(--status-success-border); color: var(--status-success);">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        <span>Open for Contributions</span>
-      </div>
-
-      <h1 class="text-4xl sm:text-5xl font-bold mb-6" style="color: var(--text-primary);">
-        Share Your<br/>
-        <span class="text-gradient">Knowledge</span>
-      </h1>
-
-      <p class="text-lg max-w-2xl mx-auto mb-8" style="color: var(--text-muted);">
-        Help build the open encyclopedia of development guidelines. Your expertise helps developers
-        write better code and trains AI agents to follow best practices.
-      </p>
-
-      <!-- Auth state container -->
-      <div id="auth-container" class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <!-- Not signed in -->
-        <div id="auth-guest" class="contents">
-          <a href="https://github.com/login/oauth/authorize?client_id=Ov23liLHag386GqnigoM&redirect_uri=https%3A%2F%2Ferold.guide%2Fauth%2Fcallback&scope=read:user" class="btn btn-primary">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <!-- Auth Section -->
+      <div id="auth-section" class="auth-section">
+        <!-- Guest State -->
+        <div id="auth-guest" class="auth-box">
+          <div class="auth-box-content">
+            <h2>Sign in to contribute</h2>
+            <p>Authenticate with GitHub to submit and manage your guidelines.</p>
+          </div>
+          <a href="https://github.com/login/oauth/authorize?client_id=Ov23liLHag386GqnigoM&redirect_uri=https%3A%2F%2Ferold.guide%2Fauth%2Fcallback&scope=read:user" class="btn-primary">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
             Sign in with GitHub
           </a>
-          <a href="/guidelines/erold/contributing/how-to-write-guidelines" class="btn btn-secondary">
-            Read the Style Guide
-          </a>
         </div>
 
-        <!-- Signed in -->
-        <div id="auth-user" class="hidden contents">
-          <div class="flex items-center gap-3 px-4 py-2 rounded-lg surface">
-            <img id="user-avatar" src="" alt="" class="w-8 h-8 rounded-full" />
-            <span id="user-name" class="font-mono text-sm" style="color: var(--text-primary);"></span>
-            <button id="sign-out" class="text-xs hover:underline ml-2" style="color: var(--text-muted);">Sign out</button>
+        <!-- User State -->
+        <div id="auth-user" class="hidden">
+          <div class="user-header">
+            <div class="user-info">
+              <img id="user-avatar" src="" alt="" class="user-avatar" />
+              <div>
+                <span id="user-name" class="user-name"></span>
+                <button id="sign-out" class="sign-out">Sign out</button>
+              </div>
+            </div>
+            <div class="user-actions">
+              <a href="/contribute/submit" class="btn-primary">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Submit Guideline
+              </a>
+              <a id="admin-link" href="/admin" class="hidden btn-secondary">Admin</a>
+            </div>
           </div>
-          <a href="/contribute/submit" class="btn btn-primary">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </div>
+      </div>
+
+      <!-- My Contributions -->
+      <section id="my-contributions" class="hidden contributions-section">
+        <div class="section-header">
+          <h2>My Contributions</h2>
+          <a href="/contribute/submit" class="section-link">+ New</a>
+        </div>
+
+        <div id="contributions-loading" class="loading-state">
+          <svg class="spinner" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+
+        <div id="contributions-empty" class="hidden empty-state">
+          <p>No contributions yet.</p>
+          <a href="/contribute/submit" class="btn-primary">Submit your first</a>
+        </div>
+
+        <div id="contributions-list" class="hidden contributions-list"></div>
+
+        <div id="contributions-error" class="hidden error-state">
+          <p>Failed to load contributions.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Quick Actions -->
+      <div class="sidebar-box">
+        <h3>Resources</h3>
+        <div class="sidebar-links">
+          <a href="/guidelines/erold/contributing/how-to-write-guidelines" class="sidebar-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
-            Submit Guideline
+            Style Guide
           </a>
-          <a id="admin-link" href="/admin" class="hidden btn btn-secondary">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <a href="/contribute/api" class="sidebar-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
             </svg>
-            Admin
+            API Documentation
           </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- My Contributions (authenticated users only) -->
-    <section id="my-contributions" class="hidden mb-16">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary);">My Contributions</h2>
-        <a href="/contribute/submit" class="text-sm hover:underline" style="color: var(--accent-primary);">+ Submit New</a>
-      </div>
-
-      <div id="contributions-loading" class="text-center py-8" role="status" aria-live="polite">
-        <svg class="w-8 h-8 mx-auto animate-spin" style="color: var(--accent-primary);" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p class="mt-2 text-sm" style="color: var(--text-muted);">Loading contributions...</p>
-      </div>
-
-      <div id="contributions-empty" class="hidden text-center py-8 rounded-xl surface">
-        <svg class="w-12 h-12 mx-auto mb-4" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <p class="mb-4" style="color: var(--text-muted);">You haven't submitted any guidelines yet.</p>
-        <a href="/contribute/submit" class="btn btn-primary inline-flex">Submit Your First Guideline</a>
-      </div>
-
-      <div id="contributions-list" class="hidden space-y-4"></div>
-
-      <div id="contributions-error" class="hidden text-center py-8 rounded-xl" role="alert" style="background: var(--status-error-bg); border: 1px solid var(--status-error-border);">
-        <p style="color: var(--status-error);">Failed to load contributions. Please try again.</p>
-      </div>
-    </section>
-
-    <!-- How it Works -->
-    <section class="mb-16">
-      <h2 class="text-2xl font-bold text-center mb-10" style="color: var(--text-primary);">How It Works</h2>
-
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {steps.map((step) => (
-          <div class="relative p-6 rounded-xl surface">
-            {step.status === 'coming-soon' && (
-              <span class="absolute top-4 right-4 px-2 py-0.5 rounded text-[10px] font-mono uppercase" style="background: var(--status-warning-bg); color: var(--status-warning); border: 1px solid var(--status-warning-border);">
-                Soon
-              </span>
-            )}
-            <div class="text-4xl font-bold mb-4" style="color: var(--border-primary);">{step.number}</div>
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style="background: var(--accent-bg); border: 1px solid var(--accent-secondary);">
-              <svg class="w-5 h-5" style="color: var(--accent-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" set:html={step.icon} aria-hidden="true" />
-            </div>
-            <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">{step.title}</h3>
-            <p class="text-sm" style="color: var(--text-muted);">{step.description}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-
-    <!-- Benefits -->
-    <section class="mb-16">
-      <div class="p-8 rounded-2xl" style="background: var(--accent-bg); border: 1px solid var(--accent-secondary);">
-        <h2 class="text-2xl font-bold text-center mb-8" style="color: var(--text-primary);">Why Contribute?</h2>
-
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div class="text-center">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style="background: var(--status-warning-bg); border: 1px solid var(--status-warning-border);">
-              <svg class="w-6 h-6" style="color: var(--status-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-              </svg>
-            </div>
-            <h3 class="font-semibold mb-1" style="color: var(--text-primary);">Get Credited</h3>
-            <p class="text-sm" style="color: var(--text-muted);">Your GitHub profile linked to every guideline</p>
-          </div>
-
-          <div class="text-center">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style="background: var(--status-success-bg); border: 1px solid var(--status-success-border);">
-              <svg class="w-6 h-6" style="color: var(--status-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <h3 class="font-semibold mb-1" style="color: var(--text-primary);">Help Developers</h3>
-            <p class="text-sm" style="color: var(--text-muted);">Share knowledge with thousands of developers</p>
-          </div>
-
-          <div class="text-center">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style="background: var(--accent-bg); border: 1px solid var(--accent-secondary);">
-              <svg class="w-6 h-6" style="color: var(--accent-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 class="font-semibold mb-1" style="color: var(--text-primary);">Train AI Agents</h3>
-            <p class="text-sm" style="color: var(--text-muted);">Your guidelines help AI write better code</p>
-          </div>
-
-          <div class="text-center">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style="background: var(--status-info-bg); border: 1px solid var(--status-info-border);">
-              <svg class="w-6 h-6" style="color: var(--status-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <h3 class="font-semibold mb-1" style="color: var(--text-primary);">Build Reputation</h3>
-            <p class="text-sm" style="color: var(--text-muted);">Establish yourself as a domain expert</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- What Makes a Good Guideline -->
-    <section class="mb-16">
-      <h2 class="text-2xl font-bold text-center mb-10" style="color: var(--text-primary);">What Makes a Good Guideline?</h2>
-
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="p-6 rounded-xl" style="background: var(--status-success-bg); border: 1px solid var(--status-success-border);">
-          <div class="flex items-center gap-2 mb-4">
-            <svg class="w-5 h-5" style="color: var(--status-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          <a href="/explore" class="sidebar-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
-            <h3 class="font-semibold" style="color: var(--text-primary);">Do</h3>
-          </div>
-          <ul class="space-y-3 text-sm" style="color: var(--text-secondary);">
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-success);" class="mt-0.5">+</span>
-              <span><strong style="color: var(--text-primary);">Be specific</strong> - Focus on one actionable recommendation</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-success);" class="mt-0.5">+</span>
-              <span><strong style="color: var(--text-primary);">Explain why</strong> - Help readers understand the reasoning</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-success);" class="mt-0.5">+</span>
-              <span><strong style="color: var(--text-primary);">Include examples</strong> - Show both good and bad code</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-success);" class="mt-0.5">+</span>
-              <span><strong style="color: var(--text-primary);">Add AI fields</strong> - Help AI agents apply your guideline</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-success);" class="mt-0.5">+</span>
-              <span><strong style="color: var(--text-primary);">Specify versions</strong> - Note version constraints where applicable</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="p-6 rounded-xl" style="background: var(--status-error-bg); border: 1px solid var(--status-error-border);">
-          <div class="flex items-center gap-2 mb-4">
-            <svg class="w-5 h-5" style="color: var(--status-error);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <h3 class="font-semibold" style="color: var(--text-primary);">Don't</h3>
-          </div>
-          <ul class="space-y-3 text-sm" style="color: var(--text-secondary);">
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-error);" class="mt-0.5">-</span>
-              <span><strong style="color: var(--text-primary);">Be vague</strong> - Avoid generic advice like "write clean code"</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-error);" class="mt-0.5">-</span>
-              <span><strong style="color: var(--text-primary);">Skip examples</strong> - Abstract rules are hard to apply</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-error);" class="mt-0.5">-</span>
-              <span><strong style="color: var(--text-primary);">Duplicate content</strong> - Check existing guidelines first</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-error);" class="mt-0.5">-</span>
-              <span><strong style="color: var(--text-primary);">Omit context</strong> - Always explain when the guideline applies</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span style="color: var(--status-error);" class="mt-0.5">-</span>
-              <span><strong style="color: var(--text-primary);">Use opinions</strong> - Base guidelines on established practices</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="text-center">
-      <div class="p-8 rounded-2xl surface">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);">Ready to Contribute?</h2>
-        <p class="mb-6 max-w-xl mx-auto" style="color: var(--text-muted);">
-          Start by reading our style guide to understand the guideline format.
-          Then check the API documentation to learn how to submit.
-        </p>
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="/guidelines/erold/contributing/how-to-write-guidelines" class="btn btn-primary">
-            Read Style Guide
-          </a>
-          <a href="/contribute/api" class="btn btn-secondary">
-            View API Docs
+            Browse Guidelines
           </a>
         </div>
       </div>
-    </section>
 
-  </main>
+      <!-- Status Legend -->
+      <div class="sidebar-box">
+        <h3>Status Guide</h3>
+        <div class="status-list">
+          <div class="status-item">
+            <span class="status-dot status-pending"></span>
+            <span>Pending review</span>
+          </div>
+          <div class="status-item">
+            <span class="status-dot status-changes"></span>
+            <span>Needs changes</span>
+          </div>
+          <div class="status-item">
+            <span class="status-dot status-approved"></span>
+            <span>Approved</span>
+          </div>
+          <div class="status-item">
+            <span class="status-dot status-rejected"></span>
+            <span>Rejected</span>
+          </div>
+        </div>
+      </div>
 
-  <script>
-    const API_URL = 'https://su5t4tzra5.execute-api.eu-west-1.amazonaws.com';
+      <!-- Tips -->
+      <div class="sidebar-box sidebar-box-muted">
+        <h3>Quick Tips</h3>
+        <ul class="tips-list">
+          <li>Be specific and actionable</li>
+          <li>Include code examples</li>
+          <li>Explain the "why"</li>
+          <li>Check for duplicates first</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
 
-    async function checkAuth() {
-      const token = localStorage.getItem('erold_token');
-      const userJson = localStorage.getItem('erold_user');
+<style>
+  /* Two-column layout - matches header/footer max-w-6xl */
+  .page-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 2.5rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    align-items: start;
+  }
 
-      const guestEl = document.getElementById('auth-guest');
-      const userEl = document.getElementById('auth-user');
-      const avatarEl = document.getElementById('user-avatar') as HTMLImageElement;
-      const nameEl = document.getElementById('user-name');
-      const signOutBtn = document.getElementById('sign-out');
-      const myContributions = document.getElementById('my-contributions');
-      const adminLink = document.getElementById('admin-link');
+  @media (min-width: 640px) {
+    .page-layout {
+      padding: 2rem 1.5rem;
+    }
+  }
 
-      if (token && userJson) {
+  @media (max-width: 1024px) {
+    .page-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      display: none;
+    }
+  }
+
+  /* Main content */
+  .main-content {
+    min-width: 0;
+  }
+
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .page-header p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  /* Auth Section */
+  .auth-section {
+    margin-bottom: 2rem;
+  }
+
+  .auth-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+  }
+
+  .auth-box-content h2 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+  }
+
+  .auth-box-content p {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    background: var(--accent-primary);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* User Header */
+  .user-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+  }
+
+  .user-name {
+    display: block;
+    font-family: monospace;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .sign-out {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .sign-out:hover {
+    text-decoration: underline;
+  }
+
+  .user-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Contributions Section */
+  .contributions-section {
+    margin-top: 1.5rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .section-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .section-link {
+    font-size: 0.8125rem;
+    color: var(--accent-primary);
+    text-decoration: none;
+  }
+
+  .section-link:hover {
+    text-decoration: underline;
+  }
+
+  .loading-state {
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--accent-primary);
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .empty-state {
+    padding: 2rem;
+    text-align: center;
+    background: var(--bg-secondary);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-primary);
+  }
+
+  .empty-state p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .error-state {
+    padding: 1rem;
+    text-align: center;
+    background: var(--status-error-bg);
+    border: 1px solid var(--status-error-border);
+    border-radius: 0.5rem;
+  }
+
+  .error-state p {
+    color: var(--status-error);
+    font-size: 0.875rem;
+  }
+
+  .contributions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: sticky;
+    top: 5rem;
+  }
+
+  .sidebar-box {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+  }
+
+  .sidebar-box-muted {
+    background: var(--bg-primary);
+  }
+
+  .sidebar-box h3 {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .sidebar-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    margin: -0.25rem -0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 0.375rem;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .sidebar-link:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+
+  /* Status List */
+  .status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  .status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+  }
+
+  .status-pending { background: #3b82f6; }
+  .status-changes { background: #f59e0b; }
+  .status-approved { background: #10b981; }
+  .status-rejected { background: #ef4444; }
+
+  /* Tips List */
+  .tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .tips-list li {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    padding-left: 0.875rem;
+    position: relative;
+  }
+
+  .tips-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 640px) {
+    .auth-box {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .user-header {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .user-actions {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  const API_URL = 'https://su5t4tzra5.execute-api.eu-west-1.amazonaws.com';
+
+  async function checkAuth() {
+    const token = localStorage.getItem('erold_token');
+    const userJson = localStorage.getItem('erold_user');
+
+    const guestEl = document.getElementById('auth-guest');
+    const userEl = document.getElementById('auth-user');
+    const avatarEl = document.getElementById('user-avatar') as HTMLImageElement;
+    const nameEl = document.getElementById('user-name');
+    const signOutBtn = document.getElementById('sign-out');
+    const myContributions = document.getElementById('my-contributions');
+    const adminLink = document.getElementById('admin-link');
+
+    if (token && userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        if (avatarEl) avatarEl.src = user.avatar;
+        if (nameEl) nameEl.textContent = user.username;
+        guestEl?.classList.add('hidden');
+        userEl?.classList.remove('hidden');
+
         try {
-          const user = JSON.parse(userJson);
-          if (avatarEl) avatarEl.src = user.avatar;
-          if (nameEl) nameEl.textContent = user.username;
-          guestEl?.classList.add('hidden');
-          userEl?.classList.remove('hidden');
-
-          try {
-            const adminResponse = await fetch(`${API_URL}/v1/admin/me`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (adminResponse.ok) {
-              const adminData = await adminResponse.json();
-              if (adminData.isAdmin) {
-                adminLink?.classList.remove('hidden');
-              }
+          const adminResponse = await fetch(`${API_URL}/v1/admin/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (adminResponse.ok) {
+            const adminData = await adminResponse.json();
+            if (adminData.isAdmin) {
+              adminLink?.classList.remove('hidden');
             }
-          } catch { /* Not admin */ }
+          }
+        } catch { /* Not admin */ }
 
-          myContributions?.classList.remove('hidden');
-          await loadContributions(token);
-        } catch {
-          localStorage.removeItem('erold_token');
-          localStorage.removeItem('erold_user');
-        }
-      }
-
-      signOutBtn?.addEventListener('click', () => {
+        myContributions?.classList.remove('hidden');
+        await loadContributions(token);
+      } catch {
         localStorage.removeItem('erold_token');
         localStorage.removeItem('erold_user');
-        window.location.reload();
-      });
+      }
     }
 
-    async function loadContributions(token: string) {
-      const loading = document.getElementById('contributions-loading');
-      const empty = document.getElementById('contributions-empty');
-      const list = document.getElementById('contributions-list');
-      const error = document.getElementById('contributions-error');
+    signOutBtn?.addEventListener('click', () => {
+      localStorage.removeItem('erold_token');
+      localStorage.removeItem('erold_user');
+      window.location.reload();
+    });
+  }
 
-      try {
-        const response = await fetch(`${API_URL}/v1/contributions`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+  async function loadContributions(token: string) {
+    const loading = document.getElementById('contributions-loading');
+    const empty = document.getElementById('contributions-empty');
+    const list = document.getElementById('contributions-list');
+    const error = document.getElementById('contributions-error');
 
-        if (!response.ok) throw new Error('Failed to fetch');
+    try {
+      const response = await fetch(`${API_URL}/v1/contributions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-        const data = await response.json();
-        loading?.classList.add('hidden');
+      if (!response.ok) throw new Error('Failed to fetch');
 
-        if (!data.contributions || data.contributions.length === 0) {
-          empty?.classList.remove('hidden');
-          return;
-        }
+      const data = await response.json();
+      loading?.classList.add('hidden');
 
-        list?.classList.remove('hidden');
-        if (list) list.innerHTML = data.contributions.map((c: any) => `
-          <div class="p-4 rounded-xl flex items-center justify-between gap-4 surface">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <h3 class="font-semibold truncate" style="color: var(--text-primary);">${escapeHtml(c.title)}</h3>
-                <span class="px-2 py-0.5 rounded text-xs font-mono ${getStatusClasses(c.status)}">${c.status.replace(/_/g, ' ')}</span>
-              </div>
-              <p class="text-sm" style="color: var(--text-muted);">
-                <span class="capitalize">${c.topic}</span> / ${c.category.replace(/-/g, ' ')} &bull; ${formatDate(c.createdAt)}
-              </p>
-              ${c.adminReview?.feedback ? `<p class="text-sm mt-1" style="color: var(--status-warning);"><strong>Admin Feedback:</strong> ${escapeHtml(c.adminReview.feedback)}</p>` : ''}
-              ${c.review?.feedback ? `<p class="text-sm mt-1" style="color: var(--status-warning);"><strong>AI Feedback:</strong> ${escapeHtml(c.review.feedback)}</p>` : ''}
-            </div>
-            <div class="flex items-center gap-2">
-              ${['pending', 'ai_needs_changes', 'admin_needs_changes'].includes(c.status) ? `
-                <a href="/contribute/submit?edit=${c.id}" class="text-sm hover:underline" style="color: var(--accent-primary);">Edit</a>
-              ` : ''}
-            </div>
+      if (!data.contributions || data.contributions.length === 0) {
+        empty?.classList.remove('hidden');
+        return;
+      }
+
+      list?.classList.remove('hidden');
+      if (list) list.innerHTML = data.contributions.map((c: any) => `
+        <a href="${['pending', 'ai_needs_changes', 'admin_needs_changes'].includes(c.status) ? `/contribute/submit?edit=${c.id}` : '#'}" class="contribution-row">
+          <div class="contribution-main">
+            <span class="contribution-title">${escapeHtml(c.title)}</span>
+            <span class="contribution-meta">${c.topic} / ${c.category.replace(/-/g, ' ')}</span>
           </div>
-        `).join('');
+          <span class="contribution-status ${getStatusClass(c.status)}">${formatStatus(c.status)}</span>
+        </a>
+      `).join('');
 
-      } catch (err) {
-        console.error('Failed to load contributions:', err);
-        loading?.classList.add('hidden');
-        error?.classList.remove('hidden');
-      }
+    } catch (err) {
+      console.error('Failed to load contributions:', err);
+      loading?.classList.add('hidden');
+      error?.classList.remove('hidden');
     }
+  }
 
-    function getStatusClasses(status: string): string {
-      switch (status) {
-        case 'pending': return 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30';
-        case 'ai_approved': return 'bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30';
-        case 'ai_needs_changes': return 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30';
-        case 'admin_needs_changes': return 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30';
-        case 'approved': return 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
-        case 'rejected': return 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30';
-        case 'withdrawn': return 'bg-gray-500/20 text-gray-600 dark:text-gray-400 border border-gray-500/30';
-        default: return 'bg-gray-500/20 text-gray-600 dark:text-gray-400 border border-gray-500/30';
-      }
+  function getStatusClass(status: string): string {
+    switch (status) {
+      case 'pending': return 'status-pending-badge';
+      case 'ai_approved':
+      case 'approved': return 'status-approved-badge';
+      case 'ai_needs_changes':
+      case 'admin_needs_changes': return 'status-changes-badge';
+      case 'rejected': return 'status-rejected-badge';
+      default: return '';
     }
+  }
 
-    function formatDate(dateStr: string): string {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric'
-      });
-    }
+  function formatStatus(status: string): string {
+    return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
 
-    function escapeHtml(str: string): string {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
+  function escapeHtml(str: string): string {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
 
-    checkAuth();
-  </script>
-</BaseLayout>
+  checkAuth();
+</script>
+
+<style is:global>
+  .contribution-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+
+  .contribution-row:hover {
+    border-color: var(--border-secondary);
+  }
+
+  .contribution-main {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .contribution-title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .contribution-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .contribution-status {
+    font-size: 0.6875rem;
+    font-family: monospace;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    white-space: nowrap;
+  }
+
+  .status-pending-badge {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+  }
+
+  .status-approved-badge {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+
+  .status-changes-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+  }
+
+  .status-rejected-badge {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+  }
+</style>
