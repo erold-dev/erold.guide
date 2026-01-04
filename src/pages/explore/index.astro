@@ -172,15 +172,21 @@ const totalPages = Math.ceil(topics.length / ITEMS_PER_PAGE);
 </BaseLayout>
 
 <style>
-  /* Two-column layout */
+  /* Two-column layout - matches header/footer max-w-6xl */
   .page-layout {
     display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 3rem;
-    max-width: 1200px;
+    grid-template-columns: 1fr 280px;
+    gap: 2.5rem;
+    max-width: 72rem; /* matches max-w-6xl */
     margin: 0 auto;
-    padding: 2rem 1.5rem;
+    padding: 2rem 1rem; /* matches px-4 */
     align-items: start;
+  }
+
+  @media (min-width: 640px) {
+    .page-layout {
+      padding: 2rem 1.5rem; /* matches sm:px-6 */
+    }
   }
 
   @media (max-width: 1024px) {
