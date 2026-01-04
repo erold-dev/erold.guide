@@ -27,193 +27,444 @@ const guidelinesByCategory = guidelines.reduce((acc, g) => {
 }, {} as Record<string, typeof guidelines>);
 
 const categories = Object.keys(guidelinesByCategory).sort();
+
+// Get unique difficulties for filter
+const difficulties = [...new Set(guidelines.map(g => g.difficulty))];
+
+// Pagination config
+const ITEMS_PER_PAGE = 25;
+const totalPages = Math.ceil(guidelines.length / ITEMS_PER_PAGE);
 ---
 
 <BaseLayout title={topic.name} description={topic.description}>
-  <main id="main-content" class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-
-    <!-- Compact Header -->
-    <header class="mb-8">
-      <!-- Breadcrumb + API link row -->
-      <div class="flex items-center justify-between mb-4">
-        <nav class="text-sm font-mono" style="color: var(--text-muted);" aria-label="Breadcrumb">
-          <a href="/" class="hover:underline" style="color: var(--text-secondary);">Home</a>
-          <span class="mx-1.5">/</span>
-          <a href="/explore" class="hover:underline" style="color: var(--text-secondary);">Explore</a>
-          <span class="mx-1.5">/</span>
-          <span style="color: var(--text-primary);">{topic.name}</span>
+  <div class="page-layout">
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+      <!-- Header -->
+      <header class="page-header">
+        <nav class="breadcrumb">
+          <a href="/">Home</a>
+          <span>/</span>
+          <a href="/explore">Explore</a>
+          <span>/</span>
+          <span class="current">{topic.name}</span>
         </nav>
-        <a
-          href={`/api/v1/topics/${topic.slug}/_index.json`}
-          class="text-xs font-mono px-2 py-1 rounded hover:opacity-80 transition-opacity"
-          style="background: var(--bg-tertiary); color: var(--text-muted);"
-          title="API endpoint"
-        >
-          API
-        </a>
-      </div>
 
-      <!-- Title row -->
-      <div class="flex items-center gap-4 mb-3">
-        {topic.logo && (
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: var(--bg-tertiary);">
-            <img src={topic.logo} alt="" class="w-6 h-6" aria-hidden="true" />
-          </div>
-        )}
-        <div class="flex items-center gap-3 flex-wrap">
-          <h1 class="text-2xl font-bold tracking-tight" style="color: var(--text-primary);">{topic.name}</h1>
-          {topic.currentVersion && (
-            <span class="text-xs font-mono px-1.5 py-0.5 rounded" style="background: var(--bg-tertiary); color: var(--text-muted);">
-              v{topic.currentVersion}
-            </span>
+        <div class="topic-header">
+          {topic.logo && (
+            <div class="topic-icon">
+              <img src={topic.logo} alt="" />
+            </div>
           )}
-          <span class="text-sm" style="color: var(--text-muted);">
-            {guidelines.length} guidelines
-          </span>
+          <div>
+            <h1>{topic.name}</h1>
+            <p>{topic.description}</p>
+          </div>
+        </div>
+
+        <!-- External links -->
+        <div class="topic-links">
+          {topic.website && (
+            <a href={topic.website} target="_blank" rel="noopener">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Website
+            </a>
+          )}
+          {topic.documentation && (
+            <a href={topic.documentation} target="_blank" rel="noopener">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              Docs
+            </a>
+          )}
+          {topic.repository && (
+            <a href={topic.repository} target="_blank" rel="noopener">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              GitHub
+            </a>
+          )}
+        </div>
+      </header>
+
+      <!-- Search & Filters -->
+      <div class="search-filters">
+        <div class="search-box">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="search"
+            id="guideline-search"
+            class="search-input"
+            placeholder="Search guidelines..."
+            aria-label="Search guidelines"
+          />
+        </div>
+
+        <div class="filter-row">
+          {categories.length > 1 && (
+            <div class="filter-chips">
+              <button class="filter-chip active" data-filter="all" data-filter-type="category">All</button>
+              {categories.map(cat => (
+                <button class="filter-chip" data-filter={cat} data-filter-type="category">
+                  {cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div class="difficulty-filter">
+            <select id="difficulty-filter" class="filter-select">
+              <option value="all">All levels</option>
+              {difficulties.map(d => (
+                <option value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      <!-- Description + links -->
-      <p class="text-sm mb-3" style="color: var(--text-secondary); max-width: 600px;">
-        {topic.description}
-      </p>
+      <!-- Guidelines List -->
+      {guidelines.length > 0 ? (
+        <div id="guidelines-list" class="guidelines-list">
+          {guidelines.map((g, index) => (
+            <a
+              href={`/guidelines/${g.topic}/${g.category}/${g.slug}`}
+              class="guideline-row"
+              data-category={g.category}
+              data-difficulty={g.difficulty}
+              data-title={g.title.toLowerCase()}
+              data-page={Math.floor(index / ITEMS_PER_PAGE) + 1}
+            >
+              <div class="guideline-row-main">
+                <h3 class="guideline-row-title">{g.title}</h3>
+                <p class="guideline-row-desc">{g.description}</p>
+              </div>
+              <div class="guideline-row-meta">
+                <span class={`difficulty-badge difficulty-${g.difficulty}`}>{g.difficulty}</span>
+                <span class="guideline-row-time">{g.estimatedReadTime}m</span>
+                <svg class="guideline-row-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="empty-state">
+          <p>No guidelines yet for {topic.name}.</p>
+          <a href="/contribute" class="btn-primary">Contribute a Guideline</a>
+        </div>
+      )}
 
-      <!-- Compact external links -->
-      <div class="flex items-center gap-4 text-sm">
-        {topic.website && (
-          <a href={topic.website} target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:underline" style="color: var(--text-muted);">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            Website
-          </a>
-        )}
-        {topic.documentation && (
-          <a href={topic.documentation} target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:underline" style="color: var(--text-muted);">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            Docs
-          </a>
-        )}
-        {topic.repository && (
-          <a href={topic.repository} target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:underline" style="color: var(--text-muted);">
-            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" /></svg>
-            GitHub
-          </a>
-        )}
+      <!-- Empty search state -->
+      <div id="empty-state" class="empty-state hidden">
+        <p>No guidelines match your filters.</p>
       </div>
-    </header>
 
-    <!-- Category filter (horizontal tabs) -->
-    {categories.length > 1 && (
-      <nav class="flex items-center gap-2 mb-6 overflow-x-auto pb-2" aria-label="Categories">
-        <a
-          href="#all"
-          class="category-tab active"
-          data-category="all"
-        >
-          All ({guidelines.length})
-        </a>
-        {categories.map((cat) => (
-          <a
-            href={`#${cat}`}
-            class="category-tab"
-            data-category={cat}
-          >
-            {cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} ({guidelinesByCategory[cat].length})
-          </a>
-        ))}
-      </nav>
-    )}
+      <!-- Pagination -->
+      {totalPages > 1 && (
+        <nav id="pagination" class="pagination" aria-label="Pagination">
+          <button id="prev-page" class="pagination-btn" disabled>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Prev
+          </button>
+          <span id="page-info" class="pagination-info">Page 1 of {totalPages}</span>
+          <button id="next-page" class="pagination-btn">
+            Next
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </nav>
+      )}
+    </main>
 
-    <!-- Guidelines List - THE MAIN CONTENT -->
-    {guidelines.length > 0 ? (
-      <div class="guidelines-list">
-        {categories.map((category) => (
-          <section class="category-section" data-category={category}>
-            {categories.length > 1 && (
-              <h2 class="category-heading" id={category}>
-                {category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </h2>
-            )}
+    <!-- Right Sidebar -->
+    <aside class="sidebar">
+      <!-- Stats -->
+      <div class="sidebar-box">
+        <h3>Overview</h3>
+        <dl class="stats-list">
+          <div class="stat-item">
+            <dt>Guidelines</dt>
+            <dd>{guidelines.length}</dd>
+          </div>
+          <div class="stat-item">
+            <dt>Categories</dt>
+            <dd>{categories.length}</dd>
+          </div>
+          {topic.currentVersion && (
+            <div class="stat-item">
+              <dt>Version</dt>
+              <dd>v{topic.currentVersion}</dd>
+            </div>
+          )}
+        </dl>
+      </div>
 
-            {guidelinesByCategory[category].map((g) => (
-              <a href={`/guidelines/${g.topic}/${g.category}/${g.slug}`} class="guideline-row">
-                <div class="guideline-row-main">
-                  <h3 class="guideline-row-title">{g.title}</h3>
-                  <p class="guideline-row-desc">{g.description}</p>
-                </div>
-                <div class="guideline-row-meta">
-                  <span class={`difficulty-dot difficulty-${g.difficulty}`} title={g.difficulty}></span>
-                  <span class="guideline-row-time">{g.estimatedReadTime}m</span>
-                  <svg class="guideline-row-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </a>
+      <!-- Categories -->
+      {categories.length > 0 && (
+        <div class="sidebar-box">
+          <h3>Categories</h3>
+          <div class="category-list">
+            {categories.map(cat => (
+              <button class="category-item" data-category={cat}>
+                <span>{cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                <span class="category-count">{guidelinesByCategory[cat].length}</span>
+              </button>
             ))}
-          </section>
-        ))}
-      </div>
-    ) : (
-      <div class="empty-state-compact">
-        <p style="color: var(--text-muted);">No guidelines yet for {topic.name}.</p>
-        <a href="/contribute" class="btn btn-primary mt-3">Contribute a Guideline</a>
-      </div>
-    )}
+          </div>
+        </div>
+      )}
 
-  </main>
+      <!-- Quick Actions -->
+      <div class="sidebar-box">
+        <h3>Actions</h3>
+        <div class="sidebar-links">
+          <a href="/contribute" class="sidebar-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Contribute to {topic.name}
+          </a>
+          <a href="/explore" class="sidebar-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            Browse all topics
+          </a>
+        </div>
+      </div>
+
+      <!-- API -->
+      <div class="sidebar-box sidebar-box-muted">
+        <h3>API Access</h3>
+        <p>Get these guidelines via JSON API.</p>
+        <code class="api-endpoint">GET /api/v1/topics/{topic.slug}/_index.json</code>
+      </div>
+    </aside>
+  </div>
 </BaseLayout>
 
 <style>
-  /* Category tabs */
-  .category-tab {
+  /* Two-column layout */
+  .page-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 1024px) {
+    .page-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      display: none;
+    }
+  }
+
+  /* Main content */
+  .main-content {
+    min-width: 0;
+  }
+
+  /* Header */
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .breadcrumb a {
+    color: var(--text-secondary);
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .breadcrumb span {
+    margin: 0 0.375rem;
+  }
+
+  .breadcrumb .current {
+    color: var(--text-primary);
+  }
+
+  .topic-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .topic-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    padding: 0.5rem 1rem;
+    background: var(--bg-tertiary);
+  }
+
+  .topic-icon img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .topic-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .topic-header p {
     font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .topic-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .topic-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .topic-links a:hover {
+    color: var(--accent-primary);
+  }
+
+  /* Search & Filters */
+  .search-filters {
+    margin-bottom: 1.5rem;
+  }
+
+  .search-box {
+    position: relative;
+    margin-bottom: 0.75rem;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    color: var(--text-muted);
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-primary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+
+  .search-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    flex: 1;
+  }
+
+  .filter-chip {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
     font-weight: 500;
     border-radius: 9999px;
-    color: var(--text-muted);
-    background: var(--bg-secondary);
     border: 1px solid var(--border-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    cursor: pointer;
     transition: all 0.15s ease;
-    white-space: nowrap;
   }
 
-  .category-tab:hover, .category-tab.active {
-    color: var(--text-primary);
+  .filter-chip:hover, .filter-chip.active {
     background: var(--bg-tertiary);
     border-color: var(--border-primary);
+    color: var(--text-primary);
   }
 
-  /* Category heading */
-  .category-heading {
+  .filter-select {
+    padding: 0.375rem 0.625rem;
     font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    padding: 1rem 0 0.5rem;
-    border-bottom: 1px solid var(--border-secondary);
-    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-primary);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
   }
 
-  .category-section:first-child .category-heading {
-    padding-top: 0;
+  /* Guidelines list */
+  .guidelines-list {
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Guideline rows - THE MAIN CONTENT */
   .guideline-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem 0;
+    padding: 0.875rem 0;
     border-bottom: 1px solid var(--border-secondary);
-    transition: background 0.1s ease;
+    transition: all 0.1s ease;
   }
 
   .guideline-row:hover {
     background: var(--bg-secondary);
-    margin: 0 -1rem;
-    padding: 1rem;
+    margin: 0 -0.75rem;
+    padding: 0.875rem 0.75rem;
     border-radius: 0.5rem;
     border-bottom-color: transparent;
   }
@@ -222,17 +473,21 @@ const categories = Object.keys(guidelinesByCategory).sort();
     border-bottom: none;
   }
 
+  .guideline-row.hidden {
+    display: none;
+  }
+
   .guideline-row-main {
     flex: 1;
     min-width: 0;
   }
 
   .guideline-row-title {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text-primary);
-    line-height: 1.4;
-    margin-bottom: 0.25rem;
+    line-height: 1.3;
+    margin-bottom: 0.125rem;
   }
 
   .guideline-row:hover .guideline-row-title {
@@ -240,13 +495,12 @@ const categories = Object.keys(guidelinesByCategory).sort();
   }
 
   .guideline-row-desc {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: var(--text-muted);
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
+    line-height: 1.4;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .guideline-row-meta {
@@ -254,6 +508,29 @@ const categories = Object.keys(guidelinesByCategory).sort();
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
+  }
+
+  .difficulty-badge {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    text-transform: capitalize;
+  }
+
+  .difficulty-badge.difficulty-beginner {
+    background: var(--status-success-bg);
+    color: var(--status-success);
+  }
+
+  .difficulty-badge.difficulty-intermediate {
+    background: var(--status-warning-bg);
+    color: var(--status-warning);
+  }
+
+  .difficulty-badge.difficulty-advanced {
+    background: var(--status-error-bg);
+    color: var(--status-error);
   }
 
   .guideline-row-time {
@@ -275,32 +552,194 @@ const categories = Object.keys(guidelinesByCategory).sort();
     color: var(--accent-primary);
   }
 
-  /* Difficulty dots */
-  .difficulty-dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-  }
-
-  .difficulty-dot.difficulty-beginner {
-    background: var(--status-success);
-  }
-
-  .difficulty-dot.difficulty-intermediate {
-    background: var(--status-warning);
-  }
-
-  .difficulty-dot.difficulty-advanced {
-    background: var(--status-error);
-  }
-
   /* Empty state */
-  .empty-state-compact {
+  .empty-state {
     text-align: center;
     padding: 3rem 1rem;
+    color: var(--text-muted);
   }
 
-  /* Responsive */
+  .empty-state.hidden {
+    display: none;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    background: var(--accent-primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-secondary);
+  }
+
+  .pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-primary);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pagination-info {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: sticky;
+    top: 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sidebar-box {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-secondary);
+  }
+
+  .sidebar-box-muted {
+    background: var(--bg-tertiary);
+  }
+
+  .sidebar-box h3 {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .sidebar-box p {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+
+  .stats-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-item dt {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+  }
+
+  .stat-item dd {
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+  }
+
+  .category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: color 0.15s ease;
+  }
+
+  .category-item:hover {
+    color: var(--accent-primary);
+  }
+
+  .category-count {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .sidebar-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    transition: color 0.15s ease;
+  }
+
+  .sidebar-link:hover {
+    color: var(--accent-primary);
+  }
+
+  .api-endpoint {
+    display: block;
+    font-size: 0.6875rem;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    background: var(--bg-primary);
+    color: var(--accent-primary);
+    font-family: var(--font-mono);
+    overflow-x: auto;
+    word-break: break-all;
+  }
+
   @media (max-width: 640px) {
     .guideline-row-desc {
       display: none;
@@ -313,24 +752,124 @@ const categories = Object.keys(guidelinesByCategory).sort();
 </style>
 
 <script>
-  // Simple category filtering
-  document.querySelectorAll('.category-tab').forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      const category = (e.target as HTMLElement).dataset.category;
+  const searchInput = document.getElementById('guideline-search') as HTMLInputElement;
+  const filterChips = document.querySelectorAll('.filter-chip[data-filter-type="category"]');
+  const difficultySelect = document.getElementById('difficulty-filter') as HTMLSelectElement;
+  const categoryItems = document.querySelectorAll('.category-item');
+  const guidelineRows = document.querySelectorAll('.guideline-row');
+  const emptyState = document.getElementById('empty-state');
+  const pagination = document.getElementById('pagination');
+  const prevBtn = document.getElementById('prev-page') as HTMLButtonElement;
+  const nextBtn = document.getElementById('next-page') as HTMLButtonElement;
+  const pageInfo = document.getElementById('page-info');
 
-      // Update active tab
-      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-      (e.target as HTMLElement).classList.add('active');
+  let currentPage = 1;
+  let currentCategory = 'all';
+  let currentDifficulty = 'all';
+  let searchQuery = '';
+  const ITEMS_PER_PAGE = 25;
 
-      // Filter sections
-      document.querySelectorAll('.category-section').forEach(section => {
-        if (category === 'all' || section.dataset.category === category) {
-          (section as HTMLElement).style.display = 'block';
+  function filterAndPaginate() {
+    let visibleCount = 0;
+    let pageCount = 0;
+
+    guidelineRows.forEach((row) => {
+      const el = row as HTMLElement;
+      const category = el.dataset.category || '';
+      const difficulty = el.dataset.difficulty || '';
+      const title = el.dataset.title || '';
+
+      const matchesCategory = currentCategory === 'all' || category === currentCategory;
+      const matchesDifficulty = currentDifficulty === 'all' || difficulty === currentDifficulty;
+      const matchesSearch = !searchQuery || title.includes(searchQuery.toLowerCase());
+
+      if (matchesCategory && matchesDifficulty && matchesSearch) {
+        visibleCount++;
+        const itemPage = Math.ceil(visibleCount / ITEMS_PER_PAGE);
+
+        if (itemPage === currentPage) {
+          el.classList.remove('hidden');
         } else {
-          (section as HTMLElement).style.display = 'none';
+          el.classList.add('hidden');
         }
-      });
+        pageCount = itemPage;
+      } else {
+        el.classList.add('hidden');
+      }
+    });
+
+    // Update pagination
+    if (pagination && pageInfo && prevBtn && nextBtn) {
+      if (pageCount <= 1) {
+        pagination.style.display = 'none';
+      } else {
+        pagination.style.display = 'flex';
+        pageInfo.textContent = `Page ${currentPage} of ${pageCount}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === pageCount;
+      }
+    }
+
+    // Empty state
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', visibleCount > 0);
+    }
+  }
+
+  // Search
+  searchInput?.addEventListener('input', (e) => {
+    searchQuery = (e.target as HTMLInputElement).value;
+    currentPage = 1;
+    filterAndPaginate();
+  });
+
+  // Category filter chips
+  filterChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      filterChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentCategory = (chip as HTMLElement).dataset.filter || 'all';
+      currentPage = 1;
+      filterAndPaginate();
     });
   });
+
+  // Category sidebar items
+  categoryItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const category = (item as HTMLElement).dataset.category || '';
+      currentCategory = category;
+      currentPage = 1;
+
+      // Update filter chips
+      filterChips.forEach(c => {
+        c.classList.toggle('active', (c as HTMLElement).dataset.filter === category);
+      });
+
+      filterAndPaginate();
+    });
+  });
+
+  // Difficulty filter
+  difficultySelect?.addEventListener('change', (e) => {
+    currentDifficulty = (e.target as HTMLSelectElement).value;
+    currentPage = 1;
+    filterAndPaginate();
+  });
+
+  // Pagination
+  prevBtn?.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      filterAndPaginate();
+    }
+  });
+
+  nextBtn?.addEventListener('click', () => {
+    currentPage++;
+    filterAndPaginate();
+  });
+
+  // Initial filter
+  filterAndPaginate();
 </script>
