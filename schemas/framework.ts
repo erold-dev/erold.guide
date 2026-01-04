@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
 /**
- * Framework schema
- * Represents a framework or library (e.g., Next.js, React, FastAPI)
+ * Topic schema
+ * Represents any subject with guidelines: frameworks, libraries, concepts, tools, practices
  */
-export const FrameworkSchema = z.object({
+export const TopicSchema = z.object({
   // Identity
   id: z.string().regex(/^[a-z0-9-]+$/),
   name: z.string(),
@@ -13,17 +13,17 @@ export const FrameworkSchema = z.object({
   // Metadata
   description: z.string().max(500),
   logo: z.string().url().optional(),
-  website: z.string().url(),
+  website: z.string().url().optional(),
   repository: z.string().url().optional(),
-  documentation: z.string().url(),
+  documentation: z.string().url().optional(),
 
   // Classification
-  technology: z.string(), // Parent technology (e.g., "javascript", "python")
-  type: z.enum(['framework', 'library', 'runtime', 'tool', 'platform']),
+  technology: z.string().optional(), // Parent technology (e.g., "javascript", "python") - optional for concepts
+  type: z.enum(['framework', 'library', 'runtime', 'tool', 'platform', 'concept', 'practice']),
   tags: z.array(z.string()),
 
-  // Version info
-  currentVersion: z.string(),
+  // Version info (optional - not all topics have versions)
+  currentVersion: z.string().optional(),
   supportedVersions: z.array(z.string()).default([]),
 
   // Guidelines stats
@@ -35,21 +35,29 @@ export const FrameworkSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
-export type Framework = z.infer<typeof FrameworkSchema>;
+export type Topic = z.infer<typeof TopicSchema>;
+
+// Backwards compatibility aliases
+export const FrameworkSchema = TopicSchema;
+export type Framework = Topic;
 
 /**
- * Framework summary for listings
+ * Topic summary for listings
  */
-export const FrameworkSummarySchema = z.object({
+export const TopicSummarySchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
   description: z.string(),
   logo: z.string().optional(),
-  technology: z.string(),
-  type: z.enum(['framework', 'library', 'runtime', 'tool', 'platform']),
+  technology: z.string().optional(),
+  type: z.enum(['framework', 'library', 'runtime', 'tool', 'platform', 'concept', 'practice']),
   guidelinesCount: z.number(),
   categories: z.array(z.string()),
 });
 
-export type FrameworkSummary = z.infer<typeof FrameworkSummarySchema>;
+export type TopicSummary = z.infer<typeof TopicSummarySchema>;
+
+// Backwards compatibility aliases
+export const FrameworkSummarySchema = TopicSummarySchema;
+export type FrameworkSummary = TopicSummary;

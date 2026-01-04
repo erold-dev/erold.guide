@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "npm run build:api && astro build",
+    "build": "astro build && npm run build:api",
     "build:api": "tsx scripts/generate-api.ts",
     "build:astro": "astro build",
     "preview": "astro preview",

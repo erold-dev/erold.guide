@@ -7,7 +7,7 @@ website: https://erold.guide
 repository: https://github.com/erold-dev/erold.guide
 documentation: https://erold.guide/contribute
 technology: documentation
-type: meta
+type: platform
 tags:
   - contributing
   - documentation

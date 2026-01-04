@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TechnologySummarySchema } from './technology';
-import { FrameworkSummarySchema } from './framework';
+import { TopicSummarySchema } from './framework';
 
 /**
  * API Manifest schema
@@ -20,7 +20,7 @@ export const ManifestSchema = z.object({
   // Statistics
   stats: z.object({
     totalGuidelines: z.number(),
-    totalFrameworks: z.number(),
+    totalTopics: z.number(),
     totalTechnologies: z.number(),
     totalTags: z.number(),
     lastUpdated: z.string().datetime(),
@@ -30,7 +30,7 @@ export const ManifestSchema = z.object({
   endpoints: z.object({
     manifest: z.string(),
     technologies: z.string(),
-    frameworks: z.string(),
+    topics: z.string(),
     tags: z.string(),
     stacks: z.string(),
     search: z.string(),
@@ -38,7 +38,7 @@ export const ManifestSchema = z.object({
 
   // Quick access to top-level resources
   technologies: z.array(TechnologySummarySchema),
-  frameworks: z.array(FrameworkSummarySchema),
+  topics: z.array(TopicSummarySchema),
 
   // Available tags
   tags: z.array(
@@ -55,7 +55,7 @@ export const ManifestSchema = z.object({
       id: z.string(),
       name: z.string(),
       description: z.string(),
-      frameworks: z.array(z.string()),
+      topics: z.array(z.string()),
       path: z.string(),
     })
   ),
@@ -64,11 +64,11 @@ export const ManifestSchema = z.object({
 export type Manifest = z.infer<typeof ManifestSchema>;
 
 /**
- * Framework index schema
- * Index file for all guidelines in a framework
+ * Topic index schema
+ * Index file for all guidelines in a topic
  */
-export const FrameworkIndexSchema = z.object({
-  framework: FrameworkSummarySchema,
+export const TopicIndexSchema = z.object({
+  topic: TopicSummarySchema,
   generatedAt: z.string().datetime(),
   contentHash: z.string(),
 
@@ -98,18 +98,22 @@ export const FrameworkIndexSchema = z.object({
   ),
 });
 
-export type FrameworkIndex = z.infer<typeof FrameworkIndexSchema>;
+export type TopicIndex = z.infer<typeof TopicIndexSchema>;
+
+// Backwards compatibility alias
+export const FrameworkIndexSchema = TopicIndexSchema;
+export type FrameworkIndex = TopicIndex;
 
 /**
  * Tag index schema
- * Cross-framework index by tag
+ * Cross-topic index by tag
  */
 export const TagIndexSchema = z.object({
   tag: z.string(),
   generatedAt: z.string().datetime(),
 
-  // Guidelines grouped by framework
-  byFramework: z.record(
+  // Guidelines grouped by topic
+  byTopic: z.record(
     z.array(
       z.object({
         title: z.string(),
@@ -136,8 +140,8 @@ export const StackIndexSchema = z.object({
   description: z.string(),
   generatedAt: z.string().datetime(),
 
-  // Frameworks in this stack
-  frameworks: z.array(
+  // Topics in this stack
+  topics: z.array(
     z.object({
       id: z.string(),
       name: z.string(),
@@ -150,7 +154,7 @@ export const StackIndexSchema = z.object({
     z.object({
       title: z.string(),
       slug: z.string(),
-      framework: z.string(),
+      topic: z.string(),
       category: z.string(),
       description: z.string(),
       path: z.string(),

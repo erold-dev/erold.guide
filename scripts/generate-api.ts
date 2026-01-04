@@ -12,10 +12,10 @@ import matter from 'gray-matter';
 import yaml from 'js-yaml';
 import {
   GuidelineFrontmatterSchema,
-  FrameworkSchema,
+  TopicSchema,
   TechnologySchema,
   type Manifest,
-  type FrameworkIndex,
+  type TopicIndex,
   type TagIndex,
   type StackIndex,
   type GuidelineSummary,
@@ -62,18 +62,18 @@ async function loadAllGuidelines(): Promise<ParsedGuideline[]> {
   const guidelinesDir = path.join(CONTENT_DIR, 'guidelines');
 
   try {
-    const frameworks = await fs.readdir(guidelinesDir);
+    const topics = await fs.readdir(guidelinesDir);
 
-    for (const framework of frameworks) {
-      const frameworkDir = path.join(guidelinesDir, framework);
-      const stat = await fs.stat(frameworkDir);
+    for (const topic of topics) {
+      const topicDir = path.join(guidelinesDir, topic);
+      const stat = await fs.stat(topicDir);
 
       if (!stat.isDirectory()) continue;
 
-      const categories = await fs.readdir(frameworkDir);
+      const categories = await fs.readdir(topicDir);
 
       for (const category of categories) {
-        const categoryDir = path.join(frameworkDir, category);
+        const categoryDir = path.join(topicDir, category);
         const catStat = await fs.stat(categoryDir);
 
         if (!catStat.isDirectory()) continue;
@@ -108,27 +108,27 @@ async function loadAllGuidelines(): Promise<ParsedGuideline[]> {
 }
 
 /**
- * Load all frameworks
+ * Load all topics
  */
-async function loadAllFrameworks(): Promise<
-  ReturnType<typeof FrameworkSchema.parse>[]
+async function loadAllTopics(): Promise<
+  ReturnType<typeof TopicSchema.parse>[]
 > {
-  const frameworks: ReturnType<typeof FrameworkSchema.parse>[] = [];
-  const frameworksDir = path.join(CONTENT_DIR, 'frameworks');
+  const topics: ReturnType<typeof TopicSchema.parse>[] = [];
+  const topicsDir = path.join(CONTENT_DIR, 'topics');
 
   try {
-    const files = await fs.readdir(frameworksDir);
+    const files = await fs.readdir(topicsDir);
 
     for (const file of files) {
       if (!file.endsWith('.yaml') && !file.endsWith('.yml')) continue;
 
-      const filePath = path.join(frameworksDir, file);
+      const filePath = path.join(topicsDir, file);
       const content = await fs.readFile(filePath, 'utf-8');
       const data = yaml.load(content) as Record<string, unknown>;
 
       try {
-        const framework = FrameworkSchema.parse(data);
-        frameworks.push(framework);
+        const topic = TopicSchema.parse(data);
+        topics.push(topic);
       } catch (error) {
         console.error(`  Error parsing ${filePath}:`, error);
       }
@@ -137,7 +137,7 @@ async function loadAllFrameworks(): Promise<
     // Directory doesn't exist
   }
 
-  return frameworks;
+  return topics;
 }
 
 /**
@@ -180,77 +180,77 @@ function toSummary(g: ParsedGuideline): GuidelineSummary {
   return {
     title: g.frontmatter.title,
     slug: g.frontmatter.slug,
-    framework: g.frontmatter.framework,
+    topic: g.frontmatter.topic,
     category: g.frontmatter.category,
     description: g.frontmatter.description,
     tags: g.frontmatter.tags,
     difficulty: g.frontmatter.difficulty,
     estimatedReadTime: g.frontmatter.estimatedReadTime,
     updatedAt: g.frontmatter.updatedAt,
-    path: `/guidelines/${g.frontmatter.framework}/${g.frontmatter.category}/${g.frontmatter.slug}`,
+    path: `/guidelines/${g.frontmatter.topic}/${g.frontmatter.category}/${g.frontmatter.slug}`,
   };
 }
 
 /**
- * Generate framework index files
+ * Generate topic index files
  */
-async function generateFrameworkIndexes(
+async function generateTopicIndexes(
   guidelines: ParsedGuideline[],
-  frameworks: ReturnType<typeof FrameworkSchema.parse>[]
+  topics: ReturnType<typeof TopicSchema.parse>[]
 ): Promise<void> {
-  console.log('\nGenerating framework indexes...');
+  console.log('\nGenerating topic indexes...');
 
-  const byFramework = new Map<string, ParsedGuideline[]>();
+  const byTopic = new Map<string, ParsedGuideline[]>();
 
   for (const g of guidelines) {
-    const list = byFramework.get(g.frontmatter.framework) || [];
+    const list = byTopic.get(g.frontmatter.topic) || [];
     list.push(g);
-    byFramework.set(g.frontmatter.framework, list);
+    byTopic.set(g.frontmatter.topic, list);
   }
 
-  for (const framework of frameworks) {
-    const frameworkGuidelines = byFramework.get(framework.slug) || [];
-    const frameworkDir = path.join(OUTPUT_DIR, 'frameworks', framework.slug);
+  for (const topic of topics) {
+    const topicGuidelines = byTopic.get(topic.slug) || [];
+    const topicDir = path.join(OUTPUT_DIR, 'topics', topic.slug);
 
     // Group by category
     const byCategory = new Map<string, ParsedGuideline[]>();
-    for (const g of frameworkGuidelines) {
+    for (const g of topicGuidelines) {
       const list = byCategory.get(g.frontmatter.category) || [];
       list.push(g);
       byCategory.set(g.frontmatter.category, list);
     }
 
-    // Main framework index
-    const index: FrameworkIndex = {
-      framework: {
-        id: framework.id,
-        name: framework.name,
-        slug: framework.slug,
-        description: framework.description,
-        logo: framework.logo,
-        technology: framework.technology,
-        type: framework.type,
-        guidelinesCount: frameworkGuidelines.length,
+    // Main topic index
+    const index: TopicIndex = {
+      topic: {
+        id: topic.id,
+        name: topic.name,
+        slug: topic.slug,
+        description: topic.description,
+        logo: topic.logo,
+        technology: topic.technology,
+        type: topic.type,
+        guidelinesCount: topicGuidelines.length,
         categories: Array.from(byCategory.keys()),
       },
       generatedAt: new Date().toISOString(),
-      contentHash: generateHash(JSON.stringify(frameworkGuidelines)),
+      contentHash: generateHash(JSON.stringify(topicGuidelines)),
       categories: Array.from(byCategory.entries()).map(([name, items]) => ({
         name,
         slug: name,
-        description: `${name} guidelines for ${framework.name}`,
+        description: `${name} guidelines for ${topic.name}`,
         guidelinesCount: items.length,
-        path: `/api/v1/frameworks/${framework.slug}/${name}.json`,
+        path: `/api/v1/topics/${topic.slug}/${name}.json`,
       })),
-      guidelines: frameworkGuidelines.map(toSummary),
+      guidelines: topicGuidelines.map(toSummary),
     };
 
-    await writeJson(path.join(frameworkDir, '_index.json'), index);
+    await writeJson(path.join(topicDir, '_index.json'), index);
 
     // Category-specific indexes
     for (const [category, items] of byCategory) {
-      await writeJson(path.join(frameworkDir, `${category}.json`), {
-        framework: framework.slug,
+      await writeJson(path.join(topicDir, `${category}.json`), {
+        topic: topic.slug,
         category,
         generatedAt: new Date().toISOString(),
         guidelines: items.map(toSummary),
@@ -282,28 +282,28 @@ async function generateTagIndexes(
   for (const [tag, items] of byTag) {
     tagCounts.set(tag, items.length);
 
-    // Group by framework
-    const byFramework: Record<
+    // Group by topic
+    const byTopic: Record<
       string,
       { title: string; slug: string; description: string; path: string }[]
     > = {};
 
     for (const g of items) {
-      if (!byFramework[g.frontmatter.framework]) {
-        byFramework[g.frontmatter.framework] = [];
+      if (!byTopic[g.frontmatter.topic]) {
+        byTopic[g.frontmatter.topic] = [];
       }
-      byFramework[g.frontmatter.framework].push({
+      byTopic[g.frontmatter.topic].push({
         title: g.frontmatter.title,
         slug: g.frontmatter.slug,
         description: g.frontmatter.description,
-        path: `/guidelines/${g.frontmatter.framework}/${g.frontmatter.category}/${g.frontmatter.slug}`,
+        path: `/guidelines/${g.frontmatter.topic}/${g.frontmatter.category}/${g.frontmatter.slug}`,
       });
     }
 
     const index: TagIndex = {
       tag,
       generatedAt: new Date().toISOString(),
-      byFramework,
+      byTopic,
       totalCount: items.length,
     };
 
@@ -318,7 +318,7 @@ async function generateTagIndexes(
  */
 async function generateStackIndexes(
   guidelines: ParsedGuideline[]
-): Promise<{ id: string; name: string; description: string; frameworks: string[] }[]> {
+): Promise<{ id: string; name: string; description: string; topics: string[] }[]> {
   console.log('\nGenerating stack indexes...');
 
   // Pre-defined common stacks
@@ -327,19 +327,19 @@ async function generateStackIndexes(
       id: 'react-fullstack',
       name: 'React Full Stack',
       description: 'Full-stack React with Next.js and TypeScript',
-      frameworks: ['react', 'nextjs', 'typescript'],
+      topics: ['react', 'nextjs', 'typescript'],
     },
     {
       id: 'python-api',
       name: 'Python API',
       description: 'Python backend with FastAPI',
-      frameworks: ['python', 'fastapi'],
+      topics: ['python', 'fastapi'],
     },
   ];
 
   for (const stack of stacks) {
     const stackGuidelines = guidelines.filter((g) =>
-      stack.frameworks.includes(g.frontmatter.framework)
+      stack.topics.includes(g.frontmatter.topic)
     );
 
     const index: StackIndex = {
@@ -347,20 +347,20 @@ async function generateStackIndexes(
       name: stack.name,
       description: stack.description,
       generatedAt: new Date().toISOString(),
-      frameworks: stack.frameworks.map((f) => ({
-        id: f,
-        name: f,
+      topics: stack.topics.map((t) => ({
+        id: t,
+        name: t,
         guidelinesCount: stackGuidelines.filter(
-          (g) => g.frontmatter.framework === f
+          (g) => g.frontmatter.topic === t
         ).length,
       })),
       guidelines: stackGuidelines.map((g) => ({
         title: g.frontmatter.title,
         slug: g.frontmatter.slug,
-        framework: g.frontmatter.framework,
+        topic: g.frontmatter.topic,
         category: g.frontmatter.category,
         description: g.frontmatter.description,
-        path: `/guidelines/${g.frontmatter.framework}/${g.frontmatter.category}/${g.frontmatter.slug}`,
+        path: `/guidelines/${g.frontmatter.topic}/${g.frontmatter.category}/${g.frontmatter.slug}`,
       })),
     };
 
@@ -375,10 +375,10 @@ async function generateStackIndexes(
  */
 async function generateManifest(
   guidelines: ParsedGuideline[],
-  frameworks: ReturnType<typeof FrameworkSchema.parse>[],
+  topics: ReturnType<typeof TopicSchema.parse>[],
   technologies: ReturnType<typeof TechnologySchema.parse>[],
   tagCounts: Map<string, number>,
-  stacks: { id: string; name: string; description: string; frameworks: string[] }[]
+  stacks: { id: string; name: string; description: string; topics: string[] }[]
 ): Promise<void> {
   console.log('\nGenerating manifest...');
 
@@ -386,14 +386,14 @@ async function generateManifest(
     version: '1.0.0',
     generatedAt: new Date().toISOString(),
     contentHash: generateHash(
-      JSON.stringify({ guidelines: guidelines.length, frameworks, technologies })
+      JSON.stringify({ guidelines: guidelines.length, topics, technologies })
     ),
     baseUrl: BASE_URL,
     apiBaseUrl: `${BASE_URL}/api/v1`,
     rawBaseUrl: `${BASE_URL}/raw`,
     stats: {
       totalGuidelines: guidelines.length,
-      totalFrameworks: frameworks.length,
+      totalTopics: topics.length,
       totalTechnologies: technologies.length,
       totalTags: tagCounts.size,
       lastUpdated: new Date().toISOString(),
@@ -401,7 +401,7 @@ async function generateManifest(
     endpoints: {
       manifest: '/api/v1/manifest.json',
       technologies: '/api/v1/technologies.json',
-      frameworks: '/api/v1/frameworks.json',
+      topics: '/api/v1/topics.json',
       tags: '/api/v1/tags.json',
       stacks: '/api/v1/stacks.json',
       search: '/api/v1/search.json',
@@ -413,19 +413,19 @@ async function generateManifest(
       description: t.description,
       logo: t.logo,
       type: t.type,
-      frameworksCount: t.frameworksCount,
+      topicsCount: t.frameworksCount, // Using existing field for backwards compat
     })),
-    frameworks: frameworks.map((f) => ({
-      id: f.id,
-      name: f.name,
-      slug: f.slug,
-      description: f.description,
-      logo: f.logo,
-      technology: f.technology,
-      type: f.type,
-      guidelinesCount: guidelines.filter((g) => g.frontmatter.framework === f.slug)
+    topics: topics.map((t) => ({
+      id: t.id,
+      name: t.name,
+      slug: t.slug,
+      description: t.description,
+      logo: t.logo,
+      technology: t.technology,
+      type: t.type,
+      guidelinesCount: guidelines.filter((g) => g.frontmatter.topic === t.slug)
         .length,
-      categories: f.categories,
+      categories: t.categories,
     })),
     tags: Array.from(tagCounts.entries())
       .sort((a, b) => b[1] - a[1])
@@ -438,7 +438,7 @@ async function generateManifest(
       id: s.id,
       name: s.name,
       description: s.description,
-      frameworks: s.frameworks,
+      topics: s.topics,
       path: `/api/v1/stacks/${s.id}.json`,
     })),
   };
@@ -454,11 +454,11 @@ async function main(): Promise<void> {
   console.log('Loading content...');
 
   const guidelines = await loadAllGuidelines();
-  const frameworks = await loadAllFrameworks();
+  const topics = await loadAllTopics();
   const technologies = await loadAllTechnologies();
 
   console.log(`  Found ${guidelines.length} guidelines`);
-  console.log(`  Found ${frameworks.length} frameworks`);
+  console.log(`  Found ${topics.length} topics`);
   console.log(`  Found ${technologies.length} technologies`);
 
   // Clear output directory
@@ -466,22 +466,22 @@ async function main(): Promise<void> {
   await ensureDir(OUTPUT_DIR);
 
   // Generate all indexes
-  await generateFrameworkIndexes(guidelines, frameworks);
+  await generateTopicIndexes(guidelines, topics);
   const tagCounts = await generateTagIndexes(guidelines);
   const stacks = await generateStackIndexes(guidelines);
-  await generateManifest(guidelines, frameworks, technologies, tagCounts, stacks);
+  await generateManifest(guidelines, topics, technologies, tagCounts, stacks);
 
   // Generate flat listings
-  await writeJson(path.join(OUTPUT_DIR, 'frameworks.json'), {
+  await writeJson(path.join(OUTPUT_DIR, 'topics.json'), {
     generatedAt: new Date().toISOString(),
-    frameworks: frameworks.map((f) => ({
-      id: f.id,
-      name: f.name,
-      slug: f.slug,
-      description: f.description,
-      logo: f.logo,
-      technology: f.technology,
-      guidelinesCount: guidelines.filter((g) => g.frontmatter.framework === f.slug)
+    topics: topics.map((t) => ({
+      id: t.id,
+      name: t.name,
+      slug: t.slug,
+      description: t.description,
+      logo: t.logo,
+      technology: t.technology,
+      guidelinesCount: guidelines.filter((g) => g.frontmatter.topic === t.slug)
         .length,
     })),
   });
@@ -495,7 +495,7 @@ async function main(): Promise<void> {
       description: t.description,
       logo: t.logo,
       type: t.type,
-      frameworksCount: t.frameworksCount,
+      topicsCount: t.frameworksCount,
     })),
   });
 
