@@ -2,137 +2,310 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const statusFilters = [
-  { value: '', label: 'All' },
-  { value: 'pending', label: 'Pending' },
+  { value: '', label: 'All Contributions' },
+  { value: 'pending', label: 'Pending Review' },
   { value: 'ai_approved', label: 'AI Approved' },
-  { value: 'ai_needs_changes', label: 'AI Needs Changes' },
+  { value: 'ai_needs_changes', label: 'Needs Changes' },
   { value: 'ai_rejected', label: 'AI Rejected' },
-  { value: 'approved', label: 'Approved' },
+  { value: 'approved', label: 'Published' },
   { value: 'rejected', label: 'Rejected' },
 ];
 ---
 
 <BaseLayout title="Admin Review" description="Review and manage guideline contributions">
-  <div class="mx-auto max-w-6xl px-4 sm:px-6 py-12">
+  <main id="main-content" class="mx-auto max-w-6xl px-4 sm:px-6 py-12">
 
     <!-- Auth Check -->
-    <div id="auth-checking" class="text-center py-24">
-      <svg class="w-8 h-8 mx-auto text-[--color-primary-400] animate-spin" fill="none" viewBox="0 0 24 24">
+    <div id="auth-checking" class="text-center py-24" role="status" aria-live="polite">
+      <svg class="w-8 h-8 mx-auto animate-spin" style="color: var(--accent-primary);" fill="none" viewBox="0 0 24 24" aria-hidden="true">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <p class="mt-4 text-[--color-terminal-muted]">Checking admin access...</p>
+      <p class="mt-4" style="color: var(--text-muted);">Checking admin access...</p>
     </div>
 
     <!-- Not Authorized -->
-    <div id="not-authorized" class="hidden text-center py-24">
-      <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-6" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
-        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="not-authorized" class="hidden text-center py-24" role="alert">
+      <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-6" style="background: var(--status-error-bg); border: 1px solid var(--status-error-border);">
+        <svg class="w-8 h-8" style="color: var(--status-error);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
       </div>
-      <h1 class="text-2xl font-bold text-white mb-2">Access Denied</h1>
-      <p class="text-[--color-terminal-muted] mb-6">You don't have permission to access the admin panel.</p>
+      <h1 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">Access Denied</h1>
+      <p class="mb-6" style="color: var(--text-muted);">You don't have permission to access the admin panel.</p>
       <a href="/contribute" class="btn btn-primary">Back to Contribute</a>
     </div>
 
     <!-- Admin Content -->
     <div id="admin-content" class="hidden">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-white">Admin Review</h1>
-          <p class="text-[--color-terminal-muted] mt-1">Review and manage guideline contributions</p>
+          <h1 class="text-3xl font-bold" style="color: var(--text-primary);">Admin Review</h1>
+          <p class="mt-1" style="color: var(--text-muted);">Review and manage guideline contributions</p>
         </div>
         <div class="flex items-center gap-3">
-          <select id="status-filter" class="px-3 py-2 rounded-lg text-sm font-mono" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border); color: white;">
+          <label for="status-filter" class="sr-only">Filter by status</label>
+          <select
+            id="status-filter"
+            class="form-select"
+            aria-label="Filter contributions by status"
+          >
             {statusFilters.map(f => (
               <option value={f.value}>{f.label}</option>
             ))}
           </select>
-          <button id="refresh-btn" class="btn btn-secondary text-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button
+            id="refresh-btn"
+            type="button"
+            class="btn btn-secondary"
+            aria-label="Refresh contributions list"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Refresh
+            <span>Refresh</span>
           </button>
         </div>
-      </div>
+      </header>
 
       <!-- Stats -->
-      <div id="stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <div class="text-2xl font-bold text-white" id="stat-pending">-</div>
-          <div class="text-sm text-[--color-terminal-muted]">Pending Review</div>
+      <section id="stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8" aria-label="Contribution statistics">
+        <div class="surface p-4 rounded-xl">
+          <div class="text-2xl font-bold" style="color: var(--text-primary);" id="stat-pending" aria-label="Pending review count">-</div>
+          <div class="text-sm" style="color: var(--text-muted);">Pending Review</div>
         </div>
-        <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <div class="text-2xl font-bold text-green-400" id="stat-approved">-</div>
-          <div class="text-sm text-[--color-terminal-muted]">AI Approved</div>
+        <div class="surface p-4 rounded-xl">
+          <div class="text-2xl font-bold" style="color: var(--status-success);" id="stat-approved" aria-label="AI approved count">-</div>
+          <div class="text-sm" style="color: var(--text-muted);">AI Approved</div>
         </div>
-        <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <div class="text-2xl font-bold text-yellow-400" id="stat-changes">-</div>
-          <div class="text-sm text-[--color-terminal-muted]">Needs Changes</div>
+        <div class="surface p-4 rounded-xl">
+          <div class="text-2xl font-bold" style="color: var(--status-warning);" id="stat-changes" aria-label="Needs changes count">-</div>
+          <div class="text-sm" style="color: var(--text-muted);">Needs Changes</div>
         </div>
-        <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <div class="text-2xl font-bold text-emerald-400" id="stat-published">-</div>
-          <div class="text-sm text-[--color-terminal-muted]">Published</div>
+        <div class="surface p-4 rounded-xl">
+          <div class="text-2xl font-bold" style="color: var(--accent-primary);" id="stat-published" aria-label="Published count">-</div>
+          <div class="text-sm" style="color: var(--text-muted);">Published</div>
         </div>
-      </div>
+      </section>
 
       <!-- Contributions List -->
-      <div id="contributions-loading" class="text-center py-12">
-        <svg class="w-8 h-8 mx-auto text-[--color-primary-400] animate-spin" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p class="mt-2 text-sm text-[--color-terminal-muted]">Loading contributions...</p>
-      </div>
+      <section aria-label="Contributions list">
+        <div id="contributions-loading" class="text-center py-12" role="status" aria-live="polite">
+          <svg class="w-8 h-8 mx-auto animate-spin" style="color: var(--accent-primary);" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="mt-2 text-sm" style="color: var(--text-muted);">Loading contributions...</p>
+        </div>
 
-      <div id="contributions-empty" class="hidden text-center py-12 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-        <svg class="w-12 h-12 mx-auto text-[--color-terminal-muted] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-        <p class="text-[--color-terminal-muted]">No contributions found with this filter.</p>
-      </div>
+        <div id="contributions-empty" class="hidden surface text-center py-12 rounded-xl">
+          <svg class="w-12 h-12 mx-auto mb-4" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <p style="color: var(--text-muted);">No contributions found with this filter.</p>
+        </div>
 
-      <div id="contributions-list" class="hidden space-y-4"></div>
+        <ul id="contributions-list" class="hidden space-y-4" role="list" aria-label="Pending contributions"></ul>
 
-      <div id="contributions-error" class="hidden text-center py-12 rounded-xl" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);">
-        <p class="text-red-400">Failed to load contributions. Please try again.</p>
-      </div>
+        <div id="contributions-error" class="hidden text-center py-12 rounded-xl" role="alert" style="background: var(--status-error-bg); border: 1px solid var(--status-error-border);">
+          <p style="color: var(--status-error);">Failed to load contributions. Please try again.</p>
+        </div>
+      </section>
     </div>
 
     <!-- Detail Modal -->
-    <div id="detail-modal" class="fixed inset-0 z-50 hidden">
-      <div class="absolute inset-0 bg-black/70" id="modal-backdrop"></div>
-      <div class="absolute inset-4 sm:inset-8 lg:inset-16 overflow-hidden rounded-2xl flex flex-col" style="background: var(--color-terminal-bg); border: 1px solid var(--color-terminal-border);">
+    <div
+      id="detail-modal"
+      class="fixed inset-0 z-50 hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div class="absolute inset-0 bg-black/70" id="modal-backdrop" aria-hidden="true"></div>
+      <div
+        class="absolute inset-4 sm:inset-8 lg:inset-16 overflow-hidden rounded-2xl flex flex-col surface"
+        id="modal-container"
+      >
         <!-- Modal Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color: var(--color-terminal-border);">
-          <h2 id="modal-title" class="text-xl font-bold text-white truncate">Contribution Details</h2>
-          <button id="modal-close" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
-            <svg class="w-5 h-5 text-[--color-terminal-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <header class="flex items-center justify-between px-6 py-4 border-b" style="border-color: var(--border-primary);">
+          <h2 id="modal-title" class="text-xl font-bold truncate" style="color: var(--text-primary);">Contribution Details</h2>
+          <button
+            id="modal-close"
+            type="button"
+            class="p-2 rounded-lg transition-colors"
+            style="min-width: 44px; min-height: 44px;"
+            aria-label="Close modal"
+          >
+            <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-        </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="px-6 border-b" style="border-color: var(--border-primary);" aria-label="Modal sections">
+          <div class="flex gap-4" role="tablist">
+            <button
+              id="tab-content"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="panel-content"
+              class="modal-tab active py-3 px-1 text-sm font-medium border-b-2 transition-colors"
+              style="min-height: 44px;"
+            >
+              Content
+            </button>
+            <button
+              id="tab-review"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-review"
+              class="modal-tab py-3 px-1 text-sm font-medium border-b-2 transition-colors"
+              style="min-height: 44px;"
+            >
+              AI Review
+            </button>
+          </div>
+        </nav>
 
         <!-- Modal Body -->
         <div class="flex-1 overflow-auto p-6" id="modal-body">
-          <!-- Loaded dynamically -->
+          <!-- Content Panel -->
+          <div id="panel-content" role="tabpanel" aria-labelledby="tab-content">
+            <!-- Loaded dynamically -->
+          </div>
+          <!-- Review Panel -->
+          <div id="panel-review" role="tabpanel" aria-labelledby="tab-review" class="hidden">
+            <!-- Loaded dynamically -->
+          </div>
         </div>
 
         <!-- Modal Footer -->
-        <div id="modal-actions" class="px-6 py-4 border-t flex flex-wrap gap-3" style="border-color: var(--color-terminal-border);">
+        <footer id="modal-actions" class="px-6 py-4 border-t flex flex-wrap gap-3" style="border-color: var(--border-primary);">
           <!-- Actions loaded dynamically -->
-        </div>
+        </footer>
       </div>
     </div>
 
-  </div>
+  </main>
+
+  <style>
+    .modal-tab {
+      color: var(--text-muted);
+      border-color: transparent;
+    }
+    .modal-tab:hover {
+      color: var(--text-secondary);
+    }
+    .modal-tab.active {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+    .modal-tab:focus-visible {
+      outline: var(--focus-ring-width) solid var(--focus-ring-color);
+      outline-offset: var(--focus-ring-offset);
+      border-radius: 4px;
+    }
+
+    /* Status badges with text labels */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .status-badge::before {
+      content: '';
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+    }
+    .status-pending {
+      background: var(--status-info-bg);
+      color: var(--status-info);
+      border: 1px solid var(--status-info-border);
+    }
+    .status-pending::before {
+      background: var(--status-info);
+    }
+    .status-ai-approved {
+      background: var(--status-success-bg);
+      color: var(--status-success);
+      border: 1px solid var(--status-success-border);
+    }
+    .status-ai-approved::before {
+      background: var(--status-success);
+    }
+    .status-needs-changes {
+      background: var(--status-warning-bg);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning-border);
+    }
+    .status-needs-changes::before {
+      background: var(--status-warning);
+    }
+    .status-rejected {
+      background: var(--status-error-bg);
+      color: var(--status-error);
+      border: 1px solid var(--status-error-border);
+    }
+    .status-rejected::before {
+      background: var(--status-error);
+    }
+    .status-published {
+      background: var(--status-success-bg);
+      color: var(--accent-primary);
+      border: 1px solid var(--accent-secondary);
+    }
+    .status-published::before {
+      background: var(--accent-primary);
+    }
+
+    /* Contribution card */
+    .contribution-card {
+      padding: 1rem;
+      border-radius: 0.75rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+    }
+    .contribution-card:hover {
+      border-color: var(--border-secondary);
+    }
+
+    /* Score bar */
+    .score-bar {
+      height: 0.5rem;
+      border-radius: 9999px;
+      background: var(--bg-tertiary);
+      overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .score-bar-fill.high {
+      background: var(--status-success);
+    }
+    .score-bar-fill.medium {
+      background: var(--status-warning);
+    }
+    .score-bar-fill.low {
+      background: var(--status-error);
+    }
+  </style>
 
   <script>
     const API_URL = 'https://su5t4tzra5.execute-api.eu-west-1.amazonaws.com';
     let currentContribution: any = null;
+    let focusableElements: HTMLElement[] = [];
+    let firstFocusable: HTMLElement | null = null;
+    let lastFocusable: HTMLElement | null = null;
 
     async function checkAdminAccess() {
       const authChecking = document.getElementById('auth-checking');
@@ -194,7 +367,6 @@ const statusFilters = [
         const data = await response.json();
         loading?.classList.add('hidden');
 
-        // Update stats
         const allContribs = data.contributions || [];
         updateStats(allContribs);
 
@@ -206,31 +378,36 @@ const statusFilters = [
         list?.classList.remove('hidden');
         if (list) {
           list.innerHTML = allContribs.map((c: any) => `
-            <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+            <li class="contribution-card">
               <div class="flex items-start justify-between gap-4">
                 <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2 mb-1 flex-wrap">
-                    <h3 class="font-semibold text-white">${escapeHtml(c.title)}</h3>
-                    <span class="px-2 py-0.5 rounded text-xs font-mono ${getStatusClasses(c.status)}">${formatStatus(c.status)}</span>
-                    ${c.review?.score ? `<span class="px-2 py-0.5 rounded text-xs font-mono bg-violet-500/20 text-violet-400 border border-violet-500/30">Score: ${c.review.score}</span>` : ''}
+                  <div class="flex items-center gap-2 mb-2 flex-wrap">
+                    <h3 class="font-semibold" style="color: var(--text-primary);">${escapeHtml(c.title)}</h3>
+                    <span class="status-badge ${getStatusClass(c.status)}">${formatStatus(c.status)}</span>
+                    ${c.review?.score ? `<span class="text-xs font-medium px-2 py-0.5 rounded" style="background: var(--bg-tertiary); color: var(--text-secondary);">Score: ${c.review.score}</span>` : ''}
                   </div>
-                  <p class="text-sm text-[--color-terminal-muted] mb-2">
+                  <p class="text-sm mb-2" style="color: var(--text-muted);">
                     <span class="capitalize">${c.topic}</span> / ${c.category.replace(/-/g, ' ')}
                   </p>
-                  <div class="flex items-center gap-4 text-xs text-[--color-terminal-muted]">
+                  <div class="flex items-center gap-4 text-xs" style="color: var(--text-muted);">
                     <span class="flex items-center gap-1">
-                      <img src="${c.author?.avatar || ''}" alt="" class="w-4 h-4 rounded-full" />
-                      ${escapeHtml(c.author?.username || 'Unknown')}
+                      <img src="${c.author?.avatar || ''}" alt="" class="w-4 h-4 rounded-full" aria-hidden="true" />
+                      <span>${escapeHtml(c.author?.username || 'Unknown')}</span>
                     </span>
-                    <span>${formatDate(c.createdAt)}</span>
+                    <time datetime="${c.createdAt}">${formatDate(c.createdAt)}</time>
                   </div>
-                  ${c.review?.summary ? `<p class="mt-2 text-sm text-[--color-terminal-muted] italic">"${escapeHtml(c.review.summary)}"</p>` : ''}
+                  ${c.review?.summary ? `<p class="mt-2 text-sm italic" style="color: var(--text-muted);">"${escapeHtml(c.review.summary)}"</p>` : ''}
                 </div>
-                <button class="btn btn-secondary text-sm view-details" data-id="${c.id}">
-                  View Details
+                <button
+                  type="button"
+                  class="btn btn-secondary view-details"
+                  data-id="${c.id}"
+                  aria-label="View details for ${escapeHtml(c.title)}"
+                >
+                  View
                 </button>
               </div>
-            </div>
+            </li>
           `).join('');
 
           // Add click handlers
@@ -269,17 +446,28 @@ const statusFilters = [
       const token = localStorage.getItem('erold_token');
       const modal = document.getElementById('detail-modal');
       const modalTitle = document.getElementById('modal-title');
-      const modalBody = document.getElementById('modal-body');
+      const panelContent = document.getElementById('panel-content');
+      const panelReview = document.getElementById('panel-review');
       const modalActions = document.getElementById('modal-actions');
 
+      // Show modal
       modal?.classList.remove('hidden');
-      if (modalBody) modalBody.innerHTML = `
-        <div class="text-center py-12">
-          <svg class="w-8 h-8 mx-auto text-[--color-primary-400] animate-spin" fill="none" viewBox="0 0 24 24">
+      document.body.style.overflow = 'hidden';
+
+      // Setup focus trap
+      setupFocusTrap();
+
+      // Reset tabs
+      switchTab('content');
+
+      // Loading state
+      if (panelContent) panelContent.innerHTML = `
+        <div class="text-center py-12" role="status" aria-live="polite">
+          <svg class="w-8 h-8 mx-auto animate-spin" style="color: var(--accent-primary);" fill="none" viewBox="0 0 24 24" aria-hidden="true">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p class="mt-2 text-sm text-[--color-terminal-muted]">Loading contribution...</p>
+          <p class="mt-2 text-sm" style="color: var(--text-muted);">Loading contribution...</p>
         </div>
       `;
 
@@ -295,155 +483,152 @@ const statusFilters = [
 
         if (modalTitle) modalTitle.textContent = data.title;
 
-        if (modalBody) {
+        // Content Panel
+        if (panelContent) {
           const g = data.guideline || {};
-          modalBody.innerHTML = `
-            <div class="grid lg:grid-cols-2 gap-6">
-              <!-- Left: Metadata -->
-              <div class="space-y-6">
-                <!-- Status -->
-                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Status</h4>
-                  <div class="flex items-center gap-2">
-                    <span class="px-3 py-1 rounded text-sm font-mono ${getStatusClasses(data.status)}">${formatStatus(data.status)}</span>
-                    ${data.review?.score ? `<span class="text-sm text-[--color-terminal-muted]">Score: <strong class="text-white">${data.review.score}/100</strong></span>` : ''}
-                  </div>
-                </div>
-
-                <!-- Author -->
-                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Author</h4>
-                  <div class="flex items-center gap-3">
-                    <img src="${data.author?.avatar || ''}" alt="" class="w-10 h-10 rounded-full" />
-                    <div>
-                      <div class="font-semibold text-white">${escapeHtml(data.author?.username || 'Unknown')}</div>
-                      <div class="text-sm text-[--color-terminal-muted]">Submitted ${formatDate(data.createdAt)}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Metadata -->
-                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Metadata</h4>
-                  <dl class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                      <dt class="text-[--color-terminal-muted]">Topic</dt>
-                      <dd class="text-white capitalize">${data.topic}</dd>
-                    </div>
-                    <div class="flex justify-between">
-                      <dt class="text-[--color-terminal-muted]">Category</dt>
-                      <dd class="text-white">${data.category}</dd>
-                    </div>
-                    <div class="flex justify-between">
-                      <dt class="text-[--color-terminal-muted]">Slug</dt>
-                      <dd class="text-white font-mono">${g.slug || '-'}</dd>
-                    </div>
-                    <div class="flex justify-between">
-                      <dt class="text-[--color-terminal-muted]">Version</dt>
-                      <dd class="text-white">${g.version || '-'}</dd>
-                    </div>
-                    <div class="flex justify-between">
-                      <dt class="text-[--color-terminal-muted]">Difficulty</dt>
-                      <dd class="text-white capitalize">${g.difficulty || '-'}</dd>
-                    </div>
-                    ${g.tags?.length ? `
-                    <div>
-                      <dt class="text-[--color-terminal-muted] mb-1">Tags</dt>
-                      <dd class="flex flex-wrap gap-1">
-                        ${g.tags.map((t: string) => `<span class="px-2 py-0.5 rounded text-xs bg-white/10 text-white">${escapeHtml(t)}</span>`).join('')}
-                      </dd>
-                    </div>
-                    ` : ''}
-                  </dl>
-                </div>
-
-                <!-- AI Review -->
-                ${data.review ? `
-                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-                  <div class="flex items-center justify-between mb-3">
-                    <h4 class="text-sm font-semibold text-[--color-terminal-muted]">AI Assessment</h4>
-                    <div class="flex items-center gap-2">
-                      <span class="px-2 py-0.5 rounded text-xs font-bold ${
-                        data.review.recommendation === 'PUBLISH' ? 'bg-green-500/30 text-green-400' :
-                        data.review.recommendation === 'NEEDS_REVISION' ? 'bg-yellow-500/30 text-yellow-400' :
-                        'bg-red-500/30 text-red-400'
-                      }">${data.review.recommendation || 'PENDING'}</span>
-                      ${data.review.confidence ? `<span class="text-xs text-[--color-terminal-muted]">${data.review.confidence}% confident</span>` : ''}
-                    </div>
-                  </div>
-
-                  <!-- Admin Summary -->
-                  ${data.review.adminSummary ? `
-                  <div class="p-3 rounded-lg mb-4" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3);">
-                    <p class="text-sm text-indigo-300">${escapeHtml(data.review.adminSummary)}</p>
-                  </div>
-                  ` : ''}
-
-                  <!-- Score -->
-                  <div class="flex items-center gap-3 mb-4">
-                    <div class="text-2xl font-bold ${data.review.score >= 75 ? 'text-green-400' : data.review.score >= 50 ? 'text-yellow-400' : 'text-red-400'}">${data.review.score || 0}</div>
-                    <div class="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <div class="h-full ${data.review.score >= 75 ? 'bg-green-500' : data.review.score >= 50 ? 'bg-yellow-500' : 'bg-red-500'}" style="width: ${data.review.score || 0}%"></div>
-                    </div>
-                    <div class="text-sm text-[--color-terminal-muted]">/100</div>
-                  </div>
-
-                  <!-- Checks -->
-                  ${data.review.checks ? `
-                  <div class="grid grid-cols-2 gap-2 mb-4">
-                    ${Object.entries(data.review.checks).map(([key, check]: [string, any]) => `
-                      <div class="flex items-center gap-2 text-sm">
-                        <span class="${check.passed ? 'text-green-400' : 'text-red-400'}">${check.passed ? '✓' : '✗'}</span>
-                        <span class="text-[--color-terminal-muted] capitalize">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                      </div>
-                    `).join('')}
-                  </div>
-                  ` : ''}
-
-                  <!-- Recommendation Reason -->
-                  ${data.review.recommendationReason ? `
-                  <p class="text-sm text-white mb-3"><strong>Reason:</strong> ${escapeHtml(data.review.recommendationReason)}</p>
-                  ` : ''}
-
-                  <!-- Strengths -->
-                  ${data.review.strengths?.length ? `
-                  <div class="mb-3">
-                    <div class="text-xs font-semibold text-green-400 mb-1">Strengths</div>
-                    <ul class="text-sm text-[--color-terminal-muted] space-y-1">
-                      ${data.review.strengths.map((s: string) => `<li class="flex items-start gap-2"><span class="text-green-400">+</span> ${escapeHtml(s)}</li>`).join('')}
-                    </ul>
-                  </div>
-                  ` : ''}
-
-                  <!-- Issues -->
-                  ${data.review.issues?.length ? `
-                  <div class="mb-3">
-                    <div class="text-xs font-semibold text-red-400 mb-1">Issues</div>
-                    <ul class="text-sm text-[--color-terminal-muted] space-y-1">
-                      ${data.review.issues.map((i: any) => `<li class="flex items-start gap-2"><span class="${i.severity === 'critical' ? 'text-red-400' : i.severity === 'warning' ? 'text-yellow-400' : 'text-blue-400'}">${i.severity === 'critical' ? '✗' : i.severity === 'warning' ? '!' : '?'}</span> ${escapeHtml(i.description)}</li>`).join('')}
-                    </ul>
-                  </div>
-                  ` : ''}
-                </div>
-                ` : ''}
+          panelContent.innerHTML = `
+            <div class="space-y-6">
+              <!-- Status & Meta -->
+              <div class="flex flex-wrap items-center gap-4">
+                <span class="status-badge ${getStatusClass(data.status)}">${formatStatus(data.status)}</span>
+                <span class="text-sm" style="color: var(--text-muted);">
+                  <span class="capitalize">${data.topic}</span> / ${data.category}
+                </span>
+                ${g.difficulty ? `<span class="text-sm capitalize" style="color: var(--text-muted);">${g.difficulty} difficulty</span>` : ''}
               </div>
 
-              <!-- Right: Content -->
-              <div class="space-y-6">
-                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Description</h4>
-                  <p class="text-white">${escapeHtml(g.description || '-')}</p>
+              <!-- Author -->
+              <div class="flex items-center gap-3 p-4 rounded-xl" style="background: var(--bg-tertiary);">
+                <img src="${data.author?.avatar || ''}" alt="" class="w-10 h-10 rounded-full" aria-hidden="true" />
+                <div>
+                  <div class="font-semibold" style="color: var(--text-primary);">${escapeHtml(data.author?.username || 'Unknown')}</div>
+                  <time class="text-sm" style="color: var(--text-muted);" datetime="${data.createdAt}">Submitted ${formatDate(data.createdAt)}</time>
                 </div>
+              </div>
 
-                <div class="p-4 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-                  <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Content</h4>
-                  <div class="prose prose-invert prose-sm max-h-96 overflow-auto">
-                    <pre class="text-sm text-white whitespace-pre-wrap font-mono bg-black/30 p-4 rounded-lg overflow-auto">${escapeHtml(g.content || '-')}</pre>
-                  </div>
+              <!-- Description -->
+              <div>
+                <h3 class="text-sm font-semibold mb-2" style="color: var(--text-muted);">Description</h3>
+                <p style="color: var(--text-primary);">${escapeHtml(g.description || 'No description provided')}</p>
+              </div>
+
+              <!-- Tags -->
+              ${g.tags?.length ? `
+              <div>
+                <h3 class="text-sm font-semibold mb-2" style="color: var(--text-muted);">Tags</h3>
+                <div class="flex flex-wrap gap-2">
+                  ${g.tags.map((t: string) => `<span class="badge">${escapeHtml(t)}</span>`).join('')}
+                </div>
+              </div>
+              ` : ''}
+
+              <!-- Content -->
+              <div>
+                <h3 class="text-sm font-semibold mb-2" style="color: var(--text-muted);">Content</h3>
+                <div class="p-4 rounded-xl overflow-auto max-h-96 font-mono text-sm" style="background: var(--bg-tertiary); color: var(--text-primary);">
+                  <pre style="white-space: pre-wrap; word-break: break-word;">${escapeHtml(g.content || 'No content')}</pre>
                 </div>
               </div>
             </div>
           `;
+        }
+
+        // Review Panel
+        if (panelReview) {
+          if (data.review) {
+            const review = data.review;
+            panelReview.innerHTML = `
+              <div class="space-y-6">
+                <!-- Score -->
+                <div class="p-4 rounded-xl" style="background: var(--bg-tertiary);">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold" style="color: var(--text-muted);">Quality Score</h3>
+                    <span class="text-2xl font-bold ${review.score >= 75 ? 'text-green-500' : review.score >= 50 ? 'text-yellow-500' : 'text-red-500'}">${review.score || 0}<span class="text-sm font-normal" style="color: var(--text-muted);">/100</span></span>
+                  </div>
+                  <div class="score-bar">
+                    <div class="score-bar-fill ${review.score >= 75 ? 'high' : review.score >= 50 ? 'medium' : 'low'}" style="width: ${review.score || 0}%"></div>
+                  </div>
+                </div>
+
+                <!-- Recommendation -->
+                <div class="p-4 rounded-xl" style="background: ${review.recommendation === 'PUBLISH' ? 'var(--status-success-bg)' : review.recommendation === 'NEEDS_REVISION' ? 'var(--status-warning-bg)' : 'var(--status-error-bg)'}; border: 1px solid ${review.recommendation === 'PUBLISH' ? 'var(--status-success-border)' : review.recommendation === 'NEEDS_REVISION' ? 'var(--status-warning-border)' : 'var(--status-error-border)'};">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-lg font-bold" style="color: ${review.recommendation === 'PUBLISH' ? 'var(--status-success)' : review.recommendation === 'NEEDS_REVISION' ? 'var(--status-warning)' : 'var(--status-error)'};">
+                      ${review.recommendation === 'PUBLISH' ? 'Recommended: Publish' : review.recommendation === 'NEEDS_REVISION' ? 'Needs Revision' : 'Not Recommended'}
+                    </span>
+                    ${review.confidence ? `<span class="text-xs" style="color: var(--text-muted);">(${review.confidence}% confidence)</span>` : ''}
+                  </div>
+                  ${review.recommendationReason ? `<p class="text-sm" style="color: var(--text-secondary);">${escapeHtml(review.recommendationReason)}</p>` : ''}
+                </div>
+
+                <!-- Admin Summary -->
+                ${review.adminSummary ? `
+                <div class="p-4 rounded-xl" style="background: var(--bg-tertiary);">
+                  <h3 class="text-sm font-semibold mb-2" style="color: var(--text-muted);">AI Summary for Admin</h3>
+                  <p style="color: var(--text-primary);">${escapeHtml(review.adminSummary)}</p>
+                </div>
+                ` : ''}
+
+                <!-- Quality Checks -->
+                ${review.checks ? `
+                <div class="p-4 rounded-xl" style="background: var(--bg-tertiary);">
+                  <h3 class="text-sm font-semibold mb-3" style="color: var(--text-muted);">Quality Checks</h3>
+                  <div class="grid grid-cols-2 gap-3">
+                    ${Object.entries(review.checks).map(([key, check]: [string, any]) => `
+                      <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs" style="background: ${check.passed ? 'var(--status-success-bg)' : 'var(--status-error-bg)'}; color: ${check.passed ? 'var(--status-success)' : 'var(--status-error)'};">
+                          ${check.passed ? '✓' : '✗'}
+                        </span>
+                        <span class="text-sm capitalize" style="color: var(--text-secondary);">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+                ` : ''}
+
+                <!-- Strengths -->
+                ${review.strengths?.length ? `
+                <div class="p-4 rounded-xl" style="background: var(--status-success-bg); border: 1px solid var(--status-success-border);">
+                  <h3 class="text-sm font-semibold mb-2" style="color: var(--status-success);">Strengths</h3>
+                  <ul class="space-y-1">
+                    ${review.strengths.map((s: string) => `
+                      <li class="flex items-start gap-2 text-sm" style="color: var(--text-secondary);">
+                        <span style="color: var(--status-success);">+</span>
+                        <span>${escapeHtml(s)}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
+                ` : ''}
+
+                <!-- Issues -->
+                ${review.issues?.length ? `
+                <div class="p-4 rounded-xl" style="background: var(--status-error-bg); border: 1px solid var(--status-error-border);">
+                  <h3 class="text-sm font-semibold mb-2" style="color: var(--status-error);">Issues</h3>
+                  <ul class="space-y-2">
+                    ${review.issues.map((i: any) => `
+                      <li class="flex items-start gap-2 text-sm">
+                        <span class="px-1.5 py-0.5 rounded text-xs font-medium" style="background: ${i.severity === 'critical' ? 'var(--status-error)' : i.severity === 'warning' ? 'var(--status-warning)' : 'var(--status-info)'}; color: white;">
+                          ${i.severity || 'info'}
+                        </span>
+                        <span style="color: var(--text-secondary);">${escapeHtml(i.description)}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
+                ` : ''}
+              </div>
+            `;
+          } else {
+            panelReview.innerHTML = `
+              <div class="text-center py-12">
+                <svg class="w-12 h-12 mx-auto mb-4" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <p style="color: var(--text-muted);">AI review not yet completed</p>
+              </div>
+            `;
+          }
         }
 
         // Update actions based on status
@@ -456,21 +641,45 @@ const statusFilters = [
             <div class="flex-1">
               ${canRequestChanges ? `
               <div class="flex items-center gap-2">
-                <input type="text" id="feedback-input" placeholder="Feedback for changes..." class="flex-1 px-3 py-2 rounded-lg text-sm" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border); color: white;" />
-                <button id="request-changes-btn" class="btn text-sm" style="background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.3); color: rgb(251, 191, 36);">
+                <label for="feedback-input" class="sr-only">Feedback for requested changes</label>
+                <input
+                  type="text"
+                  id="feedback-input"
+                  placeholder="Feedback for changes..."
+                  class="form-input flex-1"
+                  aria-describedby="feedback-help"
+                />
+                <button
+                  id="request-changes-btn"
+                  type="button"
+                  class="btn"
+                  style="background: var(--status-warning-bg); border: 1px solid var(--status-warning-border); color: var(--status-warning);"
+                >
                   Request Changes
                 </button>
               </div>
+              <span id="feedback-help" class="sr-only">Enter feedback explaining what changes are needed</span>
               ` : ''}
             </div>
             <div class="flex items-center gap-2">
               ${canReject ? `
-              <button id="reject-btn" class="btn text-sm" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); color: rgb(239, 68, 68);">
+              <button
+                id="reject-btn"
+                type="button"
+                class="btn"
+                style="background: var(--status-error-bg); border: 1px solid var(--status-error-border); color: var(--status-error);"
+                aria-label="Reject this contribution"
+              >
                 Reject
               </button>
               ` : ''}
               ${canApprove ? `
-              <button id="approve-btn" class="btn btn-primary text-sm">
+              <button
+                id="approve-btn"
+                type="button"
+                class="btn btn-primary"
+                aria-label="Approve and publish this contribution"
+              >
                 Approve & Publish
               </button>
               ` : ''}
@@ -486,11 +695,73 @@ const statusFilters = [
           });
         }
 
+        // Update focus trap after content loaded
+        setupFocusTrap();
+
       } catch (err) {
         console.error('Failed to load contribution:', err);
-        if (modalBody) modalBody.innerHTML = `
-          <div class="text-center py-12 text-red-400">Failed to load contribution details.</div>
+        if (panelContent) panelContent.innerHTML = `
+          <div class="text-center py-12" role="alert" style="color: var(--status-error);">Failed to load contribution details.</div>
         `;
+      }
+    }
+
+    function switchTab(tab: 'content' | 'review') {
+      const tabContent = document.getElementById('tab-content');
+      const tabReview = document.getElementById('tab-review');
+      const panelContent = document.getElementById('panel-content');
+      const panelReview = document.getElementById('panel-review');
+
+      if (tab === 'content') {
+        tabContent?.classList.add('active');
+        tabContent?.setAttribute('aria-selected', 'true');
+        tabReview?.classList.remove('active');
+        tabReview?.setAttribute('aria-selected', 'false');
+        panelContent?.classList.remove('hidden');
+        panelReview?.classList.add('hidden');
+      } else {
+        tabContent?.classList.remove('active');
+        tabContent?.setAttribute('aria-selected', 'false');
+        tabReview?.classList.add('active');
+        tabReview?.setAttribute('aria-selected', 'true');
+        panelContent?.classList.add('hidden');
+        panelReview?.classList.remove('hidden');
+      }
+    }
+
+    function setupFocusTrap() {
+      const modal = document.getElementById('modal-container');
+      if (!modal) return;
+
+      focusableElements = Array.from(
+        modal.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ) as HTMLElement[];
+
+      firstFocusable = focusableElements[0] || null;
+      lastFocusable = focusableElements[focusableElements.length - 1] || null;
+
+      // Focus first element
+      firstFocusable?.focus();
+    }
+
+    function handleTabKey(e: KeyboardEvent) {
+      if (e.key !== 'Tab') return;
+
+      const modal = document.getElementById('detail-modal');
+      if (modal?.classList.contains('hidden')) return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable?.focus();
+        }
+      } else {
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable?.focus();
+        }
       }
     }
 
@@ -568,24 +839,38 @@ const statusFilters = [
     function closeModal() {
       const modal = document.getElementById('detail-modal');
       modal?.classList.add('hidden');
+      document.body.style.overflow = '';
       currentContribution = null;
+
+      // Return focus to the trigger button
+      const viewBtn = document.querySelector('.view-details') as HTMLElement;
+      viewBtn?.focus();
     }
 
-    function getStatusClasses(status: string): string {
+    function getStatusClass(status: string): string {
       switch (status) {
-        case 'pending': return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
-        case 'ai_approved': return 'bg-green-500/20 text-green-400 border border-green-500/30';
-        case 'ai_needs_changes': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
-        case 'ai_rejected': return 'bg-red-500/20 text-red-400 border border-red-500/30';
-        case 'approved': return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-        case 'rejected': return 'bg-red-500/20 text-red-400 border border-red-500/30';
-        case 'needs_changes': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
-        default: return 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+        case 'pending': return 'status-pending';
+        case 'ai_approved': return 'status-ai-approved';
+        case 'ai_needs_changes':
+        case 'needs_changes': return 'status-needs-changes';
+        case 'ai_rejected':
+        case 'rejected': return 'status-rejected';
+        case 'approved': return 'status-published';
+        default: return 'status-pending';
       }
     }
 
     function formatStatus(status: string): string {
-      return status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const labels: Record<string, string> = {
+        'pending': 'Pending',
+        'ai_approved': 'AI Approved',
+        'ai_needs_changes': 'Needs Changes',
+        'ai_rejected': 'AI Rejected',
+        'approved': 'Published',
+        'rejected': 'Rejected',
+        'needs_changes': 'Needs Changes'
+      };
+      return labels[status] || status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     }
 
     function formatDate(dateStr: string): string {
@@ -617,11 +902,18 @@ const statusFilters = [
           loadContributions((document.getElementById('status-filter') as HTMLSelectElement)?.value || '');
         });
 
+        // Tab handlers
+        document.getElementById('tab-content')?.addEventListener('click', () => switchTab('content'));
+        document.getElementById('tab-review')?.addEventListener('click', () => switchTab('review'));
+
         // Modal handlers
         document.getElementById('modal-backdrop')?.addEventListener('click', closeModal);
         document.getElementById('modal-close')?.addEventListener('click', closeModal);
+
+        // Keyboard handlers
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') closeModal();
+          handleTabKey(e);
         });
       }
     }

@@ -3,173 +3,322 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Submit Guideline" description="Submit a new guideline to erold.guide">
-  <div class="mx-auto max-w-4xl px-4 sm:px-6 py-16">
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 py-12">
     <!-- Auth Check -->
     <div id="auth-required" class="hidden">
       <div class="text-center py-16">
-        <div class="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
-          <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: var(--color-error-bg); border: 1px solid var(--color-error);">
+          <svg class="w-8 h-8" style="color: var(--color-error);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-10a4 4 0 100 8 4 4 0 000-8z" />
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-white mb-4">Authentication Required</h1>
-        <p class="text-[--color-terminal-muted] mb-6">Please sign in with GitHub to submit a guideline.</p>
-        <a href="/contribute" class="btn btn-primary inline-flex">
-          Go to Contribute Page
+        <h1 class="text-2xl font-bold mb-4" style="color: var(--text-primary);">Sign in required</h1>
+        <p class="mb-6" style="color: var(--text-secondary);">Please sign in with GitHub to submit a guideline.</p>
+        <a href="/contribute" class="btn btn-primary">
+          Go to Contribute
         </a>
       </div>
     </div>
 
-    <!-- Submission Form -->
-    <div id="submission-form" class="hidden">
-      <div class="mb-8">
-        <nav class="text-sm text-[--color-terminal-muted] mb-4">
-          <a href="/contribute" class="hover:text-white transition-colors">Contribute</a>
-          <span class="mx-2">/</span>
-          <span class="text-white">Submit Guideline</span>
-        </nav>
-        <h1 class="text-3xl font-bold text-white mb-2">Submit a Guideline</h1>
-        <p class="text-[--color-terminal-muted]">Share your knowledge with the community. All submissions are reviewed before publishing.</p>
-
-        <!-- Demo Button (Temkit only) -->
-        <button type="button" id="demo-btn" class="hidden mt-4 px-4 py-2 text-sm font-medium rounded-lg transition-colors" style="background: rgba(234, 179, 8, 0.2); color: rgb(250, 204, 21); border: 1px solid rgba(234, 179, 8, 0.4);">
-          <span class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Fill Demo Data
-          </span>
-        </button>
+    <!-- Wizard Form -->
+    <div id="wizard-container" class="hidden">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">Submit a Guideline</h1>
+        <p style="color: var(--text-secondary);">Share your knowledge with the community</p>
       </div>
 
-      <form id="guideline-form" class="space-y-8">
-        <!-- Topic & Category -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label for="topic" class="block text-sm font-medium text-white mb-2">Topic * <span class="text-[--color-terminal-muted] font-normal">(lowercase)</span></label>
-            <input type="text" id="topic" name="topic" required placeholder="e.g., react, docker, accessibility, design" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
-            <p class="mt-1 text-xs text-[--color-terminal-muted]">Technology, concept, tool, or practice</p>
-          </div>
-
-          <div>
-            <label for="category" class="block text-sm font-medium text-white mb-2">Category * <span class="text-[--color-terminal-muted] font-normal">(lowercase)</span></label>
-            <input type="text" id="category" name="category" required placeholder="e.g., security, performance, best-practices" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
-            <p class="mt-1 text-xs text-[--color-terminal-muted]">Group related guidelines together</p>
-          </div>
+      <!-- Progress Steps -->
+      <nav class="wizard-steps mb-8" aria-label="Form progress">
+        <div class="wizard-step active" data-step="1">
+          <div class="wizard-step-number">1</div>
+          <span class="wizard-step-label">Basics</span>
         </div>
-
-        <!-- Title & Slug -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label for="title" class="block text-sm font-medium text-white mb-2">Title * <span class="text-[--color-terminal-muted] font-normal">(5-100 characters)</span></label>
-            <input type="text" id="title" name="title" required minlength="5" maxlength="100" placeholder="e.g., Use Server Components by Default" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors" />
-          </div>
-
-          <div>
-            <label for="slug" class="block text-sm font-medium text-white mb-2">Slug * <span class="text-[--color-terminal-muted] font-normal">(lowercase, hyphens only)</span></label>
-            <input type="text" id="slug" name="slug" required placeholder="e.g., server-components-default" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
-          </div>
+        <div class="wizard-step-connector"></div>
+        <div class="wizard-step" data-step="2">
+          <div class="wizard-step-number">2</div>
+          <span class="wizard-step-label">Content</span>
         </div>
-
-        <!-- Version & Difficulty -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label for="version" class="block text-sm font-medium text-white mb-2">Version * <span class="text-[--color-terminal-muted] font-normal">(semver format)</span></label>
-            <input type="text" id="version" name="version" required value="1.0.0" placeholder="1.0.0" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
-          </div>
-
-          <div>
-            <label for="difficulty" class="block text-sm font-medium text-white mb-2">Difficulty *</label>
-            <select id="difficulty" name="difficulty" required class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors">
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-          </div>
+        <div class="wizard-step-connector"></div>
+        <div class="wizard-step" data-step="3">
+          <div class="wizard-step-number">3</div>
+          <span class="wizard-step-label">Details</span>
         </div>
-
-        <!-- Description -->
-        <div>
-          <label for="description" class="block text-sm font-medium text-white mb-2">Description * <span class="text-[--color-terminal-muted] font-normal">(20-300 characters)</span></label>
-          <textarea id="description" name="description" required minlength="20" maxlength="300" rows="2" placeholder="A brief summary of the guideline for search results and previews..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors resize-none"></textarea>
-          <p class="mt-1 text-sm text-[--color-terminal-muted]"><span id="desc-count">0</span>/300</p>
+        <div class="wizard-step-connector"></div>
+        <div class="wizard-step" data-step="4">
+          <div class="wizard-step-number">4</div>
+          <span class="wizard-step-label">Review</span>
         </div>
+      </nav>
 
-        <!-- Tags -->
-        <div>
-          <label for="tags-input" class="block text-sm font-medium text-white mb-2">Tags * <span class="text-[--color-terminal-muted] font-normal">(1-10 tags for discovery, press Enter to add)</span></label>
-          <div class="flex flex-wrap gap-2 mb-2" id="tags-container"></div>
-          <input type="text" id="tags-input" placeholder="e.g., accessibility, performance, security..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors" />
-          <input type="hidden" id="tags" name="tags" value="[]" />
-        </div>
+      <form id="guideline-form" novalidate>
+        <!-- Step 1: Basics -->
+        <div class="wizard-panel surface" data-panel="1">
+          <h2 class="text-lg font-semibold mb-6" style="color: var(--text-primary);">
+            Basic Information
+          </h2>
 
-        <!-- Related Guidelines -->
-        <div>
-          <label for="related-input" class="block text-sm font-medium text-white mb-2">Related Guidelines <span class="text-[--color-terminal-muted] font-normal">(optional, paths like topic/category/slug)</span></label>
-          <div class="flex flex-wrap gap-2 mb-2" id="related-container"></div>
-          <input type="text" id="related-input" placeholder="e.g., react/hooks/use-effect-cleanup..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
-          <input type="hidden" id="related" name="related" value="[]" />
-          <p class="mt-1 text-xs text-[--color-terminal-muted]">"See also" links to related guidelines</p>
-        </div>
-
-        <!-- Collections -->
-        <div>
-          <label for="collections-input" class="block text-sm font-medium text-white mb-2">Collections <span class="text-[--color-terminal-muted] font-normal">(optional, curated learning paths)</span></label>
-          <div class="flex flex-wrap gap-2 mb-2" id="collections-container"></div>
-          <input type="text" id="collections-input" placeholder="e.g., frontend-fundamentals, accessible-ui..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
-          <input type="hidden" id="collections" name="collections" value="[]" />
-          <p class="mt-1 text-xs text-[--color-terminal-muted]">Curated groups this guideline belongs to</p>
-        </div>
-
-        <!-- Content -->
-        <div>
-          <label for="content" class="block text-sm font-medium text-white mb-2">Content * <span class="text-[--color-terminal-muted] font-normal">(Markdown, 100+ characters)</span></label>
-          <div class="border border-[--color-border-primary] rounded-lg overflow-hidden">
-            <div class="flex border-b border-[--color-border-primary] bg-[--color-bg-secondary]">
-              <button type="button" id="tab-write" class="px-4 py-2 text-sm font-medium text-white border-b-2 border-[--color-primary-500]">Write</button>
-              <button type="button" id="tab-preview" class="px-4 py-2 text-sm font-medium text-[--color-terminal-muted] hover:text-white transition-colors">Preview</button>
+          <div class="space-y-6">
+            <div>
+              <label for="topic" class="form-label">
+                Topic <span style="color: var(--color-error);">*</span>
+              </label>
+              <input
+                type="text"
+                id="topic"
+                name="topic"
+                required
+                pattern="^[a-z0-9]+(-[a-z0-9]+)*$"
+                placeholder="react, docker, accessibility"
+                class="form-input font-mono"
+                aria-describedby="topic-hint"
+              />
+              <p id="topic-hint" class="mt-2 text-sm" style="color: var(--text-muted);">
+                Lowercase, hyphens only. Technology, concept, or tool.
+              </p>
             </div>
-            <textarea id="content" name="content" required minlength="100" rows="20" placeholder="# Your Guideline Title
 
-Explain the guideline here. Use Markdown for formatting.
+            <div>
+              <label for="category" class="form-label">
+                Category <span style="color: var(--color-error);">*</span>
+              </label>
+              <input
+                type="text"
+                id="category"
+                name="category"
+                required
+                pattern="^[a-z0-9]+(-[a-z0-9]+)*$"
+                placeholder="security, performance, best-practices"
+                class="form-input font-mono"
+                aria-describedby="category-hint"
+              />
+              <p id="category-hint" class="mt-2 text-sm" style="color: var(--text-muted);">
+                Groups related guidelines together.
+              </p>
+            </div>
+
+            <div>
+              <label for="title" class="form-label">
+                Title <span style="color: var(--color-error);">*</span>
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                required
+                minlength="5"
+                maxlength="100"
+                placeholder="Use Server Components by Default"
+                class="form-input"
+                aria-describedby="title-hint"
+              />
+              <p id="title-hint" class="mt-2 text-sm" style="color: var(--text-muted);">
+                Clear, actionable title (5-100 characters)
+              </p>
+            </div>
+          </div>
+
+          <div class="flex justify-end mt-8">
+            <button type="button" class="btn btn-primary" data-next="2">
+              Continue
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Content -->
+        <div class="wizard-panel surface hidden" data-panel="2">
+          <h2 class="text-lg font-semibold mb-6" style="color: var(--text-primary);">
+            Guideline Content
+          </h2>
+
+          <div class="space-y-6">
+            <div>
+              <label for="description" class="form-label">
+                Description <span style="color: var(--color-error);">*</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                required
+                minlength="20"
+                maxlength="300"
+                rows="2"
+                placeholder="A brief summary for search results..."
+                class="form-input"
+                aria-describedby="desc-hint"
+              ></textarea>
+              <p id="desc-hint" class="mt-2 text-sm" style="color: var(--text-muted);">
+                <span id="desc-count">0</span>/300 characters
+              </p>
+            </div>
+
+            <div>
+              <label for="content" class="form-label">
+                Content <span style="color: var(--color-error);">*</span>
+                <span class="form-hint ml-2">(Markdown)</span>
+              </label>
+              <div class="rounded-lg overflow-hidden border-2" style="border-color: var(--border-primary);">
+                <div class="flex border-b" style="border-color: var(--border-secondary); background: var(--bg-tertiary);">
+                  <button type="button" id="tab-write" class="px-4 py-2 text-sm font-medium border-b-2" style="border-color: var(--color-primary-500); color: var(--text-primary);">
+                    Write
+                  </button>
+                  <button type="button" id="tab-preview" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent" style="color: var(--text-muted);">
+                    Preview
+                  </button>
+                </div>
+                <textarea
+                  id="content"
+                  name="content"
+                  required
+                  minlength="100"
+                  rows="16"
+                  placeholder="# Your Guideline
+
+Explain the guideline here...
 
 ## Why This Matters
-
-Explain the reasoning...
 
 ## Code Example
 
 ```javascript
-// Your code example
+// Your code
 ```
 
-## Anti-patterns
-
-What to avoid...
-
-## Summary
-
-Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white placeholder:text-[--color-terminal-muted] outline-none resize-none font-mono text-sm" style="min-height: 400px;"></textarea>
-            <div id="preview-container" class="hidden px-4 py-3 bg-[--color-bg-tertiary] prose prose-invert max-w-none" style="min-height: 400px;"></div>
+## Summary"
+                  class="w-full px-4 py-3 outline-none font-mono text-sm"
+                  style="background: var(--bg-secondary); color: var(--text-primary); resize: vertical; min-height: 400px;"
+                  aria-describedby="content-hint"
+                ></textarea>
+                <div id="preview-container" class="hidden px-4 py-3 prose" style="background: var(--bg-secondary); min-height: 400px; overflow-y: auto;"></div>
+              </div>
+              <p id="content-hint" class="mt-2 text-sm" style="color: var(--text-muted);">
+                <span id="content-count">0</span> characters (minimum 100)
+              </p>
+            </div>
           </div>
-          <p class="mt-1 text-sm text-[--color-terminal-muted]"><span id="content-count">0</span> characters</p>
+
+          <div class="flex justify-between mt-8">
+            <button type="button" class="btn btn-secondary" data-prev="1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+            <button type="button" class="btn btn-primary" data-next="3">
+              Continue
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <!-- Error Message -->
-        <div id="error-message" class="hidden p-4 rounded-lg" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
-          <p class="text-red-400" id="error-text"></p>
+        <!-- Step 3: Details -->
+        <div class="wizard-panel surface hidden" data-panel="3">
+          <h2 class="text-lg font-semibold mb-6" style="color: var(--text-primary);">
+            Additional Details
+          </h2>
+
+          <div class="space-y-6">
+            <div>
+              <label for="difficulty" class="form-label">Difficulty</label>
+              <select id="difficulty" name="difficulty" class="form-input form-select">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate" selected>Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="tags-input" class="form-label">
+                Tags <span style="color: var(--color-error);">*</span>
+              </label>
+              <div id="tags-container" class="flex flex-wrap gap-2 mb-2" role="list" aria-label="Added tags"></div>
+              <input
+                type="text"
+                id="tags-input"
+                placeholder="Press Enter to add a tag..."
+                class="form-input"
+                aria-describedby="tags-hint"
+              />
+              <input type="hidden" id="tags" name="tags" value="[]" />
+              <p id="tags-hint" class="mt-2 text-sm" style="color: var(--text-muted);">
+                Add 1-10 tags for discovery
+              </p>
+            </div>
+
+            <div>
+              <label for="related-input" class="form-label">
+                Related Guidelines
+                <span class="form-hint ml-2">(optional)</span>
+              </label>
+              <div id="related-container" class="flex flex-wrap gap-2 mb-2" role="list" aria-label="Related guidelines"></div>
+              <input
+                type="text"
+                id="related-input"
+                placeholder="topic/category/slug"
+                class="form-input font-mono"
+                aria-describedby="related-hint"
+              />
+              <input type="hidden" id="related" name="related" value="[]" />
+              <p id="related-hint" class="mt-2 text-sm" style="color: var(--text-muted);">
+                Paths to related guidelines
+              </p>
+            </div>
+          </div>
+
+          <div class="flex justify-between mt-8">
+            <button type="button" class="btn btn-secondary" data-prev="2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+            <button type="button" class="btn btn-primary" data-next="4">
+              Review
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <!-- Submit Button -->
-        <div class="flex items-center justify-between pt-4 border-t border-[--color-border-primary]">
-          <a href="/contribute" class="text-[--color-terminal-muted] hover:text-white transition-colors">Cancel</a>
-          <button type="submit" id="submit-btn" class="btn btn-primary">
-            <span id="submit-text">Submit for Review</span>
-            <svg id="submit-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <!-- Step 4: Review -->
+        <div class="wizard-panel surface hidden" data-panel="4">
+          <h2 class="text-lg font-semibold mb-6" style="color: var(--text-primary);">
+            Review & Submit
+          </h2>
+
+          <div class="space-y-4" id="review-summary">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Error Message -->
+          <div id="error-message" class="form-error hidden mt-6" role="alert">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-          </button>
+            <span id="error-text"></span>
+          </div>
+
+          <div class="flex justify-between mt-8">
+            <button type="button" class="btn btn-secondary" data-prev="3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+            <button type="submit" id="submit-btn" class="btn btn-primary">
+              <span id="submit-text">Submit for Review</span>
+              <svg id="submit-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -177,16 +326,18 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
     <!-- Success State -->
     <div id="success-state" class="hidden">
       <div class="text-center py-16">
-        <div class="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
-          <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: var(--color-success-bg); border: 1px solid var(--color-success);">
+          <svg class="w-8 h-8" style="color: var(--color-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-white mb-4">Guideline Submitted!</h1>
-        <p class="text-[--color-terminal-muted] mb-2">Your guideline has been submitted for review.</p>
-        <p class="text-[--color-terminal-muted] mb-6">Contribution ID: <code id="contribution-id" class="font-mono text-[--color-primary-400]"></code></p>
+        <h1 class="text-2xl font-bold mb-4" style="color: var(--text-primary);">Submitted!</h1>
+        <p class="mb-2" style="color: var(--text-secondary);">Your guideline is now being reviewed.</p>
+        <p class="mb-6" style="color: var(--text-muted);">
+          ID: <code class="font-mono px-2 py-1 rounded" style="background: var(--bg-tertiary);" id="contribution-id"></code>
+        </p>
         <div class="flex items-center justify-center gap-4">
-          <a href="/contribute" class="btn btn-secondary">View My Contributions</a>
+          <a href="/contribute" class="btn btn-secondary">View Contributions</a>
           <button type="button" id="submit-another" class="btn btn-primary">Submit Another</button>
         </div>
       </div>
@@ -195,305 +346,275 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
 
   <script>
     const API_URL = 'https://su5t4tzra5.execute-api.eu-west-1.amazonaws.com';
+    let currentStep = 1;
+    let tags: string[] = [];
+    let related: string[] = [];
 
-    // Parse JWT to get user info
-    function parseJwt(token: string) {
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
-          '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        ).join(''));
-        return JSON.parse(jsonPayload);
-      } catch {
-        return null;
-      }
-    }
-
-    // Check authentication
+    // Auth check
     function checkAuth() {
       const token = localStorage.getItem('erold_token');
       const authRequired = document.getElementById('auth-required');
-      const submissionForm = document.getElementById('submission-form');
-      const demoBtn = document.getElementById('demo-btn');
+      const wizard = document.getElementById('wizard-container');
 
       if (!token) {
         authRequired?.classList.remove('hidden');
-        submissionForm?.classList.add('hidden');
+        wizard?.classList.add('hidden');
       } else {
         authRequired?.classList.add('hidden');
-        submissionForm?.classList.remove('hidden');
+        wizard?.classList.remove('hidden');
+      }
+    }
 
-        // Show demo button only for Temkit
-        const payload = parseJwt(token);
-        if (payload?.username === 'Temkit') {
-          demoBtn?.classList.remove('hidden');
+    // Wizard navigation
+    function goToStep(step: number) {
+      // Validate current step before proceeding
+      if (step > currentStep && !validateStep(currentStep)) {
+        return;
+      }
+
+      // Update panels
+      document.querySelectorAll('.wizard-panel').forEach(panel => {
+        panel.classList.add('hidden');
+      });
+      document.querySelector(`[data-panel="${step}"]`)?.classList.remove('hidden');
+
+      // Update step indicators
+      document.querySelectorAll('.wizard-step').forEach(stepEl => {
+        const stepNum = parseInt(stepEl.getAttribute('data-step') || '1');
+        stepEl.classList.remove('active', 'completed');
+        if (stepNum < step) {
+          stepEl.classList.add('completed');
+        } else if (stepNum === step) {
+          stepEl.classList.add('active');
+        }
+      });
+
+      currentStep = step;
+
+      // Generate review on step 4
+      if (step === 4) {
+        generateReview();
+      }
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(step: number): boolean {
+      const panel = document.querySelector(`[data-panel="${step}"]`);
+      if (!panel) return true;
+
+      const inputs = panel.querySelectorAll('input[required], textarea[required], select[required]');
+      let valid = true;
+
+      inputs.forEach(input => {
+        const el = input as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+        if (!el.checkValidity()) {
+          el.reportValidity();
+          valid = false;
+        }
+      });
+
+      // Check tags on step 3
+      if (step === 3 && tags.length < 1) {
+        showError('Please add at least one tag');
+        return false;
+      }
+
+      return valid;
+    }
+
+    function generateReview() {
+      const summary = document.getElementById('review-summary');
+      if (!summary) return;
+
+      const topic = (document.getElementById('topic') as HTMLInputElement).value;
+      const category = (document.getElementById('category') as HTMLInputElement).value;
+      const title = (document.getElementById('title') as HTMLInputElement).value;
+      const description = (document.getElementById('description') as HTMLTextAreaElement).value;
+      const difficulty = (document.getElementById('difficulty') as HTMLSelectElement).value;
+      const content = (document.getElementById('content') as HTMLTextAreaElement).value;
+
+      summary.innerHTML = `
+        <div class="surface p-4 rounded-lg space-y-3">
+          <div class="flex justify-between">
+            <span style="color: var(--text-muted);">Topic</span>
+            <span class="font-mono" style="color: var(--text-primary);">${escapeHtml(topic)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span style="color: var(--text-muted);">Category</span>
+            <span class="font-mono" style="color: var(--text-primary);">${escapeHtml(category)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span style="color: var(--text-muted);">Title</span>
+            <span style="color: var(--text-primary);">${escapeHtml(title)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span style="color: var(--text-muted);">Difficulty</span>
+            <span class="badge badge-${difficulty === 'beginner' ? 'success' : difficulty === 'advanced' ? 'error' : 'warning'}">${difficulty}</span>
+          </div>
+          <div class="flex justify-between">
+            <span style="color: var(--text-muted);">Tags</span>
+            <span style="color: var(--text-primary);">${tags.length} tags</span>
+          </div>
+          <div>
+            <span style="color: var(--text-muted);">Description</span>
+            <p class="mt-1 text-sm" style="color: var(--text-secondary);">${escapeHtml(description)}</p>
+          </div>
+          <div>
+            <span style="color: var(--text-muted);">Content</span>
+            <p class="mt-1 text-sm" style="color: var(--text-secondary);">${content.length} characters</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str: string): string {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showError(message: string) {
+      const errorEl = document.getElementById('error-message');
+      const errorText = document.getElementById('error-text');
+      if (errorEl && errorText) {
+        errorText.textContent = message;
+        errorEl.classList.remove('hidden');
+        errorEl.focus();
+      }
+    }
+
+    function hideError() {
+      document.getElementById('error-message')?.classList.add('hidden');
+    }
+
+    // Chip list handlers
+    function renderChips(container: HTMLElement, items: string[], onRemove: (index: number) => void) {
+      container.innerHTML = '';
+      items.forEach((item, index) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = `
+          ${escapeHtml(item)}
+          <button type="button" class="chip-remove" aria-label="Remove ${escapeHtml(item)}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        `;
+        chip.querySelector('button')?.addEventListener('click', () => onRemove(index));
+        container.appendChild(chip);
+      });
+    }
+
+    // Tags
+    const tagsContainer = document.getElementById('tags-container');
+    const tagsInput = document.getElementById('tags-input') as HTMLInputElement;
+    const tagsHidden = document.getElementById('tags') as HTMLInputElement;
+
+    tagsInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const value = tagsInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+        if (value && !tags.includes(value) && tags.length < 10) {
+          tags.push(value);
+          renderChips(tagsContainer!, tags, (i) => {
+            tags.splice(i, 1);
+            renderChips(tagsContainer!, tags, () => {});
+            tagsHidden.value = JSON.stringify(tags);
+          });
+          tagsHidden.value = JSON.stringify(tags);
+          tagsInput.value = '';
         }
       }
-    }
-
-    // Fill form with demo data
-    function fillDemoData() {
-      // Topic & Category
-      (document.getElementById('topic') as HTMLInputElement).value = 'react';
-      (document.getElementById('category') as HTMLInputElement).value = 'performance';
-
-      // Title & Slug
-      (document.getElementById('title') as HTMLInputElement).value = 'Use React.memo for Expensive Components';
-      (document.getElementById('slug') as HTMLInputElement).value = 'use-react-memo-expensive-components';
-      slugManuallyEdited = true;
-
-      // Version & Difficulty
-      (document.getElementById('version') as HTMLInputElement).value = '1.0.0';
-      (document.getElementById('difficulty') as HTMLSelectElement).value = 'intermediate';
-
-      // Description
-      const descEl = document.getElementById('description') as HTMLTextAreaElement;
-      descEl.value = 'Wrap expensive components with React.memo to prevent unnecessary re-renders and improve application performance.';
-      if (descCount) descCount.textContent = String(descEl.value.length);
-
-      // Tags
-      tags = ['react', 'performance', 'optimization', 'memo'];
-      renderTags();
-
-      // Related
-      related = ['react/hooks/use-callback', 'react/hooks/use-memo'];
-      renderRelated();
-
-      // Collections
-      collections = ['react-performance'];
-      renderCollections();
-
-      // Content
-      const contentEl = document.getElementById('content') as HTMLTextAreaElement;
-      contentEl.value = `# Use React.memo for Expensive Components
-
-When building React applications, unnecessary re-renders can significantly impact performance. \`React.memo\` is a higher-order component that memoizes your component, preventing re-renders when props haven't changed.
-
-## Why This Matters
-
-React re-renders a component whenever its parent re-renders, even if the props haven't changed. For simple components, this is fine. But for components with expensive render logic, complex DOM trees, or heavy computations, this can cause performance issues.
-
-## When to Use React.memo
-
-Use \`React.memo\` when:
-- The component renders often with the same props
-- The component has expensive render logic
-- The component is pure (same props = same output)
-
-## Code Example
-
-\`\`\`jsx
-// Before: Re-renders on every parent update
-function ExpensiveList({ items }) {
-  return (
-    <ul>
-      {items.map(item => (
-        <li key={item.id}>{complexCalculation(item)}</li>
-      ))}
-    </ul>
-  );
-}
-
-// After: Only re-renders when items change
-const ExpensiveList = React.memo(function ExpensiveList({ items }) {
-  return (
-    <ul>
-      {items.map(item => (
-        <li key={item.id}>{complexCalculation(item)}</li>
-      ))}
-    </ul>
-  );
-});
-\`\`\`
-
-## Custom Comparison
-
-For complex props, provide a custom comparison function:
-
-\`\`\`jsx
-const MyComponent = React.memo(
-  function MyComponent({ user, settings }) {
-    return <div>{user.name} - {settings.theme}</div>;
-  },
-  (prevProps, nextProps) => {
-    return prevProps.user.id === nextProps.user.id &&
-           prevProps.settings.theme === nextProps.settings.theme;
-  }
-);
-\`\`\`
-
-## Anti-patterns
-
-**Don't use React.memo when:**
-- Props change frequently (memo overhead > re-render cost)
-- The component is already cheap to render
-- You're passing new object/array references on every render
-
-\`\`\`jsx
-// Bad: memo is useless here because style is a new object every render
-<MemoizedComponent style={{ color: 'red' }} />
-
-// Good: memoize the style object
-const style = useMemo(() => ({ color: 'red' }), []);
-<MemoizedComponent style={style} />
-\`\`\`
-
-## Summary
-
-- Use \`React.memo\` for expensive pure components
-- Combine with \`useMemo\` and \`useCallback\` for optimal results
-- Profile before optimizing - don't premature optimize
-- Custom comparison functions for complex prop structures`;
-      if (contentCount) contentCount.textContent = String(contentEl.value.length);
-    }
-
-    // Demo button click handler
-    document.getElementById('demo-btn')?.addEventListener('click', fillDemoData);
-
-    // Auto-generate slug from title
-    const titleInput = document.getElementById('title') as HTMLInputElement;
-    const slugInput = document.getElementById('slug') as HTMLInputElement;
-    let slugManuallyEdited = false;
-
-    slugInput?.addEventListener('input', () => {
-      slugManuallyEdited = true;
     });
 
-    titleInput?.addEventListener('input', () => {
-      if (!slugManuallyEdited) {
-        slugInput.value = titleInput.value
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .slice(0, 50);
+    // Related guidelines
+    const relatedContainer = document.getElementById('related-container');
+    const relatedInput = document.getElementById('related-input') as HTMLInputElement;
+    const relatedHidden = document.getElementById('related') as HTMLInputElement;
+
+    relatedInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const value = relatedInput.value.trim().toLowerCase();
+        if (value && !related.includes(value) && related.length < 10) {
+          related.push(value);
+          renderChips(relatedContainer!, related, (i) => {
+            related.splice(i, 1);
+            renderChips(relatedContainer!, related, () => {});
+            relatedHidden.value = JSON.stringify(related);
+          });
+          relatedHidden.value = JSON.stringify(related);
+          relatedInput.value = '';
+        }
       }
     });
 
-    // Description character count
+    // Character counters
     const descInput = document.getElementById('description') as HTMLTextAreaElement;
     const descCount = document.getElementById('desc-count');
-
     descInput?.addEventListener('input', () => {
       if (descCount) descCount.textContent = String(descInput.value.length);
     });
 
-    // Content character count
     const contentInput = document.getElementById('content') as HTMLTextAreaElement;
     const contentCount = document.getElementById('content-count');
-
     contentInput?.addEventListener('input', () => {
       if (contentCount) contentCount.textContent = String(contentInput.value.length);
     });
 
-    // Generic chip list handler factory
-    function createChipListHandler(
-      containerId: string,
-      inputId: string,
-      hiddenId: string,
-      items: string[],
-      bgColor: string = 'rgba(37, 99, 235, 0.2)',
-      textColor: string = 'rgb(147, 197, 253)',
-      maxItems: number = 10,
-      allowSlashes: boolean = false
-    ) {
-      const container = document.getElementById(containerId);
-      const input = document.getElementById(inputId) as HTMLInputElement;
-      const hidden = document.getElementById(hiddenId) as HTMLInputElement;
-
-      function render() {
-        if (!container) return;
-        container.innerHTML = '';
-        items.forEach((item, index) => {
-          const span = document.createElement('span');
-          span.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium';
-          span.style.cssText = `background: ${bgColor}; color: ${textColor};`;
-          span.innerHTML = `
-            ${item}
-            <button type="button" class="hover:text-white" data-index="${index}">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          `;
-          container.appendChild(span);
-        });
-        hidden.value = JSON.stringify(items);
-      }
-
-      container?.addEventListener('click', (e) => {
-        const btn = (e.target as Element).closest('button');
-        if (btn) {
-          const index = parseInt(btn.getAttribute('data-index') || '0');
-          items.splice(index, 1);
-          render();
-        }
-      });
-
-      input?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const regex = allowSlashes ? /[^a-z0-9-/]/g : /[^a-z0-9-]/g;
-          const value = input.value.trim().toLowerCase().replace(regex, '-').replace(/--+/g, '-');
-          if (value && !items.includes(value) && items.length < maxItems) {
-            items.push(value);
-            render();
-            input.value = '';
-          }
-        }
-      });
-
-      return render;
-    }
-
-    // Tags handling
-    let tags: string[] = [];
-    const renderTags = createChipListHandler('tags-container', 'tags-input', 'tags', tags, 'rgba(37, 99, 235, 0.2)', 'rgb(147, 197, 253)', 10, false);
-
-    // Related guidelines handling
-    let related: string[] = [];
-    const renderRelated = createChipListHandler('related-container', 'related-input', 'related', related, 'rgba(34, 197, 94, 0.2)', 'rgb(134, 239, 172)', 10, true);
-
-    // Collections handling
-    let collections: string[] = [];
-    const renderCollections = createChipListHandler('collections-container', 'collections-input', 'collections', collections, 'rgba(168, 85, 247, 0.2)', 'rgb(216, 180, 254)', 5, false);
-
-    // Tab switching (Write/Preview)
+    // Preview tabs
     const tabWrite = document.getElementById('tab-write');
     const tabPreview = document.getElementById('tab-preview');
     const previewContainer = document.getElementById('preview-container');
 
     tabWrite?.addEventListener('click', () => {
-      tabWrite.classList.add('border-[--color-primary-500]', 'text-white');
-      tabWrite.classList.remove('text-[--color-terminal-muted]');
-      tabPreview?.classList.remove('border-[--color-primary-500]', 'text-white');
-      tabPreview?.classList.add('text-[--color-terminal-muted]');
+      tabWrite.style.borderColor = 'var(--color-primary-500)';
+      tabWrite.style.color = 'var(--text-primary)';
+      tabPreview!.style.borderColor = 'transparent';
+      tabPreview!.style.color = 'var(--text-muted)';
       contentInput?.classList.remove('hidden');
       previewContainer?.classList.add('hidden');
     });
 
-    tabPreview?.addEventListener('click', async () => {
-      tabPreview.classList.add('border-[--color-primary-500]', 'text-white');
-      tabPreview.classList.remove('text-[--color-terminal-muted]');
-      tabWrite?.classList.remove('border-[--color-primary-500]', 'text-white');
-      tabWrite?.classList.add('text-[--color-terminal-muted]');
+    tabPreview?.addEventListener('click', () => {
+      tabPreview.style.borderColor = 'var(--color-primary-500)';
+      tabPreview.style.color = 'var(--text-primary)';
+      tabWrite!.style.borderColor = 'transparent';
+      tabWrite!.style.color = 'var(--text-muted)';
       contentInput?.classList.add('hidden');
       previewContainer?.classList.remove('hidden');
 
-      // Simple markdown preview (basic)
+      // Basic markdown preview
       if (previewContainer && contentInput) {
         let html = contentInput.value
           .replace(/^### (.*$)/gim, '<h3>$1</h3>')
           .replace(/^## (.*$)/gim, '<h2>$1</h2>')
           .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-          .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-          .replace(/\*(.*)\*/gim, '<em>$1</em>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
           .replace(/`([^`]+)`/g, '<code>$1</code>')
-          .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+          .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
           .replace(/\n/g, '<br>');
-        previewContainer.innerHTML = html || '<p class="text-[--color-terminal-muted]">Nothing to preview yet...</p>';
+        previewContainer.innerHTML = html || '<p style="color: var(--text-muted);">Nothing to preview...</p>';
       }
+    });
+
+    // Navigation buttons
+    document.querySelectorAll('[data-next]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const next = parseInt(btn.getAttribute('data-next') || '1');
+        goToStep(next);
+      });
+    });
+
+    document.querySelectorAll('[data-prev]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prev = parseInt(btn.getAttribute('data-prev') || '1');
+        goToStep(prev);
+      });
     });
 
     // Form submission
@@ -501,55 +622,24 @@ const style = useMemo(() => ({ color: 'red' }), []);
     const submitBtn = document.getElementById('submit-btn');
     const submitText = document.getElementById('submit-text');
     const submitSpinner = document.getElementById('submit-spinner');
-    const errorMessage = document.getElementById('error-message');
-    const errorText = document.getElementById('error-text');
     const successState = document.getElementById('success-state');
+    const wizard = document.getElementById('wizard-container');
     const contributionId = document.getElementById('contribution-id');
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      hideError();
 
       const token = localStorage.getItem('erold_token');
       if (!token) {
-        showError('Please sign in to submit a guideline.');
+        showError('Please sign in to submit.');
         return;
       }
 
-      // Validate tags
-      if (tags.length < 1) {
-        showError('Please add at least one tag.');
-        return;
-      }
-
-      // Validate slug format (lowercase alphanumeric and hyphens)
-      const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-      const topicVal = (document.getElementById('topic') as HTMLInputElement).value;
-      const categoryVal = (document.getElementById('category') as HTMLInputElement).value;
-      const slugVal = (document.getElementById('slug') as HTMLInputElement).value;
-      const versionVal = (document.getElementById('version') as HTMLInputElement).value;
-
-      if (!slugPattern.test(topicVal)) {
-        showError('Topic must be lowercase letters, numbers, and hyphens only (e.g., react, design-systems)');
-        return;
-      }
-      if (!slugPattern.test(categoryVal)) {
-        showError('Category must be lowercase letters, numbers, and hyphens only (e.g., security, best-practices)');
-        return;
-      }
-      if (!slugPattern.test(slugVal)) {
-        showError('Slug must be lowercase letters, numbers, and hyphens only (e.g., server-components-default)');
-        return;
-      }
-      if (!/^\d+\.\d+\.\d+$/.test(versionVal)) {
-        showError('Version must be in semver format (e.g., 1.0.0)');
-        return;
-      }
-
-      // Show loading state
+      // Show loading
       submitBtn?.setAttribute('disabled', 'true');
       submitText?.classList.add('hidden');
       submitSpinner?.classList.remove('hidden');
-      errorMessage?.classList.add('hidden');
 
       try {
         const payload = {
@@ -557,24 +647,22 @@ const style = useMemo(() => ({ color: 'red' }), []);
           category: (document.getElementById('category') as HTMLInputElement).value.toLowerCase(),
           guideline: {
             title: (document.getElementById('title') as HTMLInputElement).value,
-            slug: (document.getElementById('slug') as HTMLInputElement).value,
-            version: (document.getElementById('version') as HTMLInputElement).value,
+            slug: (document.getElementById('title') as HTMLInputElement).value
+              .toLowerCase()
+              .replace(/[^a-z0-9\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .slice(0, 50),
+            version: '1.0.0',
             description: (document.getElementById('description') as HTMLTextAreaElement).value,
             tags: tags,
             related: related,
-            collections: collections,
             difficulty: (document.getElementById('difficulty') as HTMLSelectElement).value,
             content: (document.getElementById('content') as HTMLTextAreaElement).value,
           }
         };
 
-        // Check if editing existing contribution
-        const editId = (document.getElementById('guideline-form') as HTMLFormElement).dataset.editId;
-        const url = editId ? `${API_URL}/v1/contributions/${editId}` : `${API_URL}/v1/contributions`;
-        const method = editId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-          method,
+        const response = await fetch(`${API_URL}/v1/contributions`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -585,16 +673,16 @@ const style = useMemo(() => ({ color: 'red' }), []);
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error?.message || 'Failed to submit guideline');
+          throw new Error(data.error?.message || 'Submission failed');
         }
 
-        // Show success
-        document.getElementById('submission-form')?.classList.add('hidden');
+        // Success
+        wizard?.classList.add('hidden');
         successState?.classList.remove('hidden');
         if (contributionId) contributionId.textContent = data.id;
 
       } catch (err) {
-        showError(err instanceof Error ? err.message : 'Failed to submit guideline');
+        showError(err instanceof Error ? err.message : 'Submission failed');
       } finally {
         submitBtn?.removeAttribute('disabled');
         submitText?.classList.remove('hidden');
@@ -602,29 +690,24 @@ const style = useMemo(() => ({ color: 'red' }), []);
       }
     });
 
-    function showError(message: string) {
-      if (errorText) errorText.textContent = message;
-      errorMessage?.classList.remove('hidden');
-    }
-
-    // Submit another button
+    // Submit another
     document.getElementById('submit-another')?.addEventListener('click', () => {
       form.reset();
       tags = [];
       related = [];
-      collections = [];
-      renderTags();
-      renderRelated();
-      renderCollections();
-      slugManuallyEdited = false;
+      renderChips(tagsContainer!, tags, () => {});
+      renderChips(relatedContainer!, related, () => {});
+      if (descCount) descCount.textContent = '0';
+      if (contentCount) contentCount.textContent = '0';
+      currentStep = 1;
+      goToStep(1);
       successState?.classList.add('hidden');
-      document.getElementById('submission-form')?.classList.remove('hidden');
+      wizard?.classList.remove('hidden');
     });
 
-    // Load contribution for editing
+    // Load for editing
     async function loadContributionForEdit() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const editId = urlParams.get('edit');
+      const editId = new URLSearchParams(window.location.search).get('edit');
       if (!editId) return;
 
       const token = localStorage.getItem('erold_token');
@@ -635,52 +718,28 @@ const style = useMemo(() => ({ color: 'red' }), []);
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!response.ok) {
-          console.error('Failed to load contribution for editing');
-          return;
-        }
+        if (!response.ok) return;
 
         const data = await response.json();
         const g = data.guideline || {};
 
-        // Populate form fields
-        (document.getElementById('topic') as HTMLInputElement).value = data.topic || data.framework || '';
+        (document.getElementById('topic') as HTMLInputElement).value = data.topic || '';
         (document.getElementById('category') as HTMLInputElement).value = data.category || '';
-        (document.getElementById('title') as HTMLInputElement).value = g.title || data.title || '';
-        (document.getElementById('slug') as HTMLInputElement).value = g.slug || data.slug || '';
-        (document.getElementById('version') as HTMLInputElement).value = g.version || '1.0.0';
-        (document.getElementById('difficulty') as HTMLSelectElement).value = g.difficulty || 'beginner';
+        (document.getElementById('title') as HTMLInputElement).value = g.title || '';
+        (document.getElementById('description') as HTMLTextAreaElement).value = g.description || '';
+        (document.getElementById('difficulty') as HTMLSelectElement).value = g.difficulty || 'intermediate';
+        (document.getElementById('content') as HTMLTextAreaElement).value = g.content || '';
 
-        const descEl = document.getElementById('description') as HTMLTextAreaElement;
-        descEl.value = g.description || '';
-        if (descCount) descCount.textContent = String(descEl.value.length);
+        if (descCount) descCount.textContent = String((g.description || '').length);
+        if (contentCount) contentCount.textContent = String((g.content || '').length);
 
-        const contentEl = document.getElementById('content') as HTMLTextAreaElement;
-        contentEl.value = g.content || '';
-        if (contentCount) contentCount.textContent = String(contentEl.value.length);
-
-        // Load tags
         tags = g.tags || [];
-        renderTags();
-
-        // Load related
         related = g.related || [];
-        renderRelated();
-
-        // Load collections
-        collections = g.collections || [];
-        renderCollections();
-
-        slugManuallyEdited = true; // Don't auto-generate slug when editing
-
-        // Update page title
-        document.querySelector('h1')!.textContent = 'Edit Guideline';
-
-        // Store edit ID for submission
-        (document.getElementById('guideline-form') as HTMLFormElement).dataset.editId = editId;
+        renderChips(tagsContainer!, tags, (i) => { tags.splice(i, 1); renderChips(tagsContainer!, tags, () => {}); });
+        renderChips(relatedContainer!, related, (i) => { related.splice(i, 1); renderChips(relatedContainer!, related, () => {}); });
 
       } catch (err) {
-        console.error('Error loading contribution:', err);
+        console.error('Failed to load for editing:', err);
       }
     }
 

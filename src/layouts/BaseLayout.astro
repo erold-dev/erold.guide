@@ -12,10 +12,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const currentPath = Astro.url.pathname;
 
 const navLinks = [
-  { href: '/topics', label: 'topics' },
-  { href: '/technologies', label: 'technologies' },
-  { href: '/api', label: 'api' },
-  { href: '/contribute', label: 'contribute' },
+  { href: '/topics', label: 'Topics' },
+  { href: '/technologies', label: 'Technologies' },
+  { href: '/api', label: 'API' },
+  { href: '/contribute', label: 'Contribute' },
 ];
 ---
 
@@ -24,7 +24,7 @@ const navLinks = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalURL} />
 
@@ -50,30 +50,41 @@ const navLinks = [
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Theme Script (runs before render to prevent flash) -->
+    <script is:inline>
+      (function() {
+        const stored = localStorage.getItem('erold-theme');
+        if (stored) {
+          document.documentElement.setAttribute('data-theme', stored);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body class="min-h-screen antialiased">
-    <!-- Grid background -->
-    <div class="fixed inset-0 bg-grid opacity-50 pointer-events-none"></div>
-
-    <!-- Gradient glow -->
-    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-glow-blue pointer-events-none"></div>
+    <!-- Skip to main content - Accessibility -->
+    <a href="#main-content" class="skip-link">
+      Skip to main content
+    </a>
 
     <div class="relative flex min-h-screen flex-col">
       <!-- Header -->
-      <header class="sticky top-0 z-50 border-b border-[--color-terminal-border] backdrop-blur-md" style="background: rgba(10, 10, 15, 0.8);">
-        <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+      <header class="sticky top-0 z-50 border-b" style="border-color: var(--border-secondary); background: var(--bg-primary);">
+        <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <!-- Logo -->
-          <a href="/" class="flex items-center gap-2.5 group">
-            <div class="relative flex items-center justify-center w-8 h-8 rounded-lg" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(124, 58, 237, 0.2)); border: 1px solid rgba(37, 99, 235, 0.3);">
-              <span class="font-mono font-bold text-sm text-gradient">G</span>
+          <a href="/" class="flex items-center gap-2.5 group" aria-label="erold.guide home">
+            <div class="relative flex items-center justify-center w-9 h-9 rounded-lg" style="background: var(--color-info-bg); border: 1px solid var(--color-info);">
+              <span class="font-mono font-bold text-base text-gradient">G</span>
             </div>
-            <span class="font-mono font-semibold text-[--color-terminal-text] group-hover:text-white transition-colors">
-              erold<span class="text-[--color-primary-500]">.guide</span>
+            <span class="font-mono font-semibold text-base" style="color: var(--text-primary);">
+              erold<span style="color: var(--color-primary-500);">.guide</span>
             </span>
           </a>
 
           <!-- Navigation -->
-          <nav class="hidden sm:flex items-center gap-1">
+          <nav class="hidden sm:flex items-center" role="navigation" aria-label="Main navigation">
             {navLinks.map((link) => (
               <a
                 href={link.href}
@@ -81,123 +92,273 @@ const navLinks = [
                   "nav-link font-mono text-sm",
                   currentPath.startsWith(link.href) && "nav-link-active"
                 ]}
+                aria-current={currentPath.startsWith(link.href) ? "page" : undefined}
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          <!-- Right side -->
-          <div class="flex items-center gap-3">
+          <!-- Right side actions -->
+          <div class="flex items-center gap-2">
             <!-- Search trigger -->
             <button
               id="search-trigger"
-              class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-mono transition-all"
-              style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border); color: var(--color-terminal-muted);"
+              type="button"
+              class="btn-icon"
+              aria-label="Search guidelines (Command+K)"
+              aria-keyshortcuts="Control+K Meta+K"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <span class="text-xs">search</span>
-              <div class="flex items-center gap-0.5 ml-2">
-                <kbd class="kbd">⌘</kbd>
-                <kbd class="kbd">K</kbd>
-              </div>
+              <span class="sr-only">Search</span>
             </button>
 
+            <!-- Theme toggle -->
+            <button
+              id="theme-toggle"
+              type="button"
+              class="theme-toggle"
+              aria-label="Toggle dark mode"
+            >
+              <!-- Sun icon (shown in dark mode) -->
+              <svg class="icon-moon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              <!-- Moon icon (shown in light mode) -->
+              <svg class="icon-sun w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span class="sr-only">Toggle theme</span>
+            </button>
+
+            <!-- Mobile menu button -->
+            <button
+              id="mobile-menu-toggle"
+              type="button"
+              class="btn-icon sm:hidden"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-controls="mobile-menu"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
+
+        <!-- Mobile navigation -->
+        <nav
+          id="mobile-menu"
+          class="hidden sm:hidden border-t"
+          style="border-color: var(--border-secondary); background: var(--bg-secondary);"
+          role="navigation"
+          aria-label="Mobile navigation"
+        >
+          <div class="px-4 py-3 space-y-1">
+            {navLinks.map((link) => (
+              <a
+                href={link.href}
+                class:list={[
+                  "block py-3 px-4 rounded-lg font-medium transition-colors",
+                  currentPath.startsWith(link.href)
+                    ? "bg-[var(--color-info-bg)] text-[var(--color-info)]"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                ]}
+                aria-current={currentPath.startsWith(link.href) ? "page" : undefined}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </nav>
       </header>
 
       <!-- Main content -->
-      <main class="flex-1 relative">
+      <main id="main-content" class="flex-1 relative" tabindex="-1">
         <slot />
       </main>
 
       <!-- Footer -->
-      <footer class="relative border-t border-[--color-terminal-border] mt-12" style="background: var(--color-terminal-surface);">
-        <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+      <footer class="relative border-t mt-12" style="border-color: var(--border-secondary); background: var(--bg-secondary);">
+        <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-6 font-mono text-xs" style="color: var(--color-terminal-muted);">
-              <a href="/topics" class="hover:text-[--color-primary-400] transition-colors">Topics</a>
-              <a href="/api" class="hover:text-[--color-primary-400] transition-colors">API</a>
-              <a href="/contribute" class="hover:text-[--color-primary-400] transition-colors">Contribute</a>
-            </div>
-            <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
-              MIT License · Part of <a href="https://erold.dev" class="text-[--color-primary-400] hover:underline">erold</a>
+            <nav class="flex items-center gap-6 font-mono text-sm" aria-label="Footer navigation">
+              <a href="/topics" class="hover:underline" style="color: var(--text-secondary);">Topics</a>
+              <a href="/api" class="hover:underline" style="color: var(--text-secondary);">API</a>
+              <a href="/contribute" class="hover:underline" style="color: var(--text-secondary);">Contribute</a>
+            </nav>
+            <p class="font-mono text-sm" style="color: var(--text-muted);">
+              MIT License · Part of <a href="https://erold.dev" class="hover:underline" style="color: var(--color-primary-600);">erold</a>
             </p>
           </div>
         </div>
       </footer>
     </div>
 
-    <!-- Command Palette (hidden by default) -->
-    <div id="command-palette-container" class="hidden">
-      <div class="command-palette-overlay" id="command-overlay"></div>
-      <div class="command-palette">
-        <input
-          type="text"
-          class="command-palette-input"
-          placeholder="Type to search guidelines..."
-          id="command-input"
-        />
-        <div class="command-palette-results" id="command-results">
-          <div class="px-3 py-2 text-xs font-mono uppercase tracking-wider" style="color: var(--color-terminal-comment);">
-            Quick Actions
-          </div>
-          <div class="command-palette-item">
-            <svg class="command-palette-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    <!-- Search Modal -->
+    <div
+      id="search-modal"
+      class="hidden fixed inset-0 z-[100]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="search-modal-title"
+    >
+      <div class="modal-backdrop" id="search-backdrop"></div>
+      <div class="fixed inset-x-4 top-[10%] sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-xl z-[101]">
+        <div class="rounded-xl overflow-hidden shadow-2xl" style="background: var(--bg-primary); border: 1px solid var(--border-primary);">
+          <div class="relative">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <span>Go to Home</span>
-            <kbd class="kbd ml-auto">↵</kbd>
+            <input
+              type="search"
+              id="search-input"
+              class="w-full py-4 pl-12 pr-4 text-lg border-0 outline-none"
+              style="background: transparent; color: var(--text-primary);"
+              placeholder="Search guidelines..."
+              aria-label="Search guidelines"
+            />
+            <button
+              type="button"
+              id="search-close"
+              class="absolute right-3 top-1/2 -translate-y-1/2 btn-icon"
+              aria-label="Close search"
+            >
+              <kbd class="kbd">Esc</kbd>
+            </button>
           </div>
-          <div class="command-palette-item">
-            <svg class="command-palette-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-            </svg>
-            <span>Browse Topics</span>
-          </div>
-          <div class="command-palette-item">
-            <svg class="command-palette-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-            <span>API Documentation</span>
+          <div id="search-results" class="border-t max-h-[60vh] overflow-auto" style="border-color: var(--border-secondary);">
+            <div class="p-4">
+              <p class="text-sm font-medium mb-3" style="color: var(--text-muted);">Quick links</p>
+              <div class="space-y-1">
+                <a href="/" class="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--surface-hover)]">
+                  <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  <span style="color: var(--text-primary);">Home</span>
+                </a>
+                <a href="/topics" class="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--surface-hover)]">
+                  <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  <span style="color: var(--text-primary);">Browse Topics</span>
+                </a>
+                <a href="/api" class="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--surface-hover)]">
+                  <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+                  <span style="color: var(--text-primary);">API Documentation</span>
+                </a>
+                <a href="/contribute" class="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--surface-hover)]">
+                  <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span style="color: var(--text-primary);">Contribute</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <script>
-      // Command palette toggle
-      const trigger = document.getElementById('search-trigger');
-      const container = document.getElementById('command-palette-container');
-      const overlay = document.getElementById('command-overlay');
-      const input = document.getElementById('command-input');
+      // Theme toggle
+      const themeToggle = document.getElementById('theme-toggle');
 
-      function openPalette() {
-        container?.classList.remove('hidden');
-        input?.focus();
+      function setTheme(theme: string) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('erold-theme', theme);
+
+        // Update aria-label
+        themeToggle?.setAttribute(
+          'aria-label',
+          theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+        );
       }
 
-      function closePalette() {
-        container?.classList.add('hidden');
+      themeToggle?.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const isDark = current === 'dark' ||
+          (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        setTheme(isDark ? 'light' : 'dark');
+      });
+
+      // Listen for system preference changes
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('erold-theme')) {
+          document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        }
+      });
+
+      // Mobile menu toggle
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      mobileMenuToggle?.addEventListener('click', () => {
+        const isOpen = !mobileMenu?.classList.contains('hidden');
+        mobileMenu?.classList.toggle('hidden');
+        mobileMenuToggle?.setAttribute('aria-expanded', String(!isOpen));
+        mobileMenuToggle?.setAttribute('aria-label', isOpen ? 'Open menu' : 'Close menu');
+      });
+
+      // Search modal
+      const searchTrigger = document.getElementById('search-trigger');
+      const searchModal = document.getElementById('search-modal');
+      const searchBackdrop = document.getElementById('search-backdrop');
+      const searchClose = document.getElementById('search-close');
+      const searchInput = document.getElementById('search-input') as HTMLInputElement;
+
+      function openSearch() {
+        searchModal?.classList.remove('hidden');
+        searchInput?.focus();
+        document.body.style.overflow = 'hidden';
       }
 
-      trigger?.addEventListener('click', openPalette);
-      overlay?.addEventListener('click', closePalette);
+      function closeSearch() {
+        searchModal?.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      searchTrigger?.addEventListener('click', openSearch);
+      searchBackdrop?.addEventListener('click', closeSearch);
+      searchClose?.addEventListener('click', closeSearch);
 
       document.addEventListener('keydown', (e) => {
+        // Open search with Cmd/Ctrl + K
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
           e.preventDefault();
-          if (container?.classList.contains('hidden')) {
-            openPalette();
+          if (searchModal?.classList.contains('hidden')) {
+            openSearch();
           } else {
-            closePalette();
+            closeSearch();
           }
         }
-        if (e.key === 'Escape') {
-          closePalette();
+        // Close with Escape
+        if (e.key === 'Escape' && !searchModal?.classList.contains('hidden')) {
+          closeSearch();
+        }
+      });
+
+      // Focus trap for search modal
+      searchModal?.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          const focusable = searchModal.querySelectorAll<HTMLElement>(
+            'input, button, a[href], [tabindex]:not([tabindex="-1"])'
+          );
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last?.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first?.focus();
+          }
         }
       });
     </script>
