@@ -92,7 +92,7 @@ const stats = {
           <h2 id="topics-heading">Topics</h2>
           <span class="zone-count" aria-label="{topics.length} topics">{topics.length}</span>
         </div>
-        <a href="/topics" class="zone-link">
+        <a href="/explore" class="zone-link">
           View all<span class="sr-only"> topics</span> →
         </a>
       </div>
@@ -100,7 +100,7 @@ const stats = {
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {topics.map((topic) => (
           <a
-            href={`/topics/${topic.slug}`}
+            href={`/explore/${topic.slug}`}
             class="framework-card"
             aria-label={`${topic.name} - ${topic.guidelinesCount} guidelines`}
           >

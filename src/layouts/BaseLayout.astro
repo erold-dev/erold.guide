@@ -12,8 +12,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const currentPath = Astro.url.pathname;
 
 const navLinks = [
-  { href: '/topics', label: 'Topics' },
-  { href: '/technologies', label: 'Technologies' },
+  { href: '/explore', label: 'Explore' },
   { href: '/api', label: 'API' },
   { href: '/contribute', label: 'Contribute' },
 ];
@@ -222,7 +221,7 @@ const navLinks = [
         <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
             <nav class="flex items-center gap-6 font-mono text-sm" aria-label="Footer navigation">
-              <a href="/topics" class="hover:underline" style="color: var(--text-secondary);">Topics</a>
+              <a href="/explore" class="hover:underline" style="color: var(--text-secondary);">Explore</a>
               <a href="/api" class="hover:underline" style="color: var(--text-secondary);">API</a>
               <a href="/contribute" class="hover:underline" style="color: var(--text-secondary);">Contribute</a>
             </nav>
@@ -276,11 +275,11 @@ const navLinks = [
                   </svg>
                   <span style="color: var(--text-primary);">Home</span>
                 </a>
-                <a href="/topics" class="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--surface-hover)]">
+                <a href="/explore" class="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--surface-hover)]">
                   <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
-                  <span style="color: var(--text-primary);">Browse Topics</span>
+                  <span style="color: var(--text-primary);">Explore Guidelines</span>
                 </a>
                 <a href="/api" class="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--surface-hover)]">
                   <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

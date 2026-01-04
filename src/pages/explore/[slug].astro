@@ -1,0 +1,336 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTopics, getTopic, getGuidelinesByTopic } from '../../lib/content';
+
+export function getStaticPaths() {
+  const topics = getTopics();
+  return topics.map((topic) => ({
+    params: { slug: topic.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const topic = getTopic(slug);
+
+if (!topic) {
+  return Astro.redirect('/404');
+}
+
+const guidelines = getGuidelinesByTopic(slug);
+
+const guidelinesByCategory = guidelines.reduce((acc, g) => {
+  if (!acc[g.category]) {
+    acc[g.category] = [];
+  }
+  acc[g.category].push(g);
+  return acc;
+}, {} as Record<string, typeof guidelines>);
+
+const categories = Object.keys(guidelinesByCategory).sort();
+---
+
+<BaseLayout title={topic.name} description={topic.description}>
+  <main id="main-content" class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+
+    <!-- Compact Header -->
+    <header class="mb-8">
+      <!-- Breadcrumb + API link row -->
+      <div class="flex items-center justify-between mb-4">
+        <nav class="text-sm font-mono" style="color: var(--text-muted);" aria-label="Breadcrumb">
+          <a href="/" class="hover:underline" style="color: var(--text-secondary);">Home</a>
+          <span class="mx-1.5">/</span>
+          <a href="/explore" class="hover:underline" style="color: var(--text-secondary);">Explore</a>
+          <span class="mx-1.5">/</span>
+          <span style="color: var(--text-primary);">{topic.name}</span>
+        </nav>
+        <a
+          href={`/api/v1/topics/${topic.slug}/_index.json`}
+          class="text-xs font-mono px-2 py-1 rounded hover:opacity-80 transition-opacity"
+          style="background: var(--bg-tertiary); color: var(--text-muted);"
+          title="API endpoint"
+        >
+          API
+        </a>
+      </div>
+
+      <!-- Title row -->
+      <div class="flex items-center gap-4 mb-3">
+        {topic.logo && (
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: var(--bg-tertiary);">
+            <img src={topic.logo} alt="" class="w-6 h-6" aria-hidden="true" />
+          </div>
+        )}
+        <div class="flex items-center gap-3 flex-wrap">
+          <h1 class="text-2xl font-bold tracking-tight" style="color: var(--text-primary);">{topic.name}</h1>
+          {topic.currentVersion && (
+            <span class="text-xs font-mono px-1.5 py-0.5 rounded" style="background: var(--bg-tertiary); color: var(--text-muted);">
+              v{topic.currentVersion}
+            </span>
+          )}
+          <span class="text-sm" style="color: var(--text-muted);">
+            {guidelines.length} guidelines
+          </span>
+        </div>
+      </div>
+
+      <!-- Description + links -->
+      <p class="text-sm mb-3" style="color: var(--text-secondary); max-width: 600px;">
+        {topic.description}
+      </p>
+
+      <!-- Compact external links -->
+      <div class="flex items-center gap-4 text-sm">
+        {topic.website && (
+          <a href={topic.website} target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:underline" style="color: var(--text-muted);">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            Website
+          </a>
+        )}
+        {topic.documentation && (
+          <a href={topic.documentation} target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:underline" style="color: var(--text-muted);">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            Docs
+          </a>
+        )}
+        {topic.repository && (
+          <a href={topic.repository} target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:underline" style="color: var(--text-muted);">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" /></svg>
+            GitHub
+          </a>
+        )}
+      </div>
+    </header>
+
+    <!-- Category filter (horizontal tabs) -->
+    {categories.length > 1 && (
+      <nav class="flex items-center gap-2 mb-6 overflow-x-auto pb-2" aria-label="Categories">
+        <a
+          href="#all"
+          class="category-tab active"
+          data-category="all"
+        >
+          All ({guidelines.length})
+        </a>
+        {categories.map((cat) => (
+          <a
+            href={`#${cat}`}
+            class="category-tab"
+            data-category={cat}
+          >
+            {cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} ({guidelinesByCategory[cat].length})
+          </a>
+        ))}
+      </nav>
+    )}
+
+    <!-- Guidelines List - THE MAIN CONTENT -->
+    {guidelines.length > 0 ? (
+      <div class="guidelines-list">
+        {categories.map((category) => (
+          <section class="category-section" data-category={category}>
+            {categories.length > 1 && (
+              <h2 class="category-heading" id={category}>
+                {category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </h2>
+            )}
+
+            {guidelinesByCategory[category].map((g) => (
+              <a href={`/guidelines/${g.topic}/${g.category}/${g.slug}`} class="guideline-row">
+                <div class="guideline-row-main">
+                  <h3 class="guideline-row-title">{g.title}</h3>
+                  <p class="guideline-row-desc">{g.description}</p>
+                </div>
+                <div class="guideline-row-meta">
+                  <span class={`difficulty-dot difficulty-${g.difficulty}`} title={g.difficulty}></span>
+                  <span class="guideline-row-time">{g.estimatedReadTime}m</span>
+                  <svg class="guideline-row-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </section>
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state-compact">
+        <p style="color: var(--text-muted);">No guidelines yet for {topic.name}.</p>
+        <a href="/contribute" class="btn btn-primary mt-3">Contribute a Guideline</a>
+      </div>
+    )}
+
+  </main>
+</BaseLayout>
+
+<style>
+  /* Category tabs */
+  .category-tab {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-secondary);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .category-tab:hover, .category-tab.active {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+  }
+
+  /* Category heading */
+  .category-heading {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 1rem 0 0.5rem;
+    border-bottom: 1px solid var(--border-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .category-section:first-child .category-heading {
+    padding-top: 0;
+  }
+
+  /* Guideline rows - THE MAIN CONTENT */
+  .guideline-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-secondary);
+    transition: background 0.1s ease;
+  }
+
+  .guideline-row:hover {
+    background: var(--bg-secondary);
+    margin: 0 -1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-bottom-color: transparent;
+  }
+
+  .guideline-row:last-child {
+    border-bottom: none;
+  }
+
+  .guideline-row-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .guideline-row-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+  }
+
+  .guideline-row:hover .guideline-row-title {
+    color: var(--accent-primary);
+  }
+
+  .guideline-row-desc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .guideline-row-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .guideline-row-time {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+
+  .guideline-row-arrow {
+    width: 1rem;
+    height: 1rem;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .guideline-row:hover .guideline-row-arrow {
+    opacity: 1;
+    color: var(--accent-primary);
+  }
+
+  /* Difficulty dots */
+  .difficulty-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+  }
+
+  .difficulty-dot.difficulty-beginner {
+    background: var(--status-success);
+  }
+
+  .difficulty-dot.difficulty-intermediate {
+    background: var(--status-warning);
+  }
+
+  .difficulty-dot.difficulty-advanced {
+    background: var(--status-error);
+  }
+
+  /* Empty state */
+  .empty-state-compact {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .guideline-row-desc {
+      display: none;
+    }
+
+    .guideline-row-time {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Simple category filtering
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      const category = (e.target as HTMLElement).dataset.category;
+
+      // Update active tab
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      (e.target as HTMLElement).classList.add('active');
+
+      // Filter sections
+      document.querySelectorAll('.category-section').forEach(section => {
+        if (category === 'all' || section.dataset.category === category) {
+          (section as HTMLElement).style.display = 'block';
+        } else {
+          (section as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

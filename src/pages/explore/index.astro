@@ -1,0 +1,182 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTopics, getGuidelinesByTopic } from '../../lib/content';
+
+const topics = getTopics().map(topic => ({
+  ...topic,
+  guidelinesCount: getGuidelinesByTopic(topic.slug).length,
+}));
+
+const totalGuidelines = topics.reduce((sum, t) => sum + t.guidelinesCount, 0);
+
+// Group by technology/language
+const topicsByTech = topics.reduce((acc, topic) => {
+  const tech = topic.technology || 'Other';
+  if (!acc[tech]) acc[tech] = [];
+  acc[tech].push(topic);
+  return acc;
+}, {} as Record<string, typeof topics>);
+---
+
+<BaseLayout title="Explore">
+  <main id="main-content" class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+
+    <!-- Header -->
+    <header class="mb-8">
+      <nav class="text-sm font-mono mb-4" style="color: var(--text-muted);" aria-label="Breadcrumb">
+        <a href="/" class="hover:underline" style="color: var(--text-secondary);">Home</a>
+        <span class="mx-1.5">/</span>
+        <span style="color: var(--text-primary);">Explore</span>
+      </nav>
+
+      <div class="flex items-center justify-between gap-4 mb-2">
+        <h1 class="text-2xl font-bold tracking-tight" style="color: var(--text-primary);">Explore Guidelines</h1>
+        <span class="text-sm" style="color: var(--text-muted);">
+          {totalGuidelines} guidelines across {topics.length} topics
+        </span>
+      </div>
+
+      <p class="text-sm" style="color: var(--text-secondary); max-width: 500px;">
+        Browse best practices for frameworks, libraries, and development tools.
+      </p>
+    </header>
+
+    <!-- Topic list -->
+    {topics.length > 0 ? (
+      <div class="topic-list">
+        {topics.map((topic) => (
+          <a href={`/explore/${topic.slug}`} class="topic-row">
+            <div class="topic-row-icon">
+              {topic.logo ? (
+                <img src={topic.logo} alt="" class="w-5 h-5" aria-hidden="true" />
+              ) : (
+                <span class="text-sm font-bold" style="color: var(--text-muted);">{topic.name.charAt(0)}</span>
+              )}
+            </div>
+            <div class="topic-row-main">
+              <h2 class="topic-row-title">{topic.name}</h2>
+              <p class="topic-row-desc">{topic.description}</p>
+            </div>
+            <div class="topic-row-meta">
+              <span class="topic-row-count">{topic.guidelinesCount}</span>
+              <svg class="topic-row-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state-compact">
+        <p style="color: var(--text-muted);">No topics yet. Add topic YAML files to get started.</p>
+      </div>
+    )}
+
+  </main>
+</BaseLayout>
+
+<style>
+  .topic-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topic-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-secondary);
+    transition: background 0.1s ease;
+  }
+
+  .topic-row:hover {
+    background: var(--bg-secondary);
+    margin: 0 -1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-bottom-color: transparent;
+  }
+
+  .topic-row:last-child {
+    border-bottom: none;
+  }
+
+  .topic-row-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--bg-tertiary);
+  }
+
+  .topic-row-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .topic-row-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 0.125rem;
+  }
+
+  .topic-row:hover .topic-row-title {
+    color: var(--accent-primary);
+  }
+
+  .topic-row-desc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .topic-row-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .topic-row-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    min-width: 1.5rem;
+    text-align: right;
+  }
+
+  .topic-row-arrow {
+    width: 1rem;
+    height: 1rem;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .topic-row:hover .topic-row-arrow {
+    opacity: 1;
+    color: var(--accent-primary);
+  }
+
+  .empty-state-compact {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .topic-row-desc {
+      display: none;
+    }
+  }
+</style>
