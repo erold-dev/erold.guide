@@ -5,281 +5,435 @@ import { getTopics, getGuidelines, getGuidelinesByTopic } from '../lib/content';
 const allTopics = getTopics();
 const allGuidelines = getGuidelines();
 
-const topics = allTopics
+const featuredTopics = allTopics
   .map(topic => ({
     ...topic,
     guidelinesCount: getGuidelinesByTopic(topic.slug).length,
   }))
-  .sort((a, b) => b.guidelinesCount - a.guidelinesCount);
-
-const recentGuidelines = allGuidelines
-  .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-  .slice(0, 10);
+  .sort((a, b) => b.guidelinesCount - a.guidelinesCount)
+  .slice(0, 4);
 
 const stats = {
   guidelines: allGuidelines.length,
   topics: allTopics.length,
 };
-
-// Get unique tags
-const allTags = [...new Set(allGuidelines.flatMap(g => g.tags || []))].slice(0, 12);
 ---
 
-<BaseLayout title="Development Guidelines">
-  <div class="page-layout">
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Header -->
-      <header class="page-header">
-        <h1>Development Guidelines</h1>
-        <p>The open encyclopedia of best practices for modern development.</p>
-      </header>
+<BaseLayout title="Development Guidelines for Humans & AI">
+  <div class="landing">
 
-      <!-- Search -->
-      <div class="search-section">
-        <div class="search-box">
-          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="search"
-            id="homepage-search"
-            class="search-input"
-            placeholder="Search guidelines..."
-          />
-          <div class="search-shortcut">
-            <kbd>⌘K</kbd>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Development Guidelines<br/><span class="text-accent">for Humans & AI</span></h1>
+        <p class="hero-desc">
+          The open encyclopedia of best practices. Curated guidelines for modern frameworks,
+          accessible via web or JSON API.
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">{stats.guidelines}</span>
+            <span class="hero-stat-label">guidelines</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">{stats.topics}</span>
+            <span class="hero-stat-label">topics</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">100%</span>
+            <span class="hero-stat-label">free & open</span>
           </div>
         </div>
-      </div>
-
-      <!-- Topics Grid -->
-      <section class="section">
-        <div class="section-header">
-          <h2>Topics</h2>
-          <a href="/explore" class="section-link">View all →</a>
-        </div>
-        <div class="topics-grid">
-          {topics.map((topic) => (
-            <a href={`/explore/${topic.slug}`} class="topic-card">
-              <div class="topic-card-icon">
-                {topic.logo ? (
-                  <img src={topic.logo} alt="" />
-                ) : (
-                  <span>{topic.name.charAt(0)}</span>
-                )}
-              </div>
-              <div class="topic-card-info">
-                <span class="topic-card-name">{topic.name}</span>
-                <span class="topic-card-count">{topic.guidelinesCount}</span>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <!-- Recent Guidelines -->
-      <section class="section">
-        <div class="section-header">
-          <h2>Recent Guidelines</h2>
-        </div>
-        {recentGuidelines.length > 0 ? (
-          <div class="guidelines-list">
-            {recentGuidelines.map((g) => (
-              <a href={`/guidelines/${g.topic}/${g.category}/${g.slug}`} class="guideline-row">
-                <div class="guideline-row-main">
-                  <span class="guideline-row-title">{g.title}</span>
-                  <div class="guideline-row-meta">
-                    <span class="guideline-row-topic">{g.topic}</span>
-                    <span class="guideline-row-category">{g.category.replace(/-/g, ' ')}</span>
-                  </div>
-                </div>
-                <svg class="guideline-row-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-            ))}
-          </div>
-        ) : (
-          <div class="empty-state">
-            <p>No guidelines yet. Be the first to contribute!</p>
-            <a href="/contribute" class="btn-primary">Contribute</a>
-          </div>
-        )}
-      </section>
-    </main>
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <!-- Stats -->
-      <div class="sidebar-box">
-        <h3>Statistics</h3>
-        <dl class="stats-list">
-          <div class="stat-row">
-            <dt>Guidelines</dt>
-            <dd>{stats.guidelines}</dd>
-          </div>
-          <div class="stat-row">
-            <dt>Topics</dt>
-            <dd>{stats.topics}</dd>
-          </div>
-        </dl>
-      </div>
-
-      <!-- Tags -->
-      {allTags.length > 0 && (
-        <div class="sidebar-box">
-          <h3>Popular Tags</h3>
-          <div class="tags-list">
-            {allTags.map(tag => (
-              <span class="tag">{tag}</span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <!-- Quick Links -->
-      <div class="sidebar-box">
-        <h3>Quick Links</h3>
-        <div class="sidebar-links">
-          <a href="/explore" class="sidebar-link">
+        <div class="hero-actions">
+          <a href="/explore" class="btn-primary">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            Explore All
+            Explore Guidelines
           </a>
-          <a href="/api" class="sidebar-link">
+          <a href="/api" class="btn-secondary">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
             </svg>
             API Access
           </a>
-          <a href="/contribute" class="sidebar-link">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Contribute
-          </a>
         </div>
       </div>
+    </section>
 
-      <!-- For AI -->
-      <div class="sidebar-box sidebar-box-muted">
-        <h3>For AI Agents</h3>
-        <p class="sidebar-text">Access guidelines via our JSON API. Zero auth required.</p>
-        <code class="api-endpoint">GET /api/v1/topics.json</code>
+    <!-- Two Audiences -->
+    <section class="audiences">
+      <div class="audience-card">
+        <div class="audience-icon">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <h2>For Developers</h2>
+        <p>Browse best practices for your favorite frameworks. Each guideline includes code examples, anti-patterns, and clear explanations.</p>
+        <ul class="audience-list">
+          <li>Searchable guidelines by topic</li>
+          <li>Code examples you can copy</li>
+          <li>Community-curated content</li>
+        </ul>
+        <a href="/explore" class="audience-link">Browse Guidelines →</a>
       </div>
-    </aside>
+
+      <div class="audience-card audience-card-ai">
+        <div class="audience-icon">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h2>For AI Agents</h2>
+        <p>Structured JSON API designed for LLMs. Fetch guidelines programmatically to improve code generation quality.</p>
+        <div class="api-quick">
+          <div class="api-instruction">
+            <span class="api-step">1</span>
+            <span>Get all topics:</span>
+          </div>
+          <code class="api-code">GET https://erold.guide/api/v1/topics.json</code>
+
+          <div class="api-instruction">
+            <span class="api-step">2</span>
+            <span>Get topic guidelines:</span>
+          </div>
+          <code class="api-code">GET https://erold.guide/api/v1/topics/{`{topic}`}/_index.json</code>
+
+          <div class="api-instruction">
+            <span class="api-step">3</span>
+            <span>Get specific guideline:</span>
+          </div>
+          <code class="api-code">GET https://erold.guide/api/v1/topics/{`{topic}`}/{`{category}`}/{`{slug}`}.json</code>
+        </div>
+        <p class="api-note">Zero authentication. JSON responses. AI-optimized fields included.</p>
+        <a href="/api" class="audience-link">Full API Documentation →</a>
+      </div>
+    </section>
+
+    <!-- Featured Topics -->
+    <section class="featured">
+      <div class="section-header">
+        <h2>Popular Topics</h2>
+        <a href="/explore" class="section-link">View all →</a>
+      </div>
+      <div class="featured-grid">
+        {featuredTopics.map((topic) => (
+          <a href={`/explore/${topic.slug}`} class="featured-card">
+            <div class="featured-card-icon">
+              {topic.logo ? (
+                <img src={topic.logo} alt="" />
+              ) : (
+                <span>{topic.name.charAt(0)}</span>
+              )}
+            </div>
+            <div class="featured-card-content">
+              <h3>{topic.name}</h3>
+              <p>{topic.description}</p>
+            </div>
+            <div class="featured-card-count">{topic.guidelinesCount} guidelines</div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Browse</h3>
+          <p>Find guidelines for your framework or technology</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Learn</h3>
+          <p>Read best practices with code examples</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Apply</h3>
+          <p>Improve your code or train your AI agent</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contribute CTA -->
+    <section class="contribute-cta">
+      <div class="contribute-content">
+        <h2>Share Your Knowledge</h2>
+        <p>Help build the open encyclopedia. Contribute guidelines and help developers worldwide.</p>
+        <a href="/contribute" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Contribute a Guideline
+        </a>
+      </div>
+    </section>
+
   </div>
 </BaseLayout>
 
 <style>
-  .hidden {
-    display: none !important;
-  }
-
-  /* Two-column layout */
-  .page-layout {
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 2.5rem;
+  .landing {
     max-width: 72rem;
     margin: 0 auto;
-    padding: 2rem 1rem;
-    align-items: start;
+    padding: 0 1rem;
   }
 
   @media (min-width: 640px) {
-    .page-layout {
-      padding: 2rem 1.5rem;
+    .landing {
+      padding: 0 1.5rem;
     }
   }
 
-  @media (max-width: 1024px) {
-    .page-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-      display: none;
-    }
+  /* Hero */
+  .hero {
+    padding: 3rem 0 4rem;
+    text-align: center;
   }
 
-  /* Main content */
-  .main-content {
-    min-width: 0;
-  }
-
-  .page-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .page-header h1 {
-    font-size: 1.5rem;
+  .hero h1 {
+    font-size: 2.25rem;
     font-weight: 700;
+    line-height: 1.2;
     color: var(--text-primary);
-    margin-bottom: 0.25rem;
+    margin-bottom: 1rem;
   }
 
-  .page-header p {
-    font-size: 0.875rem;
-    color: var(--text-muted);
+  @media (min-width: 640px) {
+    .hero h1 {
+      font-size: 3rem;
+    }
   }
 
-  /* Search */
-  .search-section {
+  .text-accent {
+    color: var(--accent-primary);
+  }
+
+  .hero-desc {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    max-width: 36rem;
+    margin: 0 auto 1.5rem;
+    line-height: 1.6;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
     margin-bottom: 2rem;
   }
 
-  .search-box {
-    position: relative;
+  .hero-stat {
+    text-align: center;
   }
 
-  .search-icon {
-    position: absolute;
-    left: 0.875rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--text-muted);
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 0.75rem 4rem 0.75rem 2.75rem;
-    font-size: 0.9375rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--border-primary);
-    background: var(--bg-secondary);
+  .hero-stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: monospace;
     color: var(--text-primary);
   }
 
-  .search-input:focus {
-    outline: none;
+  .hero-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: white;
+    background: var(--accent-primary);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+
+  .btn-secondary:hover {
     border-color: var(--accent-primary);
   }
 
-  .search-shortcut {
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
+  /* Audiences */
+  .audiences {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 4rem;
   }
 
-  .search-shortcut kbd {
-    font-family: monospace;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    background: var(--bg-primary);
+  @media (min-width: 768px) {
+    .audiences {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .audience-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    color: var(--text-muted);
   }
 
-  /* Sections */
-  .section {
-    margin-bottom: 2rem;
+  .audience-card-ai {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(20, 184, 166, 0.05) 100%);
+    border-color: var(--accent-secondary);
+  }
+
+  .audience-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background: var(--accent-bg);
+    color: var(--accent-primary);
+    margin-bottom: 1rem;
+  }
+
+  .audience-card h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .audience-card > p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .audience-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+  }
+
+  .audience-list li {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    padding: 0.25rem 0;
+    padding-left: 1.25rem;
+    position: relative;
+  }
+
+  .audience-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--accent-primary);
+  }
+
+  .audience-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--accent-primary);
+    text-decoration: none;
+  }
+
+  .audience-link:hover {
+    text-decoration: underline;
+  }
+
+  /* API Quick Reference */
+  .api-quick {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-primary);
+  }
+
+  .api-instruction {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .api-instruction:not(:first-child) {
+    margin-top: 0.75rem;
+  }
+
+  .api-step {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.625rem;
+    font-weight: 600;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 50%;
+  }
+
+  .api-code {
+    display: block;
+    font-size: 0.75rem;
+    font-family: monospace;
+    padding: 0.5rem;
+    background: var(--bg-secondary);
+    border-radius: 0.25rem;
+    color: var(--accent-primary);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .api-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+
+  /* Featured */
+  .featured {
+    margin-bottom: 4rem;
   }
 
   .section-header {
@@ -290,7 +444,7 @@ const allTags = [...new Set(allGuidelines.flatMap(g => g.tags || []))].slice(0, 
   }
 
   .section-header h2 {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 600;
     color: var(--text-primary);
   }
@@ -305,18 +459,22 @@ const allTags = [...new Set(allGuidelines.flatMap(g => g.tags || []))].slice(0, 
     text-decoration: underline;
   }
 
-  /* Topics Grid */
-  .topics-grid {
+  .featured-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
-  .topic-card {
+  @media (min-width: 640px) {
+    .featured-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .featured-card {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
     border-radius: 0.5rem;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
@@ -324,272 +482,151 @@ const allTags = [...new Set(allGuidelines.flatMap(g => g.tags || []))].slice(0, 
     transition: border-color 0.15s;
   }
 
-  .topic-card:hover {
+  .featured-card:hover {
     border-color: var(--accent-primary);
   }
 
-  .topic-card-icon {
-    width: 2rem;
-    height: 2rem;
+  .featured-card-icon {
+    width: 2.5rem;
+    height: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0.375rem;
+    border-radius: 0.5rem;
     background: var(--bg-primary);
     flex-shrink: 0;
   }
 
-  .topic-card-icon img {
-    width: 1.25rem;
-    height: 1.25rem;
+  .featured-card-icon img {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
-  .topic-card-icon span {
-    font-size: 0.875rem;
+  .featured-card-icon span {
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
   }
 
-  .topic-card-info {
-    min-width: 0;
+  .featured-card-content {
     flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-  }
-
-  .topic-card-name {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .topic-card-count {
-    font-size: 0.75rem;
-    font-family: monospace;
-    color: var(--text-muted);
-    background: var(--bg-primary);
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-  }
-
-  /* Guidelines List */
-  .guidelines-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .guideline-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    text-decoration: none;
-    transition: border-color 0.15s;
-  }
-
-  .guideline-row:hover {
-    border-color: var(--accent-primary);
-  }
-
-  .guideline-row-main {
     min-width: 0;
-    flex: 1;
   }
 
-  .guideline-row-title {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
+  .featured-card-content h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
     color: var(--text-primary);
-    white-space: nowrap;
+    margin-bottom: 0.25rem;
+  }
+
+  .featured-card-content p {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
 
-  .guideline-row-meta {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.125rem;
-  }
-
-  .guideline-row-topic {
-    font-size: 0.75rem;
-    color: var(--accent-primary);
-  }
-
-  .guideline-row-category {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .guideline-row-arrow {
-    width: 1rem;
-    height: 1rem;
-    color: var(--text-muted);
-    flex-shrink: 0;
-  }
-
-  /* Empty State */
-  .empty-state {
-    padding: 2rem;
-    text-align: center;
-    background: var(--bg-secondary);
-    border-radius: 0.75rem;
-    border: 1px solid var(--border-primary);
-  }
-
-  .empty-state p {
-    color: var(--text-muted);
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-  }
-
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: white;
-    background: var(--accent-primary);
-    border-radius: 0.5rem;
-    text-decoration: none;
-  }
-
-  /* Sidebar */
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    position: sticky;
-    top: 5rem;
-  }
-
-  .sidebar-box {
-    padding: 1rem;
-    border-radius: 0.75rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-  }
-
-  .sidebar-box-muted {
-    background: var(--bg-primary);
-  }
-
-  .sidebar-box h3 {
+  .featured-card-count {
     font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-  }
-
-  /* Stats */
-  .stats-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .stat-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.875rem;
-  }
-
-  .stat-row dt {
-    color: var(--text-secondary);
-  }
-
-  .stat-row dd {
     font-family: monospace;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  /* Tags */
-  .tags-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-  }
-
-  .tag {
-    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--bg-primary);
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
-    background: var(--bg-primary);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
-  /* Sidebar Links */
-  .sidebar-links {
+  /* How It Works */
+  .how-it-works {
+    margin-bottom: 4rem;
+    text-align: center;
+  }
+
+  .how-it-works h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+  }
+
+  .steps {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 
-  .sidebar-link {
+  .step {
+    flex: 1;
+    min-width: 140px;
+    max-width: 180px;
+    text-align: center;
+  }
+
+  .step-number {
+    width: 2.5rem;
+    height: 2.5rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    margin: -0.25rem -0.5rem;
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    text-decoration: none;
-    border-radius: 0.375rem;
-    transition: background 0.15s, color 0.15s;
-  }
-
-  .sidebar-link:hover {
-    background: var(--surface-hover);
-    color: var(--text-primary);
-  }
-
-  /* Sidebar text */
-  .sidebar-text {
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.75rem;
-    line-height: 1.4;
-  }
-
-  .api-endpoint {
-    display: block;
-    font-size: 0.75rem;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
     font-family: monospace;
-    padding: 0.5rem;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 50%;
+  }
+
+  .step h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .step p {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .step-arrow {
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    padding-top: 0.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .step-arrow {
+      display: none;
+    }
+  }
+
+  /* Contribute CTA */
+  .contribute-cta {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    border-radius: 0.75rem;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
-    border-radius: 0.375rem;
-    color: var(--accent-primary);
-    word-break: break-all;
+    text-align: center;
+  }
+
+  .contribute-cta h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .contribute-cta p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.25rem;
   }
 </style>
-
-<script>
-  const homepageSearch = document.getElementById('homepage-search');
-  homepageSearch?.addEventListener('focus', () => {
-    const event = new KeyboardEvent('keydown', {
-      key: 'k',
-      metaKey: true,
-      bubbles: true
-    });
-    document.dispatchEvent(event);
-    homepageSearch.blur();
-  });
-</script>
