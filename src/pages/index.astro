@@ -1,13 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getFrameworks, getGuidelines, getGuidelinesByFramework, getAllCategories, getAllTags } from '../lib/content';
+import { getTopics, getGuidelines, getGuidelinesByTopic, getAllCategories, getAllTags } from '../lib/content';
 
-const allFrameworks = getFrameworks();
+const allTopics = getTopics();
 const allGuidelines = getGuidelines();
 
-const frameworks = allFrameworks.map(fw => ({
-  ...fw,
-  guidelinesCount: getGuidelinesByFramework(fw.slug).length,
+const topics = allTopics.map(topic => ({
+  ...topic,
+  guidelinesCount: getGuidelinesByTopic(topic.slug).length,
 }));
 
 const recentGuidelines = allGuidelines
@@ -18,7 +18,7 @@ const categories = getAllCategories().slice(0, 8);
 
 const stats = {
   guidelines: allGuidelines.length,
-  frameworks: allFrameworks.length,
+  topics: allTopics.length,
   tags: getAllTags().length,
 };
 ---
@@ -54,8 +54,8 @@ const stats = {
       </div>
       <div class="quick-stat-divider"></div>
       <div class="quick-stat">
-        <span class="quick-stat-value">{stats.frameworks}</span>
-        <span class="quick-stat-label">Frameworks</span>
+        <span class="quick-stat-value">{stats.topics}</span>
+        <span class="quick-stat-label">Topics</span>
       </div>
       <div class="quick-stat-divider"></div>
       <div class="quick-stat">
@@ -90,7 +90,7 @@ const stats = {
       </div>
     </section>
 
-    <!-- FRAMEWORKS ZONE -->
+    <!-- TOPICS ZONE -->
     <section class="zone mb-16">
       <div class="zone-header">
         <div class="zone-title">
@@ -99,32 +99,32 @@ const stats = {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
-          <h2>Frameworks</h2>
-          <span class="zone-count">{frameworks.length}</span>
+          <h2>Topics</h2>
+          <span class="zone-count">{topics.length}</span>
         </div>
-        <a href="/frameworks" class="zone-link">View all →</a>
+        <a href="/topics" class="zone-link">View all →</a>
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {frameworks.map((fw) => (
-          <a href={`/frameworks/${fw.slug}`} class="framework-card">
+        {topics.map((topic) => (
+          <a href={`/topics/${topic.slug}`} class="framework-card">
             <div class="framework-card-header">
               <div class="framework-card-icon">
-                {fw.logo ? (
-                  <img src={fw.logo} alt={fw.name} />
+                {topic.logo ? (
+                  <img src={topic.logo} alt={topic.name} />
                 ) : (
-                  <span class="text-lg font-bold text-white">{fw.name.charAt(0)}</span>
+                  <span class="text-lg font-bold text-white">{topic.name.charAt(0)}</span>
                 )}
               </div>
               <div>
-                <div class="framework-card-title">{fw.name}</div>
-                <div class="framework-card-tech">{fw.technology}</div>
+                <div class="framework-card-title">{topic.name}</div>
+                <div class="framework-card-tech">{topic.technology}</div>
               </div>
             </div>
-            <p class="framework-card-desc">{fw.description}</p>
+            <p class="framework-card-desc">{topic.description}</p>
             <div class="framework-card-footer">
               <div class="framework-card-stat">
-                <span class="framework-card-stat-value">{fw.guidelinesCount}</span>
+                <span class="framework-card-stat-value">{topic.guidelinesCount}</span>
                 <span class="framework-card-stat-label">guidelines</span>
               </div>
               <svg class="w-5 h-5 text-[--color-terminal-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,12 +151,12 @@ const stats = {
 
       <div class="space-y-1">
         {recentGuidelines.map((g, i) => (
-          <a href={`/guidelines/${g.framework}/${g.category}/${g.slug}`} class="guideline-card">
+          <a href={`/guidelines/${g.topic}/${g.category}/${g.slug}`} class="guideline-card">
             <div class="guideline-card-number">{i + 1}</div>
             <div class="guideline-card-content">
               <div class="guideline-card-title">{g.title}</div>
               <div class="guideline-card-meta">
-                <span class="guideline-card-framework">{g.framework}</span>
+                <span class="guideline-card-framework">{g.topic}</span>
                 <span class="guideline-card-category">{g.category.replace(/-/g, ' ')}</span>
               </div>
             </div>
@@ -231,10 +231,10 @@ const stats = {
                 <span class="ml-3 text-xs text-[--color-terminal-muted] font-mono">api-example.sh</span>
               </div>
               <div class="terminal-body">
-                <div class="text-[--color-terminal-muted]"># Fetch all frameworks</div>
-                <div class="text-[--color-accent-400]">curl</div> <span class="text-[--color-syntax-string]">erold.guide/api/v1/frameworks.json</span>
+                <div class="text-[--color-terminal-muted]"># Fetch all topics</div>
+                <div class="text-[--color-accent-400]">curl</div> <span class="text-[--color-syntax-string]">erold.guide/api/v1/topics.json</span>
                 <div class="mt-3 text-[--color-terminal-muted]"># Get Next.js guidelines</div>
-                <div class="text-[--color-accent-400]">curl</div> <span class="text-[--color-syntax-string]">erold.guide/api/v1/frameworks/nextjs/_index.json</span>
+                <div class="text-[--color-accent-400]">curl</div> <span class="text-[--color-syntax-string]">erold.guide/api/v1/topics/nextjs/_index.json</span>
               </div>
             </div>
           </div>

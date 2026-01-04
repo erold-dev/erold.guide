@@ -1,0 +1,44 @@
+{
+  "CallerReference": "erold-api-2026-01-01",
+  "Comment": "erold.guide API distribution",
+  "Enabled": true,
+  "DefaultRootObject": "",
+  "Origins": {
+    "Quantity": 1,
+    "Items": [
+      {
+        "Id": "erold-api-s3",
+        "DomainName": "erold-guidelines-api.s3.us-east-1.amazonaws.com",
+        "OriginAccessControlId": "E2V1H11LVNYZXJ",
+        "S3OriginConfig": {
+          "OriginAccessIdentity": ""
+        }
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "erold-api-s3",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "AllowedMethods": {
+      "Quantity": 2,
+      "Items": ["GET", "HEAD"],
+      "CachedMethods": {
+        "Quantity": 2,
+        "Items": ["GET", "HEAD"]
+      }
+    },
+    "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+    "Compress": true
+  },
+  "Aliases": {
+    "Quantity": 1,
+    "Items": ["api.erold.guide"]
+  },
+  "ViewerCertificate": {
+    "ACMCertificateArn": "arn:aws:acm:us-east-1:337909771594:certificate/3776c64c-f63a-4998-bd94-069e5c5beaca",
+    "SSLSupportMethod": "sni-only",
+    "MinimumProtocolVersion": "TLSv1.2_2021"
+  },
+  "PriceClass": "PriceClass_100",
+  "HttpVersion": "http2and3"
+}

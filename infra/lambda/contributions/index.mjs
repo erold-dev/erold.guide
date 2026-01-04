@@ -29,11 +29,11 @@ function isAdmin(user) {
 }
 
 // Generate markdown file content for a guideline
-function generateMarkdownFile(framework, category, guideline, contributor) {
+function generateMarkdownFile(topic, category, guideline, contributor) {
   const frontmatter = {
     title: guideline.title,
     slug: guideline.slug,
-    framework: framework,
+    topic: topic,
     category: category,
     version: guideline.version,
     difficulty: guideline.difficulty,
@@ -98,7 +98,7 @@ function markdownToHtml(markdown) {
 }
 
 // Generate static HTML page for a guideline
-function generateHtmlPage(framework, category, guideline, contributor) {
+function generateHtmlPage(topic, category, guideline, contributor) {
   const contentHtml = markdownToHtml(guideline.content);
   const tagsHtml = guideline.tags.map(t =>
     `<span class="px-2 py-1 text-xs rounded-full bg-blue-500/20 text-blue-400">${t}</span>`
@@ -135,7 +135,7 @@ function generateHtmlPage(framework, category, guideline, contributor) {
     <nav class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="/" class="text-xl font-bold text-white">erold.guide</a>
       <div class="flex items-center gap-6 text-sm text-gray-400">
-        <a href="/frameworks" class="hover:text-white">Frameworks</a>
+        <a href="/topics" class="hover:text-white">Topics</a>
         <a href="/contribute" class="hover:text-white">Contribute</a>
       </div>
     </nav>
@@ -146,7 +146,7 @@ function generateHtmlPage(framework, category, guideline, contributor) {
     <nav class="text-sm text-gray-400 mb-6">
       <a href="/" class="hover:text-white">Home</a>
       <span class="mx-2">/</span>
-      <a href="/frameworks/${framework}" class="hover:text-white capitalize">${framework}</a>
+      <a href="/topics/${topic}" class="hover:text-white capitalize">${topic}</a>
       <span class="mx-2">/</span>
       <span class="text-white">${category}</span>
     </nav>
@@ -315,10 +315,10 @@ function validateGuideline(data) {
 
 // Contribution handlers
 async function createContribution(user, body) {
-  const { framework, category, guideline } = body;
+  const { topic, category, guideline } = body;
 
-  if (!framework || !category) {
-    return error(400, "VALIDATION_ERROR", "Framework and category are required");
+  if (!topic || !category) {
+    return error(400, "VALIDATION_ERROR", "Topic and category are required");
   }
 
   const validationErrors = validateGuideline(guideline);
@@ -332,7 +332,7 @@ async function createContribution(user, body) {
     IndexName: "gsi1",
     KeyConditionExpression: "gsi1pk = :pk AND gsi1sk = :sk",
     ExpressionAttributeValues: {
-      ":pk": `FRAMEWORK#${framework}`,
+      ":pk": `TOPIC#${topic}`,
       ":sk": `${category}#${guideline.slug}`,
     },
   }));
@@ -348,7 +348,7 @@ async function createContribution(user, body) {
   await s3UsEast1.send(new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: `${id}/guideline.json`,
-    Body: JSON.stringify({ framework, category, guideline }),
+    Body: JSON.stringify({ topic, category, guideline }),
     ContentType: "application/json",
   }));
 
@@ -360,7 +360,7 @@ async function createContribution(user, body) {
     gsi1sk: now,
     id,
     status: "pending",
-    framework,
+    topic,
     category,
     slug: guideline.slug,
     title: guideline.title,
@@ -394,7 +394,7 @@ async function createContribution(user, body) {
     status: "pending",
     createdAt: now,
     contributor: item.contributor,
-    framework,
+    topic,
     category,
     guideline: { title: guideline.title, slug: guideline.slug },
   });
@@ -438,7 +438,7 @@ async function listContributions(user) {
     contributions: result.Items?.map(item => ({
       id: item.id,
       status: item.status,
-      framework: item.framework,
+      topic: item.topic || item.framework, // Backwards compatibility
       category: item.category,
       title: item.title,
       slug: item.slug,
@@ -467,7 +467,7 @@ async function updateContribution(user, id, body) {
     return error(400, "INVALID_STATE", "Can only update pending or needs-changes contributions");
   }
 
-  const { framework, category, guideline } = body;
+  const { topic, category, guideline } = body;
   const validationErrors = validateGuideline(guideline);
   if (validationErrors.length > 0) {
     return error(400, "VALIDATION_ERROR", "Invalid guideline format", validationErrors);
@@ -477,7 +477,7 @@ async function updateContribution(user, id, body) {
   await s3UsEast1.send(new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: `${id}/guideline.json`,
-    Body: JSON.stringify({ framework, category, guideline }),
+    Body: JSON.stringify({ topic, category, guideline }),
     ContentType: "application/json",
   }));
 
@@ -569,7 +569,7 @@ async function adminListContributions(user, queryParams) {
   const contributions = result.Items?.map(item => ({
     id: item.id,
     status: item.status,
-    framework: item.framework,
+    topic: item.topic || item.framework, // Backwards compatibility
     category: item.category,
     title: item.title,
     slug: item.slug,
@@ -633,11 +633,12 @@ async function adminApproveContribution(user, id, body) {
     Key: `${id}/guideline.json`,
   }));
   const content = JSON.parse(await s3Result.Body.transformToString());
-  const { framework, category, guideline } = content;
+  const topic = content.topic || content.framework; // Backwards compatibility
+  const { category, guideline } = content;
 
   // Generate markdown file
-  const markdown = generateMarkdownFile(framework, category, guideline, existing.Item.contributor);
-  const guidelinePath = `guidelines/${framework}/${category}/${guideline.slug}.md`;
+  const markdown = generateMarkdownFile(topic, category, guideline, existing.Item.contributor);
+  const guidelinePath = `guidelines/${topic}/${category}/${guideline.slug}.md`;
 
   // Publish markdown to guidelines bucket (for content storage) - EU region
   await s3EuWest1.send(new PutObjectCommand({
@@ -653,8 +654,8 @@ async function adminApproveContribution(user, id, body) {
   console.log(`Published markdown to ${guidelinePath}`);
 
   // Generate and publish static HTML page to website bucket
-  const htmlContent = generateHtmlPage(framework, category, guideline, existing.Item.contributor);
-  const htmlPath = `guidelines/${framework}/${category}/${guideline.slug}/index.html`;
+  const htmlContent = generateHtmlPage(topic, category, guideline, existing.Item.contributor);
+  const htmlPath = `guidelines/${topic}/${category}/${guideline.slug}/index.html`;
 
   await s3UsEast1.send(new PutObjectCommand({
     Bucket: WEBSITE_BUCKET,
@@ -673,11 +674,11 @@ async function adminApproveContribution(user, id, body) {
         CallerReference: `${id}-${Date.now()}`,
         Paths: {
           Quantity: 1,
-          Items: [`/guidelines/${framework}/${category}/${guideline.slug}*`],
+          Items: [`/guidelines/${topic}/${category}/${guideline.slug}*`],
         },
       },
     }));
-    console.log(`CloudFront invalidation created for /guidelines/${framework}/${category}/${guideline.slug}`);
+    console.log(`CloudFront invalidation created for /guidelines/${topic}/${category}/${guideline.slug}`);
   } catch (cfErr) {
     console.error('CloudFront invalidation failed (non-blocking):', cfErr.message);
   }
@@ -701,12 +702,12 @@ async function adminApproveContribution(user, id, body) {
   await dynamodb.send(new PutCommand({
     TableName: TABLE_NAME,
     Item: {
-      pk: `GUIDELINE#${framework}#${category}#${guideline.slug}`,
+      pk: `GUIDELINE#${topic}#${category}#${guideline.slug}`,
       sk: "META",
-      gsi1pk: `FRAMEWORK#${framework}`,
+      gsi1pk: `TOPIC#${topic}`,
       gsi1sk: `${category}#${guideline.slug}`,
       contributionId: id,
-      framework,
+      topic,
       category,
       slug: guideline.slug,
       title: guideline.title,
@@ -714,6 +715,8 @@ async function adminApproveContribution(user, id, body) {
       version: guideline.version,
       difficulty: guideline.difficulty,
       tags: guideline.tags,
+      related: guideline.related || [],
+      collections: guideline.collections || [],
       contributor: existing.Item.contributor,
       publishedAt: now,
       publishedPath: guidelinePath,
@@ -725,7 +728,7 @@ async function adminApproveContribution(user, id, body) {
     status: "approved",
     approvedAt: now,
     publishedPath: guidelinePath,
-    guidelineUrl: `https://erold.guide/guidelines/${framework}/${category}/${guideline.slug}`,
+    guidelineUrl: `https://erold.guide/guidelines/${topic}/${category}/${guideline.slug}`,
   });
 }
 

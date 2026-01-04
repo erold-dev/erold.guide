@@ -1,7 +1,7 @@
 ---
 title: Never Block the Async Event Loop
 slug: never-block-async
-framework: fastapi
+topic: fastapi
 category: async-patterns
 version: "1.0.0"
 description: Never use blocking operations in async endpoints. Blocking calls like time.sleep(), requests.get(), or synchronous database queries will block the entire event loop.
@@ -16,9 +16,10 @@ author: erold-team
 contributors: []
 createdAt: "2025-01-01T00:00:00Z"
 updatedAt: "2025-01-01T00:00:00Z"
-relatedGuidelines:
-  - asyncio-to-thread
-  - async-database-patterns
+related:
+  - fastapi/async-patterns/asyncio-to-thread
+  - fastapi/async-patterns/async-database-patterns
+collections: []
 prerequisites: []
 difficulty: intermediate
 estimatedReadTime: 7

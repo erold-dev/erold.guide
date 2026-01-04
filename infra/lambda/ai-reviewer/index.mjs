@@ -24,7 +24,7 @@ const REVIEW_SYSTEM_PROMPT = `You are a senior technical reviewer for erold.guid
 
 2. **Technical Accuracy** (CRITICAL)
    - Is the information technically correct?
-   - Is it up-to-date for current framework versions?
+   - Is it up-to-date for current versions?
    - Would following this advice produce working code?
 
 3. **Content Quality** (Important)
@@ -85,12 +85,12 @@ Respond with a JSON object:
 
 Be STRICT on safety. Be helpful with feedback. Admins rely on your assessment.`;
 
-async function getExistingGuidelines(framework) {
+async function getExistingGuidelines(topic) {
   // Try to get existing guidelines from the published bucket for comparison
   try {
     const listResult = await s3EuWest1.send(new ListObjectsV2Command({
       Bucket: GUIDELINES_BUCKET,
-      Prefix: `guidelines/${framework}/`,
+      Prefix: `guidelines/${topic}/`,
     }));
 
     if (!listResult.Contents || listResult.Contents.length === 0) {
@@ -185,12 +185,13 @@ async function reviewContribution(contributionId) {
   const content = JSON.parse(await s3Result.Body.transformToString());
 
   // Get existing guidelines for comparison
-  const existingGuidelines = await getExistingGuidelines(content.framework);
+  const topic = content.topic || content.framework; // Backwards compatibility
+  const existingGuidelines = await getExistingGuidelines(topic);
 
   // Build the review prompt
   const userPrompt = `## Submission to Review
 
-**Framework:** ${content.framework}
+**Topic:** ${topic}
 **Category:** ${content.category}
 **Title:** ${content.guideline.title}
 **Slug:** ${content.guideline.slug}
@@ -206,11 +207,11 @@ ${content.guideline.content}
 
 ---
 
-## Existing Guidelines in ${content.framework} (for duplicate detection)
+## Existing Guidelines in ${topic} (for duplicate detection)
 
 ${existingGuidelines.length > 0
   ? existingGuidelines.map(g => `- **${g.title}** (${g.slug})`).join('\n')
-  : 'No existing guidelines found for this framework.'}
+  : 'No existing guidelines found for this topic.'}
 
 ---
 

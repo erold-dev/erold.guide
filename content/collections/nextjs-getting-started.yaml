@@ -1,0 +1,12 @@
+id: nextjs-getting-started
+name: Getting Started with Next.js App Router
+description: A curated learning path for developers new to Next.js App Router. Start here to build a solid foundation.
+icon: rocket
+guidelines:
+  - nextjs/app-router/server-components-default
+  - nextjs/app-router/client-components-boundaries
+  - nextjs/app-router/data-fetching-patterns
+  - nextjs/security/server-actions-validation
+order: 1
+createdAt: "2026-01-01T00:00:00Z"
+updatedAt: "2026-01-01T00:00:00Z"

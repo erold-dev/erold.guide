@@ -234,7 +234,7 @@ const benefits = [
             </li>
             <li class="flex items-start gap-2">
               <span class="text-green-400 mt-0.5">+</span>
-              <span><strong class="text-white">Specify versions</strong> - Note framework version constraints</span>
+              <span><strong class="text-white">Specify versions</strong> - Note version constraints where applicable</span>
             </li>
           </ul>
         </div>
@@ -378,7 +378,7 @@ const benefits = [
                 <span class="px-2 py-0.5 rounded text-xs font-mono ${getStatusClasses(c.status)}">${c.status.replace(/_/g, ' ')}</span>
               </div>
               <p class="text-sm text-[--color-terminal-muted]">
-                <span class="capitalize">${c.framework}</span> / ${c.category.replace(/-/g, ' ')} &bull; ${formatDate(c.createdAt)}
+                <span class="capitalize">${c.topic}</span> / ${c.category.replace(/-/g, ' ')} &bull; ${formatDate(c.createdAt)}
               </p>
               ${c.adminReview?.feedback ? `<p class="text-sm text-yellow-400 mt-1"><strong>Admin Feedback:</strong> ${escapeHtml(c.adminReview.feedback)}</p>` : ''}
               ${c.review?.feedback ? `<p class="text-sm text-orange-400 mt-1"><strong>AI Feedback:</strong> ${escapeHtml(c.review.feedback)}</p>` : ''}

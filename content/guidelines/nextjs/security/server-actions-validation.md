@@ -1,7 +1,7 @@
 ---
 title: Always Validate Server Action Inputs
 slug: server-actions-validation
-framework: nextjs
+topic: nextjs
 category: security
 version: "1.0.0"
 description: Server Actions are public HTTP endpoints. Always validate and sanitize all inputs using Zod or similar validation libraries to prevent security vulnerabilities.
@@ -17,11 +17,12 @@ author: erold-team
 contributors: []
 createdAt: "2025-01-01T00:00:00Z"
 updatedAt: "2025-01-01T00:00:00Z"
-relatedGuidelines:
-  - input-sanitization
-  - sql-injection-prevention
+related:
+  - nextjs/security/input-sanitization
+  - nextjs/security/sql-injection-prevention
+collections: []
 prerequisites:
-  - server-components-default
+  - nextjs/app-router/server-components-default
 difficulty: intermediate
 estimatedReadTime: 8
 ---

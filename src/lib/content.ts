@@ -5,7 +5,7 @@ import matter from 'gray-matter';
 
 const CONTENT_DIR = path.join(process.cwd(), 'content');
 
-export interface Framework {
+export interface Topic {
   id: string;
   name: string;
   slug: string;
@@ -14,7 +14,7 @@ export interface Framework {
   website?: string;
   repository?: string;
   documentation?: string;
-  technology: string;
+  technology?: string; // Optional - not all topics are technologies
   type: string;
   tags: string[];
   currentVersion?: string;
@@ -25,24 +25,14 @@ export interface Framework {
   updatedAt: string;
 }
 
-export interface Technology {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  logo?: string;
-  website?: string;
-  type: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
+// Backwards compatibility alias
+export type Framework = Topic;
 
 export interface Guideline {
   // Core identification
   title: string;
   slug: string;
-  framework: string;
+  topic: string; // Was "framework" - now covers any subject
   category: string;
   version: string;
   description: string;
@@ -62,8 +52,9 @@ export interface Guideline {
   updatedAt: string;
 
   // Relationships
-  relatedGuidelines: string[];
+  related: string[]; // Was "relatedGuidelines" - paths to related guidelines
   prerequisites: string[];
+  collections: string[]; // Curated collections this belongs to
 
   // Reading metadata
   difficulty: 'beginner' | 'intermediate' | 'advanced';
@@ -71,9 +62,9 @@ export interface Guideline {
 
   // AI-optimized fields
   ai?: {
-    prompt_snippet: string;        // One-liner for AI to use directly
-    applies_when: string[];        // Context triggers for this guideline
-    does_not_apply_when: string[]; // Exclusion triggers
+    prompt_snippet: string;
+    applies_when: string[];
+    does_not_apply_when: string[];
     priority: 'critical' | 'recommended' | 'optional';
     confidence: 'established' | 'emerging' | 'experimental';
   };
@@ -89,31 +80,61 @@ export interface Guideline {
   content: string;
 }
 
-export function getFrameworks(): Framework[] {
-  const frameworksDir = path.join(CONTENT_DIR, 'frameworks');
-  if (!fs.existsSync(frameworksDir)) return [];
+export interface Collection {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  guidelines: string[];
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
-  const files = fs.readdirSync(frameworksDir).filter(f => f.endsWith('.yaml'));
+export function getTopics(): Topic[] {
+  // Try topics directory first, fall back to frameworks for backwards compatibility
+  let topicsDir = path.join(CONTENT_DIR, 'topics');
+  if (!fs.existsSync(topicsDir)) {
+    topicsDir = path.join(CONTENT_DIR, 'frameworks');
+    if (!fs.existsSync(topicsDir)) return [];
+  }
+
+  const files = fs.readdirSync(topicsDir).filter(f => f.endsWith('.yaml'));
   return files.map(file => {
-    const content = fs.readFileSync(path.join(frameworksDir, file), 'utf-8');
-    return yaml.load(content) as Framework;
+    const content = fs.readFileSync(path.join(topicsDir, file), 'utf-8');
+    return yaml.load(content) as Topic;
   });
 }
 
-export function getFramework(slug: string): Framework | undefined {
-  const frameworks = getFrameworks();
-  return frameworks.find(f => f.slug === slug);
+// Backwards compatibility alias
+export function getFrameworks(): Topic[] {
+  return getTopics();
 }
 
-export function getTechnologies(): Technology[] {
-  const techDir = path.join(CONTENT_DIR, 'technologies');
-  if (!fs.existsSync(techDir)) return [];
+export function getTopic(slug: string): Topic | undefined {
+  const topics = getTopics();
+  return topics.find(t => t.slug === slug);
+}
 
-  const files = fs.readdirSync(techDir).filter(f => f.endsWith('.yaml'));
+// Backwards compatibility alias
+export function getFramework(slug: string): Topic | undefined {
+  return getTopic(slug);
+}
+
+export function getCollections(): Collection[] {
+  const collectionsDir = path.join(CONTENT_DIR, 'collections');
+  if (!fs.existsSync(collectionsDir)) return [];
+
+  const files = fs.readdirSync(collectionsDir).filter(f => f.endsWith('.yaml'));
   return files.map(file => {
-    const content = fs.readFileSync(path.join(techDir, file), 'utf-8');
-    return yaml.load(content) as Technology;
-  });
+    const content = fs.readFileSync(path.join(collectionsDir, file), 'utf-8');
+    return yaml.load(content) as Collection;
+  }).sort((a, b) => a.order - b.order);
+}
+
+export function getCollection(id: string): Collection | undefined {
+  const collections = getCollections();
+  return collections.find(c => c.id === id);
 }
 
 export function getGuidelines(): Guideline[] {
@@ -122,14 +143,14 @@ export function getGuidelines(): Guideline[] {
 
   const guidelines: Guideline[] = [];
 
-  const frameworks = fs.readdirSync(guidelinesDir);
-  for (const framework of frameworks) {
-    const frameworkDir = path.join(guidelinesDir, framework);
-    if (!fs.statSync(frameworkDir).isDirectory()) continue;
+  const topics = fs.readdirSync(guidelinesDir);
+  for (const topic of topics) {
+    const topicDir = path.join(guidelinesDir, topic);
+    if (!fs.statSync(topicDir).isDirectory()) continue;
 
-    const categories = fs.readdirSync(frameworkDir);
+    const categories = fs.readdirSync(topicDir);
     for (const category of categories) {
-      const categoryDir = path.join(frameworkDir, category);
+      const categoryDir = path.join(topicDir, category);
       if (!fs.statSync(categoryDir).isDirectory()) continue;
 
       const files = fs.readdirSync(categoryDir).filter(f => f.endsWith('.md'));
@@ -137,10 +158,17 @@ export function getGuidelines(): Guideline[] {
         const filePath = path.join(categoryDir, file);
         const fileContent = fs.readFileSync(filePath, 'utf-8');
         const { data, content } = matter(fileContent);
-        guidelines.push({
+
+        // Support both old "framework" and new "topic" fields
+        const guideline = {
           ...data,
+          topic: data.topic || data.framework, // Backwards compatibility
+          related: data.related || data.relatedGuidelines || [],
+          collections: data.collections || [],
           content,
-        } as Guideline);
+        } as Guideline;
+
+        guidelines.push(guideline);
       }
     }
   }
@@ -148,14 +176,44 @@ export function getGuidelines(): Guideline[] {
   return guidelines;
 }
 
-export function getGuidelinesByFramework(frameworkSlug: string): Guideline[] {
-  return getGuidelines().filter(g => g.framework === frameworkSlug);
+export function getGuidelinesByTopic(topicSlug: string): Guideline[] {
+  return getGuidelines().filter(g => g.topic === topicSlug);
 }
 
-export function getGuideline(framework: string, category: string, slug: string): Guideline | undefined {
+// Backwards compatibility alias
+export function getGuidelinesByFramework(frameworkSlug: string): Guideline[] {
+  return getGuidelinesByTopic(frameworkSlug);
+}
+
+export function getGuidelinesByCollection(collectionId: string): Guideline[] {
+  return getGuidelines().filter(g => g.collections?.includes(collectionId));
+}
+
+export function getGuidelinesByTag(tag: string): Guideline[] {
+  return getGuidelines().filter(g => g.tags?.includes(tag));
+}
+
+export function getGuideline(topic: string, category: string, slug: string): Guideline | undefined {
   return getGuidelines().find(
-    g => g.framework === framework && g.category === category && g.slug === slug
+    g => g.topic === topic && g.category === category && g.slug === slug
   );
+}
+
+export function getRelatedGuidelines(guideline: Guideline): Guideline[] {
+  if (!guideline.related || guideline.related.length === 0) return [];
+
+  const allGuidelines = getGuidelines();
+  return guideline.related
+    .map(relPath => {
+      const parts = relPath.split('/');
+      if (parts.length === 3) {
+        return allGuidelines.find(g =>
+          g.topic === parts[0] && g.category === parts[1] && g.slug === parts[2]
+        );
+      }
+      return undefined;
+    })
+    .filter((g): g is Guideline => g !== undefined);
 }
 
 export function getAllTags(): { name: string; count: number }[] {
@@ -163,12 +221,25 @@ export function getAllTags(): { name: string; count: number }[] {
   const tagCounts = new Map<string, number>();
 
   for (const guideline of guidelines) {
-    for (const tag of guideline.tags) {
+    for (const tag of guideline.tags || []) {
       tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
     }
   }
 
   return Array.from(tagCounts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+export function getAllTopics(): { name: string; count: number }[] {
+  const guidelines = getGuidelines();
+  const topicCounts = new Map<string, number>();
+
+  for (const guideline of guidelines) {
+    topicCounts.set(guideline.topic, (topicCounts.get(guideline.topic) || 0) + 1);
+  }
+
+  return Array.from(topicCounts.entries())
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count);
 }

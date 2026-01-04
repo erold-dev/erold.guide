@@ -1,7 +1,7 @@
 ---
 title: Default to Server Components
 slug: server-components-default
-framework: nextjs
+topic: nextjs
 category: app-router
 version: "1.0.0"
 description: Use Server Components by default in Next.js App Router. Only add 'use client' when you need interactivity, browser APIs, or React hooks.
@@ -16,9 +16,10 @@ author: erold-team
 contributors: []
 createdAt: "2025-01-01T00:00:00Z"
 updatedAt: "2025-01-01T00:00:00Z"
-relatedGuidelines:
-  - client-components-boundaries
-  - data-fetching-patterns
+related:
+  - nextjs/app-router/client-components-boundaries
+  - nextjs/app-router/data-fetching-patterns
+collections: []
 prerequisites: []
 difficulty: beginner
 estimatedReadTime: 5

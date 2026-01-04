@@ -43,12 +43,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       </div>
 
       <form id="guideline-form" class="space-y-8">
-        <!-- Framework & Category -->
+        <!-- Topic & Category -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label for="framework" class="block text-sm font-medium text-white mb-2">Framework/Technology * <span class="text-[--color-terminal-muted] font-normal">(lowercase)</span></label>
-            <input type="text" id="framework" name="framework" required placeholder="e.g., nextjs, react, python, docker" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
-            <p class="mt-1 text-xs text-[--color-terminal-muted]">Any framework, library, language, or technology</p>
+            <label for="topic" class="block text-sm font-medium text-white mb-2">Topic * <span class="text-[--color-terminal-muted] font-normal">(lowercase)</span></label>
+            <input type="text" id="topic" name="topic" required placeholder="e.g., react, docker, accessibility, design" class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+            <p class="mt-1 text-xs text-[--color-terminal-muted]">Technology, concept, tool, or practice</p>
           </div>
 
           <div>
@@ -97,10 +97,28 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
         <!-- Tags -->
         <div>
-          <label for="tags-input" class="block text-sm font-medium text-white mb-2">Tags * <span class="text-[--color-terminal-muted] font-normal">(1-10 tags, press Enter to add)</span></label>
+          <label for="tags-input" class="block text-sm font-medium text-white mb-2">Tags * <span class="text-[--color-terminal-muted] font-normal">(1-10 tags for discovery, press Enter to add)</span></label>
           <div class="flex flex-wrap gap-2 mb-2" id="tags-container"></div>
-          <input type="text" id="tags-input" placeholder="Type a tag and press Enter..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors" />
+          <input type="text" id="tags-input" placeholder="e.g., accessibility, performance, security..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors" />
           <input type="hidden" id="tags" name="tags" value="[]" />
+        </div>
+
+        <!-- Related Guidelines -->
+        <div>
+          <label for="related-input" class="block text-sm font-medium text-white mb-2">Related Guidelines <span class="text-[--color-terminal-muted] font-normal">(optional, paths like topic/category/slug)</span></label>
+          <div class="flex flex-wrap gap-2 mb-2" id="related-container"></div>
+          <input type="text" id="related-input" placeholder="e.g., react/hooks/use-effect-cleanup..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+          <input type="hidden" id="related" name="related" value="[]" />
+          <p class="mt-1 text-xs text-[--color-terminal-muted]">"See also" links to related guidelines</p>
+        </div>
+
+        <!-- Collections -->
+        <div>
+          <label for="collections-input" class="block text-sm font-medium text-white mb-2">Collections <span class="text-[--color-terminal-muted] font-normal">(optional, curated learning paths)</span></label>
+          <div class="flex flex-wrap gap-2 mb-2" id="collections-container"></div>
+          <input type="text" id="collections-input" placeholder="e.g., frontend-fundamentals, accessible-ui..." class="w-full px-4 py-3 rounded-lg bg-[--color-bg-secondary] border border-[--color-border-primary] text-white placeholder:text-[--color-terminal-muted] focus:border-[--color-primary-500] focus:ring-1 focus:ring-[--color-primary-500] outline-none transition-colors font-mono" />
+          <input type="hidden" id="collections" name="collections" value="[]" />
+          <p class="mt-1 text-xs text-[--color-terminal-muted]">Curated groups this guideline belongs to</p>
         </div>
 
         <!-- Content -->
@@ -216,8 +234,8 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
 
     // Fill form with demo data
     function fillDemoData() {
-      // Framework & Category
-      (document.getElementById('framework') as HTMLInputElement).value = 'react';
+      // Topic & Category
+      (document.getElementById('topic') as HTMLInputElement).value = 'react';
       (document.getElementById('category') as HTMLInputElement).value = 'performance';
 
       // Title & Slug
@@ -237,6 +255,14 @@ Key takeaways..." class="w-full px-4 py-3 bg-[--color-bg-tertiary] text-white pl
       // Tags
       tags = ['react', 'performance', 'optimization', 'memo'];
       renderTags();
+
+      // Related
+      related = ['react/hooks/use-callback', 'react/hooks/use-memo'];
+      renderRelated();
+
+      // Collections
+      collections = ['react-performance'];
+      renderCollections();
 
       // Content
       const contentEl = document.getElementById('content') as HTMLTextAreaElement;
@@ -361,52 +387,77 @@ const style = useMemo(() => ({ color: 'red' }), []);
       if (contentCount) contentCount.textContent = String(contentInput.value.length);
     });
 
-    // Tags handling
-    const tagsContainer = document.getElementById('tags-container');
-    const tagsInput = document.getElementById('tags-input') as HTMLInputElement;
-    const tagsHidden = document.getElementById('tags') as HTMLInputElement;
-    let tags: string[] = [];
+    // Generic chip list handler factory
+    function createChipListHandler(
+      containerId: string,
+      inputId: string,
+      hiddenId: string,
+      items: string[],
+      bgColor: string = 'rgba(37, 99, 235, 0.2)',
+      textColor: string = 'rgb(147, 197, 253)',
+      maxItems: number = 10,
+      allowSlashes: boolean = false
+    ) {
+      const container = document.getElementById(containerId);
+      const input = document.getElementById(inputId) as HTMLInputElement;
+      const hidden = document.getElementById(hiddenId) as HTMLInputElement;
 
-    function renderTags() {
-      if (!tagsContainer) return;
-      tagsContainer.innerHTML = '';
-      tags.forEach((tag, index) => {
-        const span = document.createElement('span');
-        span.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium';
-        span.style.cssText = 'background: rgba(37, 99, 235, 0.2); color: rgb(147, 197, 253);';
-        span.innerHTML = `
-          ${tag}
-          <button type="button" class="hover:text-white" data-index="${index}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        `;
-        tagsContainer.appendChild(span);
+      function render() {
+        if (!container) return;
+        container.innerHTML = '';
+        items.forEach((item, index) => {
+          const span = document.createElement('span');
+          span.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium';
+          span.style.cssText = `background: ${bgColor}; color: ${textColor};`;
+          span.innerHTML = `
+            ${item}
+            <button type="button" class="hover:text-white" data-index="${index}">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          `;
+          container.appendChild(span);
+        });
+        hidden.value = JSON.stringify(items);
+      }
+
+      container?.addEventListener('click', (e) => {
+        const btn = (e.target as Element).closest('button');
+        if (btn) {
+          const index = parseInt(btn.getAttribute('data-index') || '0');
+          items.splice(index, 1);
+          render();
+        }
       });
-      tagsHidden.value = JSON.stringify(tags);
+
+      input?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const regex = allowSlashes ? /[^a-z0-9-/]/g : /[^a-z0-9-]/g;
+          const value = input.value.trim().toLowerCase().replace(regex, '-').replace(/--+/g, '-');
+          if (value && !items.includes(value) && items.length < maxItems) {
+            items.push(value);
+            render();
+            input.value = '';
+          }
+        }
+      });
+
+      return render;
     }
 
-    tagsContainer?.addEventListener('click', (e) => {
-      const btn = (e.target as Element).closest('button');
-      if (btn) {
-        const index = parseInt(btn.getAttribute('data-index') || '0');
-        tags.splice(index, 1);
-        renderTags();
-      }
-    });
+    // Tags handling
+    let tags: string[] = [];
+    const renderTags = createChipListHandler('tags-container', 'tags-input', 'tags', tags, 'rgba(37, 99, 235, 0.2)', 'rgb(147, 197, 253)', 10, false);
 
-    tagsInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const value = tagsInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-        if (value && !tags.includes(value) && tags.length < 10) {
-          tags.push(value);
-          renderTags();
-          tagsInput.value = '';
-        }
-      }
-    });
+    // Related guidelines handling
+    let related: string[] = [];
+    const renderRelated = createChipListHandler('related-container', 'related-input', 'related', related, 'rgba(34, 197, 94, 0.2)', 'rgb(134, 239, 172)', 10, true);
+
+    // Collections handling
+    let collections: string[] = [];
+    const renderCollections = createChipListHandler('collections-container', 'collections-input', 'collections', collections, 'rgba(168, 85, 247, 0.2)', 'rgb(216, 180, 254)', 5, false);
 
     // Tab switching (Write/Preview)
     const tabWrite = document.getElementById('tab-write');
@@ -472,13 +523,13 @@ const style = useMemo(() => ({ color: 'red' }), []);
 
       // Validate slug format (lowercase alphanumeric and hyphens)
       const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-      const frameworkVal = (document.getElementById('framework') as HTMLInputElement).value;
+      const topicVal = (document.getElementById('topic') as HTMLInputElement).value;
       const categoryVal = (document.getElementById('category') as HTMLInputElement).value;
       const slugVal = (document.getElementById('slug') as HTMLInputElement).value;
       const versionVal = (document.getElementById('version') as HTMLInputElement).value;
 
-      if (!slugPattern.test(frameworkVal)) {
-        showError('Framework must be lowercase letters, numbers, and hyphens only (e.g., nextjs, react-native)');
+      if (!slugPattern.test(topicVal)) {
+        showError('Topic must be lowercase letters, numbers, and hyphens only (e.g., react, design-systems)');
         return;
       }
       if (!slugPattern.test(categoryVal)) {
@@ -502,7 +553,7 @@ const style = useMemo(() => ({ color: 'red' }), []);
 
       try {
         const payload = {
-          framework: (document.getElementById('framework') as HTMLInputElement).value.toLowerCase(),
+          topic: (document.getElementById('topic') as HTMLInputElement).value.toLowerCase(),
           category: (document.getElementById('category') as HTMLInputElement).value.toLowerCase(),
           guideline: {
             title: (document.getElementById('title') as HTMLInputElement).value,
@@ -510,6 +561,8 @@ const style = useMemo(() => ({ color: 'red' }), []);
             version: (document.getElementById('version') as HTMLInputElement).value,
             description: (document.getElementById('description') as HTMLTextAreaElement).value,
             tags: tags,
+            related: related,
+            collections: collections,
             difficulty: (document.getElementById('difficulty') as HTMLSelectElement).value,
             content: (document.getElementById('content') as HTMLTextAreaElement).value,
           }
@@ -558,7 +611,11 @@ const style = useMemo(() => ({ color: 'red' }), []);
     document.getElementById('submit-another')?.addEventListener('click', () => {
       form.reset();
       tags = [];
+      related = [];
+      collections = [];
       renderTags();
+      renderRelated();
+      renderCollections();
       slugManuallyEdited = false;
       successState?.classList.add('hidden');
       document.getElementById('submission-form')?.classList.remove('hidden');
@@ -584,26 +641,35 @@ const style = useMemo(() => ({ color: 'red' }), []);
         }
 
         const data = await response.json();
+        const g = data.guideline || {};
 
         // Populate form fields
-        (document.getElementById('framework') as HTMLInputElement).value = data.framework || '';
+        (document.getElementById('topic') as HTMLInputElement).value = data.topic || data.framework || '';
         (document.getElementById('category') as HTMLInputElement).value = data.category || '';
-        (document.getElementById('title') as HTMLInputElement).value = data.title || '';
-        (document.getElementById('slug') as HTMLInputElement).value = data.slug || '';
-        (document.getElementById('version') as HTMLInputElement).value = data.version || '1.0.0';
-        (document.getElementById('difficulty') as HTMLSelectElement).value = data.difficulty || 'beginner';
+        (document.getElementById('title') as HTMLInputElement).value = g.title || data.title || '';
+        (document.getElementById('slug') as HTMLInputElement).value = g.slug || data.slug || '';
+        (document.getElementById('version') as HTMLInputElement).value = g.version || '1.0.0';
+        (document.getElementById('difficulty') as HTMLSelectElement).value = g.difficulty || 'beginner';
 
         const descEl = document.getElementById('description') as HTMLTextAreaElement;
-        descEl.value = data.description || '';
+        descEl.value = g.description || '';
         if (descCount) descCount.textContent = String(descEl.value.length);
 
         const contentEl = document.getElementById('content') as HTMLTextAreaElement;
-        contentEl.value = data.content || '';
+        contentEl.value = g.content || '';
         if (contentCount) contentCount.textContent = String(contentEl.value.length);
 
         // Load tags
-        tags = data.tags || [];
+        tags = g.tags || [];
         renderTags();
+
+        // Load related
+        related = g.related || [];
+        renderRelated();
+
+        // Load collections
+        collections = g.collections || [];
+        renderCollections();
 
         slugManuallyEdited = true; // Don't auto-generate slug when editing
 

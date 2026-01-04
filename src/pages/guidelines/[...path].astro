@@ -1,24 +1,26 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getGuidelines, getGuideline, getFramework } from '../../lib/content';
+import { getGuidelines, getGuideline, getTopic, getRelatedGuidelines } from '../../lib/content';
 import { marked } from 'marked';
 
 export function getStaticPaths() {
   const guidelines = getGuidelines();
   return guidelines.map((g) => ({
-    params: { path: `${g.framework}/${g.category}/${g.slug}` },
+    params: { path: `${g.topic}/${g.category}/${g.slug}` },
   }));
 }
 
 const { path } = Astro.params;
-const [framework, category, slug] = path.split('/');
+const [topic, category, slug] = path.split('/');
 
-const guideline = getGuideline(framework, category, slug);
-const frameworkData = getFramework(framework);
+const guideline = getGuideline(topic, category, slug);
+const topicData = getTopic(topic);
 
 if (!guideline) {
   return Astro.redirect('/404');
 }
+
+const relatedGuidelines = guideline ? getRelatedGuidelines(guideline) : [];
 
 const htmlContent = await marked.parse(guideline.content);
 
@@ -35,9 +37,9 @@ const difficulty = difficultyColors[guideline.difficulty] || difficultyColors.be
   <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
     <!-- Breadcrumb -->
     <nav class="font-mono text-xs mb-6" style="color: var(--color-terminal-muted);">
-      <a href="/frameworks" class="hover:text-[--color-primary-400]">frameworks</a>
+      <a href="/topics" class="hover:text-[--color-primary-400]">topics</a>
       <span class="mx-2">/</span>
-      <a href={`/frameworks/${framework}`} class="hover:text-[--color-primary-400]">{framework}</a>
+      <a href={`/topics/${topic}`} class="hover:text-[--color-primary-400]">{topic}</a>
       <span class="mx-2">/</span>
       <span style="color: var(--color-terminal-comment);">{category}</span>
       <span class="mx-2">/</span>
@@ -119,16 +121,20 @@ const difficulty = difficultyColors[guideline.difficulty] || difficultyColors.be
       </div>
 
       <!-- Related -->
-      {guideline.relatedGuidelines.length > 0 && (
+      {relatedGuidelines.length > 0 && (
         <div class="mt-6">
           <h3 class="font-mono text-xs uppercase tracking-wider mb-3" style="color: var(--color-terminal-comment);">
             Related Guidelines
           </h3>
           <div class="flex flex-wrap gap-2">
-            {guideline.relatedGuidelines.map((related) => (
-              <span class="font-mono text-xs px-2 py-1 rounded" style="background: var(--color-terminal-surface); color: var(--color-terminal-muted);">
-                {related}
-              </span>
+            {relatedGuidelines.map((related) => (
+              <a
+                href={`/guidelines/${related.topic}/${related.category}/${related.slug}`}
+                class="font-mono text-xs px-2 py-1 rounded hover:bg-[--color-primary-500] hover:text-white transition-colors"
+                style="background: var(--color-terminal-surface); color: var(--color-terminal-muted);"
+              >
+                {related.title}
+              </a>
             ))}
           </div>
         </div>
@@ -140,7 +146,7 @@ const difficulty = difficultyColors[guideline.difficulty] || difficultyColors.be
           API Endpoint
         </h3>
         <code class="font-mono text-xs break-all" style="color: var(--color-terminal-muted);">
-          /api/v1/guidelines/{guideline.framework}/{guideline.category}/{guideline.slug}.json
+          /api/v1/guidelines/{guideline.topic}/{guideline.category}/{guideline.slug}.json
         </code>
       </div>
 

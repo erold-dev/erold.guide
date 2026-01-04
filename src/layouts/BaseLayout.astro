@@ -12,7 +12,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const currentPath = Astro.url.pathname;
 
 const navLinks = [
-  { href: '/frameworks', label: 'frameworks' },
+  { href: '/topics', label: 'topics' },
   { href: '/technologies', label: 'technologies' },
   { href: '/api', label: 'api' },
   { href: '/contribute', label: 'contribute' },
@@ -119,7 +119,7 @@ const navLinks = [
         <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6">
           <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-6 font-mono text-xs" style="color: var(--color-terminal-muted);">
-              <a href="/frameworks" class="hover:text-[--color-primary-400] transition-colors">Frameworks</a>
+              <a href="/topics" class="hover:text-[--color-primary-400] transition-colors">Topics</a>
               <a href="/api" class="hover:text-[--color-primary-400] transition-colors">API</a>
               <a href="/contribute" class="hover:text-[--color-primary-400] transition-colors">Contribute</a>
             </div>
@@ -156,7 +156,7 @@ const navLinks = [
             <svg class="command-palette-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
             </svg>
-            <span>Browse Frameworks</span>
+            <span>Browse Topics</span>
           </div>
           <div class="command-palette-item">
             <svg class="command-palette-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

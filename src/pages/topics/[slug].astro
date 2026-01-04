@@ -1,22 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getFrameworks, getFramework, getGuidelinesByFramework } from '../../lib/content';
+import { getTopics, getTopic, getGuidelinesByTopic } from '../../lib/content';
 
 export function getStaticPaths() {
-  const frameworks = getFrameworks();
-  return frameworks.map((fw) => ({
-    params: { slug: fw.slug },
+  const topics = getTopics();
+  return topics.map((topic) => ({
+    params: { slug: topic.slug },
   }));
 }
 
 const { slug } = Astro.params;
-const framework = getFramework(slug);
+const topic = getTopic(slug);
 
-if (!framework) {
+if (!topic) {
   return Astro.redirect('/404');
 }
 
-const guidelines = getGuidelinesByFramework(slug);
+const guidelines = getGuidelinesByTopic(slug);
 
 const guidelinesByCategory = guidelines.reduce((acc, g) => {
   if (!acc[g.category]) {
@@ -29,41 +29,41 @@ const guidelinesByCategory = guidelines.reduce((acc, g) => {
 const categories = Object.keys(guidelinesByCategory).sort();
 ---
 
-<BaseLayout title={framework.name} description={framework.description}>
+<BaseLayout title={topic.name} description={topic.description}>
   <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
 
     <!-- Breadcrumb -->
     <nav class="text-sm font-mono mb-6" style="color: var(--color-terminal-muted);">
       <a href="/" class="hover:text-[--color-primary-400] transition-colors">Home</a>
       <span class="mx-2">/</span>
-      <a href="/frameworks" class="hover:text-[--color-primary-400] transition-colors">Frameworks</a>
+      <a href="/topics" class="hover:text-[--color-primary-400] transition-colors">Topics</a>
       <span class="mx-2">/</span>
-      <span class="text-white">{framework.name}</span>
+      <span class="text-white">{topic.name}</span>
     </nav>
 
     <!-- Header -->
     <header class="mb-12">
       <div class="flex items-start gap-5 mb-6">
         <div class="framework-card-icon w-16 h-16">
-          {framework.logo ? (
-            <img src={framework.logo} alt={framework.name} class="w-9 h-9" style="filter: brightness(0) invert(1);" />
+          {topic.logo ? (
+            <img src={topic.logo} alt={topic.name} class="w-9 h-9" style="filter: brightness(0) invert(1);" />
           ) : (
-            <span class="text-2xl font-bold text-white">{framework.name.charAt(0)}</span>
+            <span class="text-2xl font-bold text-white">{topic.name.charAt(0)}</span>
           )}
         </div>
         <div>
-          <h1 class="text-3xl font-bold text-white tracking-tight">{framework.name}</h1>
+          <h1 class="text-3xl font-bold text-white tracking-tight">{topic.name}</h1>
           <p class="text-lg mt-2" style="color: var(--color-terminal-muted);">
-            {framework.description}
+            {topic.description}
           </p>
         </div>
       </div>
 
       <!-- Quick Links -->
       <div class="flex flex-wrap gap-3">
-        {framework.website && (
+        {topic.website && (
           <a
-            href={framework.website}
+            href={topic.website}
             target="_blank"
             rel="noopener"
             class="btn btn-secondary text-sm"
@@ -74,9 +74,9 @@ const categories = Object.keys(guidelinesByCategory).sort();
             Website
           </a>
         )}
-        {framework.documentation && (
+        {topic.documentation && (
           <a
-            href={framework.documentation}
+            href={topic.documentation}
             target="_blank"
             rel="noopener"
             class="btn btn-secondary text-sm"
@@ -87,9 +87,9 @@ const categories = Object.keys(guidelinesByCategory).sort();
             Docs
           </a>
         )}
-        {framework.repository && (
+        {topic.repository && (
           <a
-            href={framework.repository}
+            href={topic.repository}
             target="_blank"
             rel="noopener"
             class="btn btn-secondary text-sm"
@@ -114,11 +114,11 @@ const categories = Object.keys(guidelinesByCategory).sort();
         <span class="quick-stat-value">{categories.length}</span>
         <span class="quick-stat-label">Categories</span>
       </div>
-      {framework.currentVersion && (
+      {topic.currentVersion && (
         <>
           <div class="quick-stat-divider"></div>
           <div class="quick-stat">
-            <span class="quick-stat-value">v{framework.currentVersion}</span>
+            <span class="quick-stat-value">v{topic.currentVersion}</span>
             <span class="quick-stat-label">Latest</span>
           </div>
         </>
@@ -143,7 +143,7 @@ const categories = Object.keys(guidelinesByCategory).sort();
             <div class="space-y-1">
               {guidelinesByCategory[category].map((g, i) => (
                 <a
-                  href={`/guidelines/${g.framework}/${g.category}/${g.slug}`}
+                  href={`/guidelines/${g.topic}/${g.category}/${g.slug}`}
                   class="guideline-card"
                 >
                   <div class="guideline-card-number">{i + 1}</div>
@@ -185,15 +185,15 @@ const categories = Object.keys(guidelinesByCategory).sort();
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <div class="empty-state-title">No guidelines yet for {framework.name}</div>
+          <div class="empty-state-title">No guidelines yet for {topic.name}</div>
           <div class="empty-state-desc">
-            Guidelines for this framework are coming soon.
+            Guidelines for this topic are coming soon.
           </div>
           <a
-            href="/contributing"
+            href="/contribute"
             class="btn btn-primary mt-4"
           >
-            Learn How to Contribute
+            Contribute a Guideline
           </a>
         </div>
       )}
@@ -209,7 +209,7 @@ const categories = Object.keys(guidelinesByCategory).sort();
         <div class="flex items-center gap-3">
           <span class="text-xs font-mono px-2 py-1 rounded" style="background: rgba(16, 185, 129, 0.1); color: var(--color-accent-400);">GET</span>
           <code class="text-sm font-mono" style="color: var(--color-terminal-muted);">
-            /api/v1/frameworks/{framework.slug}/_index.json
+            /api/v1/topics/{topic.slug}/_index.json
           </code>
         </div>
       </div>

@@ -215,7 +215,7 @@ const statusFilters = [
                     ${c.review?.score ? `<span class="px-2 py-0.5 rounded text-xs font-mono bg-violet-500/20 text-violet-400 border border-violet-500/30">Score: ${c.review.score}</span>` : ''}
                   </div>
                   <p class="text-sm text-[--color-terminal-muted] mb-2">
-                    <span class="capitalize">${c.framework}</span> / ${c.category.replace(/-/g, ' ')}
+                    <span class="capitalize">${c.topic}</span> / ${c.category.replace(/-/g, ' ')}
                   </p>
                   <div class="flex items-center gap-4 text-xs text-[--color-terminal-muted]">
                     <span class="flex items-center gap-1">
@@ -327,8 +327,8 @@ const statusFilters = [
                   <h4 class="text-sm font-semibold text-[--color-terminal-muted] mb-3">Metadata</h4>
                   <dl class="space-y-2 text-sm">
                     <div class="flex justify-between">
-                      <dt class="text-[--color-terminal-muted]">Framework</dt>
-                      <dd class="text-white capitalize">${data.framework}</dd>
+                      <dt class="text-[--color-terminal-muted]">Topic</dt>
+                      <dd class="text-white capitalize">${data.topic}</dd>
                     </div>
                     <div class="flex justify-between">
                       <dt class="text-[--color-terminal-muted]">Category</dt>

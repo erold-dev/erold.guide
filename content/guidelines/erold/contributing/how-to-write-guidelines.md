@@ -1,7 +1,7 @@
 ---
 title: How to Write Guidelines
 slug: how-to-write-guidelines
-framework: erold
+topic: erold
 category: contributing
 version: "1.0.0"
 description: Learn the structure, format, and best practices for writing guidelines that help developers and AI agents build better software.
@@ -15,13 +15,14 @@ author: erold-team
 contributors: []
 createdAt: "2026-01-01T00:00:00Z"
 updatedAt: "2026-01-01T00:00:00Z"
-relatedGuidelines: []
+related: []
+collections: []
 prerequisites: []
 difficulty: beginner
 estimatedReadTime: 10
 
 ai:
-  prompt_snippet: "When writing a guideline for erold.guide, follow this structure: YAML frontmatter with required fields (title, slug, framework, category, version, description, tags, author, difficulty), then markdown content with sections for Why, When to Apply, Code Examples, Anti-patterns, and Summary."
+  prompt_snippet: "When writing a guideline for erold.guide, follow this structure: YAML frontmatter with required fields (title, slug, topic, category, version, description, tags, author, difficulty), then markdown content with sections for Why, When to Apply, Code Examples, Anti-patterns, and Summary."
   applies_when:
     - "Contributing a new guideline to erold.guide"
     - "Updating an existing guideline"
@@ -60,8 +61,8 @@ The frontmatter contains all metadata and must be valid YAML between `---` delim
 ---
 title: "Clear, Actionable Title"          # 5-100 characters
 slug: "url-friendly-slug"                  # lowercase, hyphens only
-framework: "nextjs"                        # Framework ID (e.g., nextjs, fastapi, react)
-category: "app-router"                     # Category within framework
+topic: "nextjs"                            # Topic ID (e.g., nextjs, fastapi, react, accessibility)
+category: "app-router"                     # Category within topic
 version: "1.0.0"                           # Semantic version of this guideline
 description: "A concise description..."    # 20-300 characters
 tags:                                      # 1-10 relevant tags
@@ -74,8 +75,9 @@ createdAt: "2026-01-01T00:00:00Z"         # ISO 8601 datetime
 updatedAt: "2026-01-01T00:00:00Z"         # ISO 8601 datetime
 deprecated: false                          # boolean
 contributors: []                           # Array of GitHub usernames
-relatedGuidelines: []                      # Array of related slugs
-prerequisites: []                          # Array of prerequisite slugs
+related: []                                # Paths to related guidelines (topic/category/slug)
+collections: []                            # Curated collection IDs
+prerequisites: []                          # Paths to prerequisite guidelines
 ---
 ```
 
@@ -299,12 +301,12 @@ ai:
 
 ## File Organization
 
-Guidelines are organized by framework and category:
+Guidelines are organized by topic and category:
 
 ```
 content/
 └── guidelines/
-    └── {framework}/
+    └── {topic}/
         └── {category}/
             └── {slug}.md
 ```
@@ -333,7 +335,7 @@ Before submitting, ensure your guideline:
 
 - [ ] Title is clear and actionable (5-100 chars)
 - [ ] Description summarizes the guideline (20-300 chars)
-- [ ] Correct framework and category
+- [ ] Correct topic and category
 - [ ] Appropriate difficulty level
 - [ ] Realistic estimated read time
 - [ ] At least one code example

@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Wrangler local state
+.wrangler/
+
+# Lambda zip archives
+infra/lambda/*.zip

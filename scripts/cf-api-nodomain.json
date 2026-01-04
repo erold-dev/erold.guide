@@ -1,0 +1,35 @@
+{
+  "CallerReference": "erold-api-2026-01-01-v2",
+  "Comment": "erold.guide API distribution",
+  "Enabled": true,
+  "DefaultRootObject": "",
+  "Origins": {
+    "Quantity": 1,
+    "Items": [
+      {
+        "Id": "erold-api-s3",
+        "DomainName": "erold-guidelines-api.s3.us-east-1.amazonaws.com",
+        "OriginAccessControlId": "E2V1H11LVNYZXJ",
+        "S3OriginConfig": {
+          "OriginAccessIdentity": ""
+        }
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "erold-api-s3",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "AllowedMethods": {
+      "Quantity": 2,
+      "Items": ["GET", "HEAD"],
+      "CachedMethods": {
+        "Quantity": 2,
+        "Items": ["GET", "HEAD"]
+      }
+    },
+    "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+    "Compress": true
+  },
+  "PriceClass": "PriceClass_100",
+  "HttpVersion": "http2and3"
+}
