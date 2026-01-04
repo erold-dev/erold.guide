@@ -257,3 +257,41 @@ export function getAllCategories(): { name: string; count: number }[] {
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count);
 }
+
+export interface Technology {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  logo?: string;
+  website?: string;
+  documentation?: string;
+  type: string;
+  paradigms?: string[];
+  tags?: string[];
+  frameworks?: string[];
+  frameworksCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export function getTechnologies(): Technology[] {
+  const techDir = path.join(CONTENT_DIR, 'technologies');
+  if (!fs.existsSync(techDir)) return [];
+
+  const files = fs.readdirSync(techDir).filter(f => f.endsWith('.yaml'));
+  return files.map(file => {
+    const content = fs.readFileSync(path.join(techDir, file), 'utf-8');
+    return yaml.load(content) as Technology;
+  });
+}
+
+export function getTechnology(slug: string): Technology | undefined {
+  const technologies = getTechnologies();
+  return technologies.find(t => t.slug === slug);
+}
+
+export function getTopicsByTechnology(technologySlug: string): Topic[] {
+  const topics = getTopics();
+  return topics.filter(t => t.technology === technologySlug);
+}

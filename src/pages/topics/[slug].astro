@@ -30,15 +30,15 @@ const categories = Object.keys(guidelinesByCategory).sort();
 ---
 
 <BaseLayout title={topic.name} description={topic.description}>
-  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+  <main id="main-content" class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
 
     <!-- Breadcrumb -->
-    <nav class="text-sm font-mono mb-6" style="color: var(--color-terminal-muted);">
-      <a href="/" class="hover:text-[--color-primary-400] transition-colors">Home</a>
+    <nav class="text-sm font-mono mb-6" style="color: var(--text-muted);" aria-label="Breadcrumb">
+      <a href="/" class="hover:underline" style="color: var(--text-secondary);">Home</a>
       <span class="mx-2">/</span>
-      <a href="/topics" class="hover:text-[--color-primary-400] transition-colors">Topics</a>
+      <a href="/topics" class="hover:underline" style="color: var(--text-secondary);">Topics</a>
       <span class="mx-2">/</span>
-      <span class="text-white">{topic.name}</span>
+      <span style="color: var(--text-primary);">{topic.name}</span>
     </nav>
 
     <!-- Header -->
@@ -46,14 +46,14 @@ const categories = Object.keys(guidelinesByCategory).sort();
       <div class="flex items-start gap-5 mb-6">
         <div class="framework-card-icon w-16 h-16">
           {topic.logo ? (
-            <img src={topic.logo} alt={topic.name} class="w-9 h-9" style="filter: brightness(0) invert(1);" />
+            <img src={topic.logo} alt="" class="w-9 h-9" aria-hidden="true" />
           ) : (
-            <span class="text-2xl font-bold text-white">{topic.name.charAt(0)}</span>
+            <span class="text-2xl font-bold" style="color: var(--text-primary);" aria-hidden="true">{topic.name.charAt(0)}</span>
           )}
         </div>
         <div>
-          <h1 class="text-3xl font-bold text-white tracking-tight">{topic.name}</h1>
-          <p class="text-lg mt-2" style="color: var(--color-terminal-muted);">
+          <h1 class="text-3xl font-bold tracking-tight" style="color: var(--text-primary);">{topic.name}</h1>
+          <p class="text-lg mt-2" style="color: var(--text-muted);">
             {topic.description}
           </p>
         </div>
@@ -68,7 +68,7 @@ const categories = Object.keys(guidelinesByCategory).sort();
             rel="noopener"
             class="btn btn-secondary text-sm"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
             </svg>
             Website
@@ -81,7 +81,7 @@ const categories = Object.keys(guidelinesByCategory).sort();
             rel="noopener"
             class="btn btn-secondary text-sm"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
             Docs
@@ -94,7 +94,7 @@ const categories = Object.keys(guidelinesByCategory).sort();
             rel="noopener"
             class="btn btn-secondary text-sm"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
             GitHub
@@ -133,7 +133,7 @@ const categories = Object.keys(guidelinesByCategory).sort();
             <div class="zone-header">
               <div class="zone-title">
                 <div class="zone-icon">
-                  <span class="text-sm font-bold text-[--color-primary-400]">{catIndex + 1}</span>
+                  <span class="text-sm font-bold" style="color: var(--accent-primary);">{catIndex + 1}</span>
                 </div>
                 <h2>{category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h2>
                 <span class="zone-count">{guidelinesByCategory[category].length}</span>
@@ -149,28 +149,28 @@ const categories = Object.keys(guidelinesByCategory).sort();
                   <div class="guideline-card-number">{i + 1}</div>
                   <div class="guideline-card-content">
                     <div class="guideline-card-title">{g.title}</div>
-                    <p class="text-sm mt-1 line-clamp-1" style="color: var(--color-terminal-muted);">
+                    <p class="text-sm mt-1 line-clamp-1" style="color: var(--text-muted);">
                       {g.description}
                     </p>
                     <div class="guideline-card-meta mt-2">
-                      <span class={`tag text-xs ${
+                      <span class={`badge text-xs ${
                         g.difficulty === 'beginner' ? 'difficulty-beginner' :
                         g.difficulty === 'intermediate' ? 'difficulty-intermediate' :
                         'difficulty-advanced'
                       }`}>
                         {g.difficulty}
                       </span>
-                      <span class="text-xs" style="color: var(--color-terminal-muted);">
+                      <span class="text-xs" style="color: var(--text-muted);">
                         {g.estimatedReadTime} min read
                       </span>
                       {g.deprecated && (
-                        <span class="tag text-xs" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">
+                        <span class="badge text-xs" style="background: var(--status-error-bg); border-color: var(--status-error-border); color: var(--status-error);">
                           deprecated
                         </span>
                       )}
                     </div>
                   </div>
-                  <svg class="guideline-card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="guideline-card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </a>
@@ -180,8 +180,8 @@ const categories = Object.keys(guidelinesByCategory).sort();
         ))
       ) : (
         <div class="empty-state">
-          <div class="empty-state-icon">
-            <svg class="w-8 h-8 text-[--color-terminal-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="empty-state-icon" aria-hidden="true">
+            <svg class="w-8 h-8" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
@@ -200,15 +200,15 @@ const categories = Object.keys(guidelinesByCategory).sort();
     </div>
 
     <!-- API Info -->
-    <section class="mt-16 p-6 rounded-xl" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-      <h3 class="text-lg font-semibold text-white mb-3">API Access</h3>
-      <p class="text-sm mb-4" style="color: var(--color-terminal-muted);">
+    <section class="mt-16 surface p-6 rounded-xl">
+      <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">API Access</h3>
+      <p class="text-sm mb-4" style="color: var(--text-muted);">
         Access these guidelines programmatically through our JSON API.
       </p>
       <div class="space-y-2">
         <div class="flex items-center gap-3">
-          <span class="text-xs font-mono px-2 py-1 rounded" style="background: rgba(16, 185, 129, 0.1); color: var(--color-accent-400);">GET</span>
-          <code class="text-sm font-mono" style="color: var(--color-terminal-muted);">
+          <span class="text-xs font-mono px-2 py-1 rounded" style="background: var(--status-success-bg); color: var(--status-success);">GET</span>
+          <code class="text-sm font-mono" style="color: var(--text-muted);">
             /api/v1/topics/{topic.slug}/_index.json
           </code>
         </div>
@@ -216,5 +216,5 @@ const categories = Object.keys(guidelinesByCategory).sort();
       <a href="/api" class="zone-link inline-block mt-4">View full API docs →</a>
     </section>
 
-  </div>
+  </main>
 </BaseLayout>

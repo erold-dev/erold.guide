@@ -77,38 +77,38 @@ const endpoints = [
 ---
 
 <BaseLayout title="API Documentation">
-  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-    <div class="mb-8 pb-6 border-b border-[--color-terminal-border]">
-      <h1 class="text-2xl font-mono font-bold text-white mb-2">API Documentation</h1>
-      <p class="font-mono text-sm" style="color: var(--color-terminal-muted);">
+  <main id="main-content" class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <div class="mb-8 pb-6 border-b" style="border-color: var(--border-primary);">
+      <h1 class="text-2xl font-mono font-bold mb-2" style="color: var(--text-primary);">API Documentation</h1>
+      <p class="font-mono text-sm" style="color: var(--text-muted);">
         Access guidelines programmatically. All endpoints return JSON and are publicly accessible.
       </p>
     </div>
 
     <!-- Overview -->
     <section class="mb-12">
-      <h2 class="font-mono text-sm font-semibold text-white mb-4">Overview</h2>
-      <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
+      <h2 class="font-mono text-sm font-semibold mb-4" style="color: var(--text-primary);">Overview</h2>
+      <div class="surface p-4 rounded-lg">
         <dl class="space-y-3 font-mono text-sm">
           <div>
-            <dt class="mb-1" style="color: var(--color-terminal-comment);">Base URL</dt>
+            <dt class="mb-1" style="color: var(--text-muted);">Base URL</dt>
             <dd>
-              <code class="px-2 py-1 rounded" style="background: var(--color-terminal-bg); color: var(--color-primary-400);">
+              <code class="px-2 py-1 rounded" style="background: var(--bg-tertiary); color: var(--accent-primary);">
                 https://erold.guide/api/v1
               </code>
             </dd>
           </div>
           <div>
-            <dt class="mb-1" style="color: var(--color-terminal-comment);">Format</dt>
-            <dd style="color: var(--color-terminal-text);">JSON (UTF-8)</dd>
+            <dt class="mb-1" style="color: var(--text-muted);">Format</dt>
+            <dd style="color: var(--text-secondary);">JSON (UTF-8)</dd>
           </div>
           <div>
-            <dt class="mb-1" style="color: var(--color-terminal-comment);">Authentication</dt>
-            <dd style="color: var(--color-terminal-text);">None required (public API)</dd>
+            <dt class="mb-1" style="color: var(--text-muted);">Authentication</dt>
+            <dd style="color: var(--text-secondary);">None required (public API)</dd>
           </div>
           <div>
-            <dt class="mb-1" style="color: var(--color-terminal-comment);">Rate Limiting</dt>
-            <dd style="color: var(--color-terminal-text);">None (please be reasonable)</dd>
+            <dt class="mb-1" style="color: var(--text-muted);">Rate Limiting</dt>
+            <dd style="color: var(--text-secondary);">None (please be reasonable)</dd>
           </div>
         </dl>
       </div>
@@ -116,40 +116,40 @@ const endpoints = [
 
     <!-- Usage Example -->
     <section class="mb-12">
-      <h2 class="font-mono text-sm font-semibold text-white mb-4">Quick Start</h2>
-      <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-        <pre class="font-mono text-xs overflow-x-auto" style="color: var(--color-terminal-text);"><code><span style="color: var(--color-terminal-comment);"># Fetch all topics</span>
+      <h2 class="font-mono text-sm font-semibold mb-4" style="color: var(--text-primary);">Quick Start</h2>
+      <div class="surface p-4 rounded-lg">
+        <pre class="font-mono text-xs overflow-x-auto" style="color: var(--text-secondary);"><code><span style="color: var(--text-muted);"># Fetch all topics</span>
 curl https://erold.guide/api/v1/topics/index.json
 
-<span style="color: var(--color-terminal-comment);"># Fetch Next.js guidelines</span>
+<span style="color: var(--text-muted);"># Fetch Next.js guidelines</span>
 curl https://erold.guide/api/v1/topics/nextjs/index.json
 
-<span style="color: var(--color-terminal-comment);"># Fetch a specific guideline</span>
+<span style="color: var(--text-muted);"># Fetch a specific guideline</span>
 curl https://erold.guide/api/v1/guidelines/nextjs/app-router/server-components-default.json</code></pre>
       </div>
     </section>
 
     <!-- Endpoints -->
     <section>
-      <h2 class="font-mono text-sm font-semibold text-white mb-4">Endpoints</h2>
+      <h2 class="font-mono text-sm font-semibold mb-4" style="color: var(--text-primary);">Endpoints</h2>
       <div class="space-y-6">
         {endpoints.map((endpoint) => (
-          <div class="rounded-lg overflow-hidden" style="border: 1px solid var(--color-terminal-border);">
-            <div class="px-4 py-3 flex items-center gap-3" style="background: var(--color-terminal-surface);">
-              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
+          <div class="rounded-lg overflow-hidden surface">
+            <div class="px-4 py-3 flex items-center gap-3" style="background: var(--bg-tertiary);">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded" style="background: var(--status-success-bg); color: var(--status-success);">
                 {endpoint.method}
               </span>
-              <code class="font-mono text-sm text-white">{endpoint.path}</code>
+              <code class="font-mono text-sm" style="color: var(--text-primary);">{endpoint.path}</code>
             </div>
-            <div class="px-4 py-3" style="background: var(--color-terminal-bg);">
-              <p class="font-mono text-xs mb-3" style="color: var(--color-terminal-muted);">
+            <div class="px-4 py-3">
+              <p class="font-mono text-xs mb-3" style="color: var(--text-muted);">
                 {endpoint.description}
               </p>
               <details class="group">
-                <summary class="font-mono text-xs cursor-pointer text-[--color-primary-400] hover:underline">
+                <summary class="font-mono text-xs cursor-pointer hover:underline" style="color: var(--accent-primary);">
                   Example response
                 </summary>
-                <pre class="mt-2 p-3 rounded font-mono text-xs overflow-x-auto" style="background: var(--color-terminal-surface); color: var(--color-terminal-text);">{endpoint.example}</pre>
+                <pre class="mt-2 p-3 rounded font-mono text-xs overflow-x-auto" style="background: var(--bg-tertiary); color: var(--text-secondary);">{endpoint.example}</pre>
               </details>
             </div>
           </div>
@@ -159,33 +159,33 @@ curl https://erold.guide/api/v1/guidelines/nextjs/app-router/server-components-d
 
     <!-- Use Cases -->
     <section class="mt-12">
-      <h2 class="font-mono text-sm font-semibold text-white mb-4">Use Cases</h2>
+      <h2 class="font-mono text-sm font-semibold mb-4" style="color: var(--text-primary);">Use Cases</h2>
       <div class="grid sm:grid-cols-2 gap-4">
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <h3 class="font-mono text-sm font-semibold text-white mb-2">AI Agents</h3>
-          <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+        <div class="surface p-4 rounded-lg">
+          <h3 class="font-mono text-sm font-semibold mb-2" style="color: var(--text-primary);">AI Agents</h3>
+          <p class="font-mono text-xs" style="color: var(--text-muted);">
             Fetch guidelines to inform code generation and review. Pre-indexed URLs enable zero-latency lookups.
           </p>
         </div>
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <h3 class="font-mono text-sm font-semibold text-white mb-2">IDE Extensions</h3>
-          <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+        <div class="surface p-4 rounded-lg">
+          <h3 class="font-mono text-sm font-semibold mb-2" style="color: var(--text-primary);">IDE Extensions</h3>
+          <p class="font-mono text-xs" style="color: var(--text-muted);">
             Build extensions that show relevant guidelines while developers code.
           </p>
         </div>
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <h3 class="font-mono text-sm font-semibold text-white mb-2">CI/CD Pipelines</h3>
-          <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+        <div class="surface p-4 rounded-lg">
+          <h3 class="font-mono text-sm font-semibold mb-2" style="color: var(--text-primary);">CI/CD Pipelines</h3>
+          <p class="font-mono text-xs" style="color: var(--text-muted);">
             Validate code against guidelines in automated pipelines.
           </p>
         </div>
-        <div class="p-4 rounded-lg" style="background: var(--color-terminal-surface); border: 1px solid var(--color-terminal-border);">
-          <h3 class="font-mono text-sm font-semibold text-white mb-2">Documentation Sites</h3>
-          <p class="font-mono text-xs" style="color: var(--color-terminal-muted);">
+        <div class="surface p-4 rounded-lg">
+          <h3 class="font-mono text-sm font-semibold mb-2" style="color: var(--text-primary);">Documentation Sites</h3>
+          <p class="font-mono text-xs" style="color: var(--text-muted);">
             Embed guidelines in your own documentation or wikis.
           </p>
         </div>
       </div>
     </section>
-  </div>
+  </main>
 </BaseLayout>

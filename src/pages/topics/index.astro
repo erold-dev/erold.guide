@@ -11,18 +11,18 @@ const totalGuidelines = topics.reduce((sum, t) => sum + t.guidelinesCount, 0);
 ---
 
 <BaseLayout title="Topics">
-  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+  <main id="main-content" class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
 
     <!-- Header -->
     <div class="mb-12">
-      <nav class="text-sm font-mono mb-4" style="color: var(--color-terminal-muted);">
-        <a href="/" class="hover:text-[--color-primary-400] transition-colors">Home</a>
+      <nav class="text-sm font-mono mb-4" style="color: var(--text-muted);" aria-label="Breadcrumb">
+        <a href="/" class="hover:underline" style="color: var(--text-secondary);">Home</a>
         <span class="mx-2">/</span>
-        <span class="text-white">Topics</span>
+        <span style="color: var(--text-primary);">Topics</span>
       </nav>
 
-      <h1 class="text-3xl font-bold text-white tracking-tight mb-3">Topics</h1>
-      <p class="text-lg max-w-2xl" style="color: var(--color-terminal-muted);">
+      <h1 class="text-3xl font-bold tracking-tight mb-3" style="color: var(--text-primary);">Topics</h1>
+      <p class="text-lg max-w-2xl" style="color: var(--text-muted);">
         Browse development guidelines by topic.
         Topics include frameworks, libraries, concepts, tools, and practices.
       </p>
@@ -48,9 +48,9 @@ const totalGuidelines = topics.reduce((sum, t) => sum + t.guidelinesCount, 0);
           <div class="framework-card-header">
             <div class="framework-card-icon">
               {topic.logo ? (
-                <img src={topic.logo} alt={topic.name} />
+                <img src={topic.logo} alt="" aria-hidden="true" />
               ) : (
-                <span class="text-xl font-bold text-white">{topic.name.charAt(0)}</span>
+                <span class="text-xl font-bold" style="color: var(--text-primary);" aria-hidden="true">{topic.name.charAt(0)}</span>
               )}
             </div>
             <div>
@@ -64,7 +64,7 @@ const totalGuidelines = topics.reduce((sum, t) => sum + t.guidelinesCount, 0);
           {topic.tags && topic.tags.length > 0 && (
             <div class="flex flex-wrap gap-1.5 mt-3">
               {topic.tags.slice(0, 3).map(tag => (
-                <span class="tag text-xs">{tag}</span>
+                <span class="badge text-xs">{tag}</span>
               ))}
             </div>
           )}
@@ -75,7 +75,7 @@ const totalGuidelines = topics.reduce((sum, t) => sum + t.guidelinesCount, 0);
               <span class="framework-card-stat-label">guidelines</span>
             </div>
             {topic.currentVersion && (
-              <span class="text-xs font-mono px-2 py-1 rounded" style="background: var(--color-terminal-bg); color: var(--color-primary-400);">
+              <span class="text-xs font-mono px-2 py-1 rounded" style="background: var(--bg-tertiary); color: var(--accent-primary);">
                 v{topic.currentVersion}
               </span>
             )}
@@ -86,8 +86,8 @@ const totalGuidelines = topics.reduce((sum, t) => sum + t.guidelinesCount, 0);
 
     {topics.length === 0 && (
       <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg class="w-8 h-8 text-[--color-terminal-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="empty-state-icon" aria-hidden="true">
+          <svg class="w-8 h-8" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
         </div>
@@ -98,5 +98,5 @@ const totalGuidelines = topics.reduce((sum, t) => sum + t.guidelinesCount, 0);
       </div>
     )}
 
-  </div>
+  </main>
 </BaseLayout>

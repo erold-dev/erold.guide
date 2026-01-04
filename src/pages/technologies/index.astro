@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTechnologies, getTopicsByTechnology } from '../../lib/content';
+
+const technologies = getTechnologies().map(tech => ({
+  ...tech,
+  topicsCount: getTopicsByTechnology(tech.slug).length,
+}));
+
+const totalTopics = technologies.reduce((sum, t) => sum + t.topicsCount, 0);
+---
+
+<BaseLayout title="Technologies">
+  <main id="main-content" class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+
+    <!-- Header -->
+    <div class="mb-12">
+      <nav class="text-sm font-mono mb-4" style="color: var(--text-muted);" aria-label="Breadcrumb">
+        <a href="/" class="hover:underline" style="color: var(--text-secondary);">Home</a>
+        <span class="mx-2">/</span>
+        <span style="color: var(--text-primary);">Technologies</span>
+      </nav>
+
+      <h1 class="text-3xl font-bold tracking-tight mb-3" style="color: var(--text-primary);">Technologies</h1>
+      <p class="text-lg max-w-2xl" style="color: var(--text-muted);">
+        Browse by programming language and technology.
+        Each technology contains related topics, frameworks, and guidelines.
+      </p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats mb-12">
+      <div class="quick-stat">
+        <span class="quick-stat-value">{technologies.length}</span>
+        <span class="quick-stat-label">Technologies</span>
+      </div>
+      <div class="quick-stat-divider"></div>
+      <div class="quick-stat">
+        <span class="quick-stat-value">{totalTopics}</span>
+        <span class="quick-stat-label">Related Topics</span>
+      </div>
+    </div>
+
+    <!-- Technology Grid -->
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {technologies.map((tech) => (
+        <a href={`/technologies/${tech.slug}`} class="framework-card">
+          <div class="framework-card-header">
+            <div class="framework-card-icon">
+              {tech.logo ? (
+                <img src={tech.logo} alt="" aria-hidden="true" />
+              ) : (
+                <span class="text-xl font-bold" style="color: var(--text-primary);" aria-hidden="true">{tech.name.charAt(0)}</span>
+              )}
+            </div>
+            <div>
+              <div class="framework-card-title">{tech.name}</div>
+              <div class="framework-card-tech">{tech.type}</div>
+            </div>
+          </div>
+
+          <p class="framework-card-desc">{tech.description}</p>
+
+          {tech.paradigms && tech.paradigms.length > 0 && (
+            <div class="flex flex-wrap gap-1.5 mt-3">
+              {tech.paradigms.slice(0, 3).map(paradigm => (
+                <span class="badge text-xs">{paradigm}</span>
+              ))}
+            </div>
+          )}
+
+          <div class="framework-card-footer">
+            <div class="framework-card-stat">
+              <span class="framework-card-stat-value">{tech.topicsCount}</span>
+              <span class="framework-card-stat-label">topics</span>
+            </div>
+            <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {technologies.length === 0 && (
+      <div class="empty-state">
+        <div class="empty-state-icon" aria-hidden="true">
+          <svg class="w-8 h-8" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        </div>
+        <div class="empty-state-title">No technologies yet</div>
+        <div class="empty-state-desc">
+          Add technology YAML files to content/technologies/ to get started.
+        </div>
+      </div>
+    )}
+
+  </main>
+</BaseLayout>
