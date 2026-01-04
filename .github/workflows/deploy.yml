@@ -72,9 +72,27 @@ jobs:
 
       - name: Deploy Website to S3
         run: |
+          # Sync all files first
           aws s3 sync dist/ s3://erold-website/ \
             --delete \
             --exclude "api/*"
+
+          # Fix content types for static assets
+          aws s3 cp s3://erold-website/_astro/ s3://erold-website/_astro/ \
+            --recursive \
+            --exclude "*" \
+            --include "*.css" \
+            --content-type "text/css" \
+            --metadata-directive REPLACE \
+            --cache-control "public, max-age=31536000, immutable"
+
+          aws s3 cp s3://erold-website/_astro/ s3://erold-website/_astro/ \
+            --recursive \
+            --exclude "*" \
+            --include "*.js" \
+            --content-type "application/javascript" \
+            --metadata-directive REPLACE \
+            --cache-control "public, max-age=31536000, immutable"
 
       - name: Invalidate CloudFront caches
         run: |
