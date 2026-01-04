@@ -72,10 +72,10 @@ jobs:
 
       - name: Deploy Website to S3
         run: |
-          # Sync all files first
+          # Sync all files first (exclude only API JSON, not the /api HTML page)
           aws s3 sync dist/ s3://erold-website/ \
             --delete \
-            --exclude "api/*"
+            --exclude "api/v1/*"
 
           # Fix content types for static assets
           aws s3 cp s3://erold-website/_astro/ s3://erold-website/_astro/ \
