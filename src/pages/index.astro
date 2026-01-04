@@ -5,239 +5,591 @@ import { getTopics, getGuidelines, getGuidelinesByTopic } from '../lib/content';
 const allTopics = getTopics();
 const allGuidelines = getGuidelines();
 
-const topics = allTopics.map(topic => ({
-  ...topic,
-  guidelinesCount: getGuidelinesByTopic(topic.slug).length,
-}));
+const topics = allTopics
+  .map(topic => ({
+    ...topic,
+    guidelinesCount: getGuidelinesByTopic(topic.slug).length,
+  }))
+  .sort((a, b) => b.guidelinesCount - a.guidelinesCount);
 
 const recentGuidelines = allGuidelines
   .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-  .slice(0, 5);
+  .slice(0, 10);
 
 const stats = {
   guidelines: allGuidelines.length,
   topics: allTopics.length,
 };
+
+// Get unique tags
+const allTags = [...new Set(allGuidelines.flatMap(g => g.tags || []))].slice(0, 12);
 ---
 
 <BaseLayout title="Development Guidelines">
-  <div class="mx-auto max-w-5xl px-4 sm:px-6">
+  <div class="page-layout">
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="page-header">
+        <h1>Development Guidelines</h1>
+        <p>The open encyclopedia of best practices for modern development.</p>
+      </header>
 
-    <!-- HERO SECTION -->
-    <section class="hero">
-      <h1 class="hero-title">
-        Development Guidelines<br />
-        <span class="text-gradient">for Every Framework</span>
-      </h1>
-
-      <p class="hero-subtitle">
-        The open encyclopedia of best practices. Curated guidelines for modern development,
-        accessible to humans and AI agents.
-      </p>
-
-      <!-- Stats integrated into hero -->
-      <div class="flex items-center justify-center gap-6 mt-8 text-lg">
-        <div class="flex items-center gap-2">
-          <span class="font-mono font-bold" style="color: var(--text-primary);">{stats.guidelines}</span>
-          <span style="color: var(--text-secondary);">guidelines</span>
-        </div>
-        <span style="color: var(--border-primary);">·</span>
-        <div class="flex items-center gap-2">
-          <span class="font-mono font-bold" style="color: var(--text-primary);">{stats.topics}</span>
-          <span style="color: var(--text-secondary);">topics</span>
-        </div>
-        <span style="color: var(--border-primary);">·</span>
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5" style="color: var(--color-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <!-- Search -->
+      <div class="search-section">
+        <div class="search-box">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <span style="color: var(--text-secondary);">100% Free</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- SEARCH -->
-    <section class="mb-16">
-      <div class="search-box max-w-2xl mx-auto">
-        <label for="homepage-search" class="sr-only">Search guidelines</label>
-        <input
-          type="search"
-          id="homepage-search"
-          class="search-input"
-          placeholder="Search guidelines, topics..."
-          aria-describedby="search-hint"
-        />
-        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <div class="search-shortcut">
-          <kbd class="kbd">⌘</kbd>
-          <kbd class="kbd">K</kbd>
-        </div>
-      </div>
-      <p id="search-hint" class="text-center mt-3 text-sm" style="color: var(--text-muted);">
-        Or press <kbd class="kbd">⌘</kbd> <kbd class="kbd">K</kbd> anywhere
-      </p>
-    </section>
-
-    <!-- TOPICS -->
-    <section class="zone mb-16" aria-labelledby="topics-heading">
-      <div class="zone-header">
-        <div class="zone-title">
-          <div class="zone-icon" aria-hidden="true">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
+          <input
+            type="search"
+            id="homepage-search"
+            class="search-input"
+            placeholder="Search guidelines..."
+          />
+          <div class="search-shortcut">
+            <kbd>⌘K</kbd>
           </div>
-          <h2 id="topics-heading">Topics</h2>
-          <span class="zone-count" aria-label="{topics.length} topics">{topics.length}</span>
         </div>
-        <a href="/explore" class="zone-link">
-          View all<span class="sr-only"> topics</span> →
-        </a>
       </div>
 
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {topics.map((topic) => (
-          <a
-            href={`/explore/${topic.slug}`}
-            class="framework-card"
-            aria-label={`${topic.name} - ${topic.guidelinesCount} guidelines`}
-          >
-            <div class="framework-card-header">
-              <div class="framework-card-icon">
+      <!-- Topics Grid -->
+      <section class="section">
+        <div class="section-header">
+          <h2>Topics</h2>
+          <a href="/explore" class="section-link">View all →</a>
+        </div>
+        <div class="topics-grid">
+          {topics.map((topic) => (
+            <a href={`/explore/${topic.slug}`} class="topic-card">
+              <div class="topic-card-icon">
                 {topic.logo ? (
-                  <img src={topic.logo} alt="" aria-hidden="true" />
+                  <img src={topic.logo} alt="" />
                 ) : (
-                  <span class="text-lg font-bold" style="color: var(--text-primary);" aria-hidden="true">
-                    {topic.name.charAt(0)}
-                  </span>
+                  <span>{topic.name.charAt(0)}</span>
                 )}
               </div>
-              <div>
-                <div class="framework-card-title">{topic.name}</div>
-                {topic.technology && (
-                  <div class="framework-card-tech">{topic.technology}</div>
-                )}
+              <div class="topic-card-info">
+                <span class="topic-card-name">{topic.name}</span>
+                <span class="topic-card-count">{topic.guidelinesCount}</span>
               </div>
-            </div>
-            <p class="framework-card-desc">{topic.description}</p>
-            <div class="framework-card-footer">
-              <div class="framework-card-stat">
-                <span class="framework-card-stat-value">{topic.guidelinesCount}</span>
-                <span class="framework-card-stat-label">guidelines</span>
-              </div>
-              <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
-
-    <!-- RECENT GUIDELINES -->
-    <section class="zone mb-16" aria-labelledby="recent-heading">
-      <div class="zone-header">
-        <div class="zone-title">
-          <div class="zone-icon" aria-hidden="true">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <h2 id="recent-heading">Recent Guidelines</h2>
+            </a>
+          ))}
         </div>
-      </div>
+      </section>
 
-      {recentGuidelines.length > 0 ? (
-        <ul class="space-y-1" role="list">
-          {recentGuidelines.map((g, i) => (
-            <li>
-              <a href={`/guidelines/${g.topic}/${g.category}/${g.slug}`} class="guideline-card">
-                <div class="guideline-card-number" aria-hidden="true">{i + 1}</div>
-                <div class="guideline-card-content">
-                  <div class="guideline-card-title">{g.title}</div>
-                  <div class="guideline-card-meta">
-                    <span class="guideline-card-framework">{g.topic}</span>
-                    <span class="guideline-card-category">{g.category.replace(/-/g, ' ')}</span>
+      <!-- Recent Guidelines -->
+      <section class="section">
+        <div class="section-header">
+          <h2>Recent Guidelines</h2>
+        </div>
+        {recentGuidelines.length > 0 ? (
+          <div class="guidelines-list">
+            {recentGuidelines.map((g) => (
+              <a href={`/guidelines/${g.topic}/${g.category}/${g.slug}`} class="guideline-row">
+                <div class="guideline-row-main">
+                  <span class="guideline-row-title">{g.title}</span>
+                  <div class="guideline-row-meta">
+                    <span class="guideline-row-topic">{g.topic}</span>
+                    <span class="guideline-row-category">{g.category.replace(/-/g, ' ')}</span>
                   </div>
                 </div>
-                <svg class="guideline-card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="guideline-row-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div class="empty-state">
-          <div class="empty-state-icon" aria-hidden="true">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+            ))}
           </div>
-          <div class="empty-state-title">No guidelines yet</div>
-          <div class="empty-state-desc">Be the first to contribute a guideline to the encyclopedia.</div>
-          <a href="/contribute" class="btn btn-primary mt-4">
+        ) : (
+          <div class="empty-state">
+            <p>No guidelines yet. Be the first to contribute!</p>
+            <a href="/contribute" class="btn-primary">Contribute</a>
+          </div>
+        )}
+      </section>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Stats -->
+      <div class="sidebar-box">
+        <h3>Statistics</h3>
+        <dl class="stats-list">
+          <div class="stat-row">
+            <dt>Guidelines</dt>
+            <dd>{stats.guidelines}</dd>
+          </div>
+          <div class="stat-row">
+            <dt>Topics</dt>
+            <dd>{stats.topics}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Tags -->
+      {allTags.length > 0 && (
+        <div class="sidebar-box">
+          <h3>Popular Tags</h3>
+          <div class="tags-list">
+            {allTags.map(tag => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Quick Links -->
+      <div class="sidebar-box">
+        <h3>Quick Links</h3>
+        <div class="sidebar-links">
+          <a href="/explore" class="sidebar-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            Explore All
+          </a>
+          <a href="/api" class="sidebar-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            API Access
+          </a>
+          <a href="/contribute" class="sidebar-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
             Contribute
           </a>
         </div>
-      )}
-    </section>
-
-    <!-- API CTA -->
-    <section class="mb-16" aria-labelledby="api-heading">
-      <div class="surface-elevated">
-        <div class="grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h2 id="api-heading" class="text-2xl font-bold mb-3" style="color: var(--text-primary);">
-              Built for AI Agents
-            </h2>
-            <p class="mb-6" style="color: var(--text-secondary);">
-              Access all guidelines programmatically through our JSON API.
-              Pre-indexed, predictable URLs, zero authentication required.
-            </p>
-            <a href="/api" class="btn btn-primary">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-              </svg>
-              API Documentation
-            </a>
-          </div>
-          <div class="hidden md:block">
-            <div class="terminal-window" aria-hidden="true">
-              <div class="terminal-header">
-                <div class="terminal-dot terminal-dot-red"></div>
-                <div class="terminal-dot terminal-dot-yellow"></div>
-                <div class="terminal-dot terminal-dot-green"></div>
-                <span class="ml-3 text-xs font-mono" style="color: var(--text-muted);">terminal</span>
-              </div>
-              <div class="terminal-body">
-                <div style="color: var(--text-muted);"># Fetch all topics</div>
-                <div><span style="color: var(--color-accent-400);">curl</span> <span style="color: var(--color-primary-400);">erold.guide/api/v1/topics.json</span></div>
-                <div class="mt-3" style="color: var(--text-muted);"># Get Next.js guidelines</div>
-                <div><span style="color: var(--color-accent-400);">curl</span> <span style="color: var(--color-primary-400);">erold.guide/api/v1/topics/nextjs/</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-    </section>
 
+      <!-- For AI -->
+      <div class="sidebar-box sidebar-box-muted">
+        <h3>For AI Agents</h3>
+        <p class="sidebar-text">Access guidelines via our JSON API. Zero auth required.</p>
+        <code class="api-endpoint">GET /api/v1/topics.json</code>
+      </div>
+    </aside>
   </div>
-
-  <script>
-    // Connect homepage search to global search
-    const homepageSearch = document.getElementById('homepage-search');
-    homepageSearch?.addEventListener('focus', () => {
-      // Trigger the global search modal
-      const event = new KeyboardEvent('keydown', {
-        key: 'k',
-        metaKey: true,
-        bubbles: true
-      });
-      document.dispatchEvent(event);
-      homepageSearch.blur();
-    });
-  </script>
 </BaseLayout>
+
+<style>
+  .hidden {
+    display: none !important;
+  }
+
+  /* Two-column layout */
+  .page-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 2.5rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    align-items: start;
+  }
+
+  @media (min-width: 640px) {
+    .page-layout {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .page-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      display: none;
+    }
+  }
+
+  /* Main content */
+  .main-content {
+    min-width: 0;
+  }
+
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .page-header p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  /* Search */
+  .search-section {
+    margin-bottom: 2rem;
+  }
+
+  .search-box {
+    position: relative;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--text-muted);
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.75rem 4rem 0.75rem 2.75rem;
+    font-size: 0.9375rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-primary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+  }
+
+  .search-shortcut {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .search-shortcut kbd {
+    font-family: monospace;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-muted);
+  }
+
+  /* Sections */
+  .section {
+    margin-bottom: 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .section-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .section-link {
+    font-size: 0.8125rem;
+    color: var(--accent-primary);
+    text-decoration: none;
+  }
+
+  .section-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Topics Grid */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .topic-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+
+  .topic-card:hover {
+    border-color: var(--accent-primary);
+  }
+
+  .topic-card-icon {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+
+  .topic-card-icon img {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .topic-card-icon span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .topic-card-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .topic-card-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topic-card-count {
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: var(--text-muted);
+    background: var(--bg-primary);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+  }
+
+  /* Guidelines List */
+  .guidelines-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .guideline-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+
+  .guideline-row:hover {
+    border-color: var(--accent-primary);
+  }
+
+  .guideline-row-main {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .guideline-row-title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .guideline-row-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.125rem;
+  }
+
+  .guideline-row-topic {
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+  }
+
+  .guideline-row-category {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .guideline-row-arrow {
+    width: 1rem;
+    height: 1rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* Empty State */
+  .empty-state {
+    padding: 2rem;
+    text-align: center;
+    background: var(--bg-secondary);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-primary);
+  }
+
+  .empty-state p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    background: var(--accent-primary);
+    border-radius: 0.5rem;
+    text-decoration: none;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: sticky;
+    top: 5rem;
+  }
+
+  .sidebar-box {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+  }
+
+  .sidebar-box-muted {
+    background: var(--bg-primary);
+  }
+
+  .sidebar-box h3 {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Stats */
+  .stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+  }
+
+  .stat-row dt {
+    color: var(--text-secondary);
+  }
+
+  .stat-row dd {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* Tags */
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+  }
+
+  /* Sidebar Links */
+  .sidebar-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    margin: -0.25rem -0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 0.375rem;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .sidebar-link:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+
+  /* Sidebar text */
+  .sidebar-text {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .api-endpoint {
+    display: block;
+    font-size: 0.75rem;
+    font-family: monospace;
+    padding: 0.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 0.375rem;
+    color: var(--accent-primary);
+    word-break: break-all;
+  }
+</style>
+
+<script>
+  const homepageSearch = document.getElementById('homepage-search');
+  homepageSearch?.addEventListener('focus', () => {
+    const event = new KeyboardEvent('keydown', {
+      key: 'k',
+      metaKey: true,
+      bubbles: true
+    });
+    document.dispatchEvent(event);
+    homepageSearch.blur();
+  });
+</script>

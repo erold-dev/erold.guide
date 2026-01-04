@@ -7,13 +7,8 @@
   </defs>
   <rect width="32" height="32" rx="8" fill="url(#grad)"/>
   <g stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
-    <!-- Document/page outline -->
-    <path d="M10 6h8l4 4v16H10V6z"/>
-    <!-- Folded corner -->
-    <path d="M18 6v4h4"/>
-    <!-- List lines (guidelines) -->
-    <line x1="13" y1="14" x2="19" y2="14"/>
-    <line x1="13" y1="18" x2="19" y2="18"/>
-    <line x1="13" y1="22" x2="17" y2="22"/>
+    <path d="M16 6L6 11l10 5 10-5-10-5z"/>
+    <path d="M6 21l10 5 10-5"/>
+    <path d="M6 16l10 5 10-5"/>
   </g>
 </svg>
